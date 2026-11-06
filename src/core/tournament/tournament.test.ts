@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   clearResult,
   createTournament,
+  fillEmptyNames,
+  validateNewTournament,
   exportTournament,
   generateMatches,
   importTournament,
@@ -263,5 +265,22 @@ describe('stored tournaments', () => {
     expect(r.value.participants.map((p) => p.id)).toEqual(t.participants.map((p) => p.id))
     expect(r.value.results).toEqual(t.results)
     expect(r.value.createdAt).toBe(t.createdAt)
+  })
+})
+
+describe('fillEmptyNames', () => {
+  it('numbers empty slots without reusing taken names', () => {
+    expect(fillEmptyNames(['Team 3', '', '', ''], 'Team')).toEqual(['Team 3', 'Team 1', 'Team 2', 'Team 4'])
+    expect(fillEmptyNames(['', 'team 1', ''], 'Team')).toEqual(['Team 2', 'team 1', 'Team 3'])
+    expect(fillEmptyNames(['A', 'B'], 'Team')).toEqual(['A', 'B'])
+  })
+  it('always produces a valid entrant list', () => {
+    const names = fillEmptyNames(['Team 5', 'Team 2', '', '', '', '', '', ''], 'Team')
+    expect(
+      validateNewTournament({
+        name: 'Cup', gameId: null, mode: '5v5', format: 'double', bestOf: 3, grandFinalReset: true, seeding: 'manual',
+        participants: names.map((name) => ({ name })),
+      }),
+    ).toBeNull()
   })
 })

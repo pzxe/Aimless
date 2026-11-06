@@ -5,7 +5,6 @@ import {
   Crosshair,
   Download,
   Gauge,
-  CodeXml,
   Globe,
   Monitor,
   Package,
@@ -16,6 +15,7 @@ import {
 import { useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { HeroConverter, type DemoState } from '@/components/landing/HeroConverter'
+import { GitHubLink, GitHubMark } from '@/components/layout/GitHubLink'
 import { LanguageMenu } from '@/components/layout/LanguageMenu'
 import { LogoMark, Wordmark } from '@/components/layout/Logo'
 import { ThemeToggle } from '@/components/layout/AppShell'
@@ -40,7 +40,7 @@ const GAMES = getAllGames()
 const VERIFIED = GAMES.filter((g) => g.accuracy === 'verified').length
 
 function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: document.documentElement.dataset.motion === 'full' ? 'smooth' : 'auto', block: 'start' })
+  document.getElementById(id)?.scrollIntoView({ behavior: document.documentElement.dataset.motionPref === 'full' ? 'smooth' : 'auto', block: 'start' })
 }
 
 function Counter({ value, decimals = 0, suffix = '' }: { value: number; decimals?: number; suffix?: string }) {
@@ -55,36 +55,36 @@ function Counter({ value, decimals = 0, suffix = '' }: { value: number; decimals
 
 function Section({ id, eyebrow, title, lead, children, className }: { id: string; eyebrow: string; title: ReactNode; lead?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section id={id} className={cn('scroll-mt-20 py-20 sm:py-28', className)}>
-      <div data-reveal className="mx-auto mb-12 max-w-2xl text-center">
+    <section id={id} className={cn('flex scroll-mt-16 flex-col justify-center py-16 lg:min-h-[100svh] lg:py-10', className)}>
+      <div className="wrap">
+      <div data-reveal className="mx-auto mb-6 max-w-2xl text-center">
         <div className="eyebrow mb-3">{eyebrow}</div>
         <h2 className="display text-4xl sm:text-5xl">{title}</h2>
         {lead && <p className="mt-4 text-base text-muted">{lead}</p>}
       </div>
       {children}
+      </div>
     </section>
   )
 }
 
 /** Original background art: crosshair rings and a glow disc (no third-party imagery). */
+const RINGS =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23888' stroke-opacity='.28'%3E%3Ccircle cx='300' cy='300' r='290'/%3E%3Ccircle cx='300' cy='300' r='220' stroke-dasharray='2 10'/%3E%3Ccircle cx='300' cy='300' r='150'/%3E%3Cpath d='M300 10v110M300 480v110M10 300h110M480 300h110' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E\")"
+
+/** The hero's single background layer: accent glow and crosshair rings (original art). */
 function HeroArt() {
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-      <div className="absolute top-[8%] end-[-12%] size-[min(78vw,760px)] rounded-full bg-[radial-gradient(circle_at_center,var(--c-accent-glow),transparent_62%)] opacity-70 blur-2xl" />
-      <svg
-        viewBox="0 0 600 600"
-        className="absolute top-[2%] end-[-14%] size-[min(92vw,860px)] animate-[spin-slow_120s_linear_infinite] opacity-60"
-      >
-        <g fill="none" stroke="currentColor" className="text-border-strong">
-          <circle cx="300" cy="300" r="290" strokeWidth="1" />
-          <circle cx="300" cy="300" r="220" strokeWidth="1" strokeDasharray="2 10" />
-          <circle cx="300" cy="300" r="150" strokeWidth="1" />
-          <path d="M300 0v120M300 480v120M0 300h120M480 300h120" strokeWidth="1.5" />
-        </g>
-        <circle cx="300" cy="300" r="4" className="fill-accent" />
-      </svg>
-      <div className="display text-stroke absolute -bottom-10 start-[-2%] text-[28vw] leading-none select-none lg:text-[18vw]">360°</div>
-    </div>
+    <div
+      className="pointer-events-none absolute inset-0 -z-10"
+      aria-hidden="true"
+      style={{
+        backgroundImage: `${RINGS}, radial-gradient(circle at center, var(--c-accent-glow), transparent 62%)`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'min(80vw, 720px), min(80vw, 720px)',
+        backgroundPosition: 'right -6vw top 6%, right -6vw top 6%',
+      }}
+    />
   )
 }
 
@@ -98,31 +98,32 @@ function LandingNav({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
     ...(isDesktopApp ? [] : [{ id: 'download', label: t('landing.nav.download') }]),
   ]
   return (
-    <header className="glass sticky top-0 z-40 border-b border-border/60">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
+    <header className="nav glass fixed inset-x-0 top-0 z-40 border-b border-border/60">
+      <div className="wrap flex h-16 items-center justify-between gap-4">
         <Link to="/welcome" className="flex items-center gap-2.5" aria-label="Aimless">
           <LogoMark />
           <Wordmark />
         </Link>
-        <nav className="hidden items-center gap-1 md:flex" aria-label={t('nav.menu')}>
+        <nav className="hidden items-center gap-1 lg:flex" aria-label={t('nav.menu')}>
           {links.map((l) => (
             <button
               key={l.id}
               type="button"
               onClick={() => scrollToId(l.id)}
-              className="relative rounded-lg px-3 py-2 text-sm text-muted transition-colors after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-accent after:transition-transform hover:text-text hover:after:scale-x-100"
+              className="relative rounded-lg px-3 py-2 text-sm whitespace-nowrap text-muted transition-colors after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-accent after:transition-transform hover:text-text hover:after:scale-x-100"
             >
               {l.label}
             </button>
           ))}
         </nav>
         <div className="flex items-center gap-1.5">
+          <GitHubLink className="hidden sm:inline-flex" />
           <LanguageMenu />
           <ThemeToggle resolvedTheme={resolvedTheme} />
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
-            className="glow ms-1 inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent px-3.5 text-sm font-semibold text-accent-fg transition-[background-color,transform] hover:bg-accent-hover active:scale-[0.97]"
+            className="glow ms-1 inline-flex h-9 items-center gap-1.5 rounded-xl bg-accent-fill px-3.5 text-sm font-semibold text-accent-fg transition-[background-color,transform] hover:bg-accent-fill-hover active:scale-[0.97]"
           >
             <span className="hidden sm:inline">{t('landing.launch')}</span>
             <span className="sm:hidden">{t('landing.launchShort')}</span>
@@ -136,8 +137,8 @@ function LandingNav({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
 
 function CtaLink({ href, onClick, icon, children, primary }: { href?: string; onClick?: () => void; icon: ReactNode; children: ReactNode; primary?: boolean }) {
   const cls = cn(
-    'inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 active:scale-[0.97] [&_svg]:size-4',
-    primary ? 'bg-accent text-accent-fg glow hover:bg-accent-hover' : 'border border-border-strong bg-surface-2/60 text-text hover:border-accent-line hover:bg-surface-2',
+    'inline-flex h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-[background-color,border-color,transform] duration-150 hover:-translate-y-px active:translate-y-0 active:scale-[0.97] [&_svg]:size-4',
+    primary ? 'bg-accent-fill text-accent-fg glow hover:bg-accent-fill-hover' : 'border border-border bg-surface-2/80 text-text hover:bg-surface-3',
   )
   return href ? (
     <a href={href} target="_blank" rel="noreferrer" className={cls}>
@@ -156,12 +157,13 @@ function Hero({ demo, setDemo }: { demo: DemoState; setDemo: (d: DemoState) => v
   const t = useT()
   const navigate = useNavigate()
   return (
-    <section className="relative isolate">
+    <section className="relative isolate flex flex-col pt-16 lg:min-h-[100svh]">
       <HeroArt />
-      <div className="mx-auto grid min-h-[calc(100dvh-4rem)] max-w-7xl grid-cols-1 items-center gap-12 px-4 py-14 sm:px-8 lg:grid-cols-[1.1fr_1fr] lg:py-10">
+      <div className="wrap flex flex-1 flex-col">
+      <div className="grid flex-1 grid-cols-1 content-center items-stretch gap-12 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-8">
         <div>
           <div data-reveal style={{ ['--i' as string]: 0 }} className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-line bg-accent-soft py-1 ps-1 pe-3 text-xs font-medium">
-            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold tracking-wider text-accent-fg uppercase">v2.0</span>
+            <span className="rounded-full bg-accent-fill px-2 py-0.5 text-[10px] font-bold tracking-wider text-accent-fg uppercase">v2.0</span>
             {t('landing.badge')}
           </div>
           <h1 data-reveal style={{ ['--i' as string]: 1 }} className="display text-[clamp(3rem,8vw,6.5rem)]">
@@ -177,17 +179,12 @@ function Hero({ demo, setDemo }: { demo: DemoState; setDemo: (d: DemoState) => v
               {t('landing.cta.try')}
             </CtaLink>
             {!isDesktopApp && (
-              <>
-                <CtaLink href={RELEASES_URL} icon={<Download />}>
-                  {t('landing.cta.exe')}
-                </CtaLink>
-                <CtaLink href={RELEASES_URL} icon={<Package />}>
-                  {t('landing.cta.zip')}
-                </CtaLink>
-              </>
+              <CtaLink href={RELEASES_URL} icon={<Download />}>
+                {t('landing.cta.exe')}
+              </CtaLink>
             )}
           </div>
-          <ul data-reveal style={{ ['--i' as string]: 4 }} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-subtle">
+          <ul data-reveal style={{ ['--i' as string]: 4 }} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-text/85">
             <li className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-success" />{t('landing.fact.local')}</li>
             <li className="flex items-center gap-1.5"><Globe className="size-3.5 text-accent" />{t('landing.fact.languages')}</li>
             <li className="flex items-center gap-1.5"><Monitor className="size-3.5 text-accent" />{t('landing.fact.platforms')}</li>
@@ -196,6 +193,8 @@ function Hero({ demo, setDemo }: { demo: DemoState; setDemo: (d: DemoState) => v
         <div data-reveal style={{ ['--i' as string]: 3 }}>
           <HeroConverter demo={demo} setDemo={setDemo} />
         </div>
+      </div>
+      <Stats />
       </div>
     </section>
   )
@@ -210,11 +209,11 @@ function Stats() {
     { value: 0, label: t('landing.stat.requests') },
   ]
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-8">
-      <div className="card grid grid-cols-2 divide-border sm:grid-cols-4 sm:divide-x rtl:sm:divide-x-reverse">
+    <div className="pb-8">
+      <div className="grid grid-cols-2 divide-border sm:grid-cols-4 sm:divide-x rtl:sm:divide-x-reverse">
         {items.map((s, i) => (
-          <div key={s.label} data-reveal style={{ ['--i' as string]: i }} className="px-6 py-7 text-center">
-            <div className="display text-5xl">
+          <div key={s.label} data-reveal style={{ ['--i' as string]: i }} className="px-6 py-5 text-center">
+            <div className="display text-4xl">
               <Counter value={s.value} />
             </div>
             <div className="mt-2 text-xs tracking-wide text-muted uppercase">{s.label}</div>
@@ -241,7 +240,7 @@ function Bar({ label, cm, tone, max }: { label: string; cm: number; tone: 'good'
           className={cn(
             'h-full origin-left rounded-full rtl:origin-right',
             tone === 'bad' && 'bg-danger shadow-[0_0_14px_var(--c-danger)]',
-            tone === 'good' && 'bg-accent shadow-[0_0_14px_var(--c-accent-glow)]',
+            tone === 'good' && 'bg-accent-fill shadow-[0_0_14px_var(--c-accent-glow)]',
             tone === 'base' && 'bg-text/70',
           )}
           style={{ width: `${(cm / max) * 100}%` }}
@@ -262,7 +261,7 @@ function Why() {
   const max = cs.cm360
   return (
     <Section id="why" eyebrow={t('landing.why.eyebrow')} title={t('landing.why.title')} lead={t('landing.why.lead')}>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 px-4 sm:px-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card data-reveal className="p-7">
           <div className="mb-1 text-xs font-semibold tracking-[0.16em] text-danger uppercase">{t('landing.why.guess')}</div>
           <h3 className="display text-2xl">{t('landing.why.guessTitle')}</h3>
@@ -300,14 +299,14 @@ function Why() {
 
 function BentoCard({ to, icon, title, body, children, className, i }: { to: string; icon: ReactNode; title: string; body: string; children?: ReactNode; className?: string; i: number }) {
   return (
-    <Link to={to} data-reveal style={{ ['--i' as string]: i }} className={cn('card lift group flex flex-col overflow-hidden p-6', className)}>
+    <Link to={to} data-reveal style={{ ['--i' as string]: i }} className={cn('card lift group flex flex-col overflow-hidden p-5', className)}>
       <div className="flex items-center gap-3">
         <span className="flex size-10 items-center justify-center rounded-xl bg-accent-soft text-accent [&_svg]:size-5">{icon}</span>
-        <h3 className="text-lg font-semibold">{title}</h3>
+        <h3 className="display text-2xl">{title}</h3>
         <ArrowRight className="ms-auto size-4 text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-accent rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
       </div>
       <p className="mt-3 text-sm text-muted">{body}</p>
-      {children && <div className="mt-6 flex-1">{children}</div>}
+      {children && <div className="mt-4 flex-1">{children}</div>}
     </Link>
   )
 }
@@ -330,8 +329,8 @@ function Features() {
   const conv = convertSensitivity({ sourceGameId: 'cs2', sourceSensitivity: 1, sourceDpi: 800, targetGameId: 'valorant', targetDpi: 800 })
   return (
     <Section id="features" eyebrow={t('landing.features.eyebrow')} title={t('landing.features.title')} lead={t('landing.features.lead')}>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 sm:px-8 md:grid-cols-3">
-        <BentoCard i={0} to="/converter" icon={<ArrowLeftRight />} title={t('landing.f.converter')} body={t('landing.f.converterBody', { games: GAMES.length })} className="md:col-span-2 md:row-span-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <BentoCard i={0} to="/converter" icon={<ArrowLeftRight />} title={t('landing.f.converter')} body={t('landing.f.converterBody', { games: GAMES.length })} className="xl:col-span-2">
           <div dir="ltr" className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-border bg-surface-2/60 p-4">
             <div><div className="text-[11px] text-subtle">CS2 · 800 DPI</div><div className="num text-3xl font-semibold">1.00</div></div>
             <ArrowRight className="size-5 text-accent" />
@@ -342,46 +341,24 @@ function Features() {
             <div className="rounded-xl bg-surface-2/60 p-2"><div className="ltr num text-sm font-semibold text-text">{f.num(360 / cs.degreesPerCount, 0)}</div>{t('landing.f.counts')}</div>
             <div className="rounded-xl bg-surface-2/60 p-2"><div className="text-sm font-semibold text-success">✓</div>{t('accuracy.verified')}</div>
           </div>
-          <div className="mt-5 space-y-2.5">
-            {(['verified', 'approximate', 'unsupported'] as const).map((acc) => {
-              const n = GAMES.filter((g) => g.accuracy === acc).length
-              return (
-                <div key={acc} className="flex items-center gap-3 text-xs">
-                  <span className="w-28 shrink-0 text-muted">{t(`accuracy.${acc}`)}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-3">
-                    <div
-                      className={cn('h-full rounded-full', acc === 'verified' ? 'bg-success' : acc === 'approximate' ? 'bg-warning' : 'bg-danger/70')}
-                      style={{ width: `${(n / GAMES.length) * 100}%` }}
-                    />
-                  </div>
-                  <span className="ltr num w-6 text-end font-semibold">{n}</span>
-                </div>
-              )
-            })}
-          </div>
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {GAMES.map((g) => (
-              <span key={g.id} className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-subtle">{g.short}</span>
-            ))}
-          </div>
         </BentoCard>
         <BentoCard i={1} to="/tournaments" icon={<Trophy />} title={t('landing.f.tournaments')} body={t('landing.f.tournamentsBody')}>
           <MiniBracket />
         </BentoCard>
         <BentoCard i={2} to="/mousepad" icon={<RectangleHorizontal />} title={t('landing.f.mousepad')} body={t('landing.f.mousepadBody')}>
           <div dir="ltr" className="relative h-14 rounded-xl border border-border bg-surface-2">
-            <div className="absolute inset-y-4 left-2 w-[70%] rounded-full bg-accent shadow-[0_0_16px_-2px_var(--c-accent)]" />
+            <div className="absolute inset-y-4 left-2 w-[70%] rounded-full bg-accent-fill shadow-[0_0_16px_-2px_var(--c-accent)]" />
           </div>
         </BentoCard>
         <BentoCard i={3} to="/compare" icon={<BarChart3 />} title={t('landing.f.compare')} body={t('landing.f.compareBody')}>
           <div className="flex h-16 items-end gap-2">
             {[62, 88, 74, 100, 56].map((h, i) => (
-              <div key={i} className={cn('flex-1 rounded-t-md', i === 3 ? 'bg-accent shadow-[0_0_16px_var(--c-accent-glow)]' : 'bg-surface-3')} style={{ height: `${h}%` }} />
+              <div key={i} className={cn('flex-1 rounded-t-md', i === 3 ? 'bg-accent-fill shadow-[0_0_16px_var(--c-accent-glow)]' : 'bg-surface-3')} style={{ height: `${h}%` }} />
             ))}
           </div>
         </BentoCard>
         <BentoCard i={4} to="/settings" icon={<ShieldCheck />} title={t('landing.f.privacy')} body={t('landing.f.privacyBody')} />
-        <BentoCard i={5} to="/settings" icon={<Globe />} title={t('landing.f.languages')} body={t('landing.f.languagesBody')}>
+        <BentoCard i={5} to="/settings" icon={<Globe />} title={t('landing.f.languages')} body={t('landing.f.languagesBody')} className="xl:col-span-2">
           <div className="flex flex-wrap gap-1.5">
             {LANGUAGES.map((l) => (
               <span key={l.code} lang={l.code} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted">{l.native}</span>
@@ -402,7 +379,7 @@ function Playground({ demo }: { demo: DemoState }) {
   const d = describeSetting(demo.source, parseNumber(demo.dpi), parseNumber(demo.sens), calibrations)
   return (
     <Section id="playground" eyebrow={t('landing.play.eyebrow')} title={t('landing.play.title')} lead={t('landing.play.lead')}>
-      <div className="mx-auto max-w-6xl px-4 sm:px-8">
+      <div>
         <div data-reveal className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="scrollbar-thin max-w-full min-w-0 overflow-x-auto">
           <Segmented<PlayTab>
@@ -425,7 +402,7 @@ function Playground({ demo }: { demo: DemoState }) {
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
           </button>
         </div>
-        <div data-reveal>
+        <div data-reveal data-ui="aimless-tools">
           {tab === 'pad' && (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.6fr]">
               <Card className="flex flex-col justify-center p-6">
@@ -446,34 +423,50 @@ function Playground({ demo }: { demo: DemoState }) {
   )
 }
 
-function DownloadSection() {
+/** The page's closing screen: the Windows download, then the footer line. */
+function Closing() {
   const t = useT()
-  const navigate = useNavigate()
-  if (isDesktopApp) return null
   return (
-    <section id="download" className="scroll-mt-20 px-4 pb-24 sm:px-8">
-      <div data-reveal className="card relative mx-auto max-w-6xl overflow-hidden p-8 sm:p-12">
-        <div className="pointer-events-none absolute -end-24 -top-24 size-80 rounded-full bg-accent/25 blur-3xl" />
-        <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
-          <div>
-            <div className="eyebrow mb-3">{t('landing.dl.eyebrow')}</div>
-            <h2 className="display text-4xl sm:text-5xl">{t('landing.dl.title')}</h2>
-            <p className="mt-4 max-w-xl text-muted">{t('landing.dl.body')}</p>
-            <p className="mt-3 max-w-xl text-xs text-subtle">{t('landing.dl.unsigned')}</p>
+    <footer id="download" className="closing flex scroll-mt-16 flex-col lg:min-h-[100svh]">
+      <div className="wrap flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col justify-center py-16">
+          {!isDesktopApp && (
+            <div data-reveal className="card relative overflow-hidden p-8 sm:p-12">
+              <div className="pointer-events-none absolute -end-24 -top-24 size-80 rounded-full bg-accent/25 blur-3xl" aria-hidden="true" />
+              <div className="relative grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.4fr_1fr]">
+                <div>
+                  <div className="eyebrow mb-3">{t('landing.dl.eyebrow')}</div>
+                  <h2 className="display text-4xl sm:text-5xl">{t('landing.dl.title')}</h2>
+                  <p className="mt-4 max-w-xl text-muted">{t('landing.dl.body')}</p>
+                  <p className="mt-3 max-w-xl text-xs text-muted">{t('landing.dl.unsigned')}</p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <CtaLink href={RELEASES_URL} icon={<Download />}>{t('landing.cta.exe')}</CtaLink>
+                  <CtaLink href={RELEASES_URL} icon={<Package />}>{t('landing.cta.zip')}</CtaLink>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-3 pt-6 pb-[4.5rem] text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <LogoMark className="size-5" />
+            <span>{t('landing.footer.line')}</span>
           </div>
-          <div className="flex flex-col gap-3">
-            <CtaLink primary href={RELEASES_URL} icon={<Download />}>{t('landing.cta.exe')}</CtaLink>
-            <CtaLink href={RELEASES_URL} icon={<Package />}>{t('landing.cta.zip')}</CtaLink>
-            <CtaLink onClick={() => navigate('/dashboard')} icon={<Globe />}>{t('landing.cta.try')}</CtaLink>
+          <div className="flex items-center gap-4">
+            <a href={REPO_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-text">
+              <GitHubMark className="size-3.5" /> GitHub
+            </a>
+            <span>MIT</span>
+            <span>{t('landing.footer.trademarks')}</span>
           </div>
         </div>
       </div>
-    </section>
+    </footer>
   )
 }
 
 export default function LandingPage({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
-  const t = useT()
   const ref = useReveal<HTMLDivElement>()
   const [demo, setDemo] = useState<DemoState>(() => {
     const c = useConverter.getState()
@@ -484,27 +477,11 @@ export default function LandingPage({ resolvedTheme }: { resolvedTheme: 'dark' |
       <LandingNav resolvedTheme={resolvedTheme} />
       <main>
         <Hero demo={demo} setDemo={setDemo} />
-        <Stats />
         <Why />
         <Features />
         <Playground demo={demo} />
-        <DownloadSection />
       </main>
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 text-xs text-subtle sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <div className="flex items-center gap-2">
-            <LogoMark className="size-5" />
-            <span>{t('landing.footer.line')}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href={REPO_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-text">
-              <CodeXml className="size-3.5" /> GitHub
-            </a>
-            <span>MIT</span>
-            <span>{t('landing.footer.trademarks')}</span>
-          </div>
-        </div>
-      </footer>
+      <Closing />
     </div>
   )
 }

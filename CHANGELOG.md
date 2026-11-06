@@ -2,6 +2,34 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.0.2] - 2026-11-06
+
+### Added
+- **GitHub button** in the app's top bar (web and desktop app) and on the presentation page, linking to the repository. In the desktop app it opens in your default browser.
+- **Tools quality of life:**
+  - Every calculator remembers its last inputs between visits (stored locally; cleared by "Clear all data").
+  - A "Use converter setting" button fills the cm/360°, sensitivity-for-a-distance, DPI change, eDPI, ADS and polling tools from the converter in one click.
+  - DPI quick picks (400 / 800 / 1600 / 3200).
+  - ↑ / ↓ arrow keys step numeric fields (Shift for ×10) in the tools and the converter.
+
+### Fixed
+- “Fill empty slots” in the tournament creator could reuse a name that was already taken, which then blocked generating the bracket.
+- The Settings page overflowed sideways on phones.
+- The desktop top bar was transparent, so content showed through it while scrolling.
+- The bracket's Export menu now closes with Escape.
+- The hero converter overflowed at phone width; nav links wrapped at tablet width; mousepad stats overlapped on phones.
+
+### Changed
+- **Accessibility:** filled buttons and badges now use a deeper accent shade so their labels meet the 4.5:1 contrast minimum, for every accent colour in dark and light themes. Secondary grey text is brighter and also passes.
+- **Presentation page polish:**
+  - One shared content width.
+  - Each section fills exactly one screen on desktop.
+  - Two clear hero actions, with the stats on the hero itself.
+  - Consistent button styles and heading sizes.
+  - The download panel and footer form the closing screen.
+  - Clearer section headings in all five languages.
+- Screenshots and GIF demos refreshed.
+
 ## [2.0.1] - 2026-11-06
 
 ### Changed

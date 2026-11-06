@@ -5,6 +5,7 @@ import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
 import { cn } from '@/utils/cn'
 import { Button } from '../ui/Button'
+import { GitHubLink } from './GitHubLink'
 import { LanguageMenu } from './LanguageMenu'
 import { LogoMark, Wordmark } from './Logo'
 import { NAV_ITEMS } from './nav'
@@ -39,7 +40,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                   <>
                     {isActive && (
                       <span
-                        className="absolute inset-y-2.5 -start-3 w-1 rounded-full bg-accent shadow-[0_0_12px_2px_var(--c-accent-glow)]"
+                        className="absolute inset-y-2.5 -start-3 w-1 rounded-full bg-accent-fill shadow-[0_0_12px_2px_var(--c-accent-glow)]"
                         aria-hidden="true"
                       />
                     )}
@@ -93,6 +94,7 @@ function TopBarActions({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
         <Presentation className="size-3.5" />
         {t('nav.presentation')}
       </Link>
+      <GitHubLink />
       <LanguageMenu />
       <ThemeToggle resolvedTheme={resolvedTheme} />
     </div>
@@ -137,7 +139,7 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
 
       <div className="min-w-0">
         {/* Top bar */}
-        <header className="glass sticky top-0 z-30 border-b border-border/60 lg:border-none lg:bg-transparent lg:backdrop-blur-none">
+        <header className="glass sticky top-0 z-30 border-b border-border/60">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
             <div className="lg:hidden">
               <Brand />

@@ -177,7 +177,7 @@ const MatchCard = ({
         <span
           className={cn(
             'ltr num flex h-5 min-w-6 items-center justify-center rounded-md px-1 text-xs font-semibold',
-            won ? 'bg-accent text-accent-fg' : 'bg-surface-3 text-muted',
+            won ? 'bg-accent-fill text-accent-fg' : 'bg-surface-3 text-muted',
             score === undefined && 'bg-transparent',
           )}
         >
@@ -205,8 +205,8 @@ const MatchCard = ({
     >
       {match.status === 'ready' && (
         <span className="absolute top-1.5 end-1.5 flex size-2">
-          <span className="absolute inset-0 animate-[pulse-ring_1.6s_ease-out_infinite] rounded-full bg-accent" />
-          <span className="relative size-2 rounded-full bg-accent" />
+          <span className="absolute inset-0 animate-[pulse-ring_1.6s_ease-out_infinite] rounded-full bg-accent-fill" />
+          <span className="relative size-2 rounded-full bg-accent-fill" />
         </span>
       )}
       <Row i={0} />

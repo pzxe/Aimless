@@ -291,6 +291,7 @@ export const en = {
   'nav.tournaments': 'Tournaments',
   'nav.mousepad': 'Mousepad',
   'nav.presentation': 'Presentation',
+  'nav.github': 'GitHub repository',
   'nav.group.workspace': 'Workspace',
   'nav.group.library': 'Library',
 
@@ -303,6 +304,7 @@ export const en = {
   'dashboard.tournaments': 'Tournaments',
 
   'tools.eyebrow': 'Calculators',
+  'tools.fromConverter': 'Use converter setting',
 
   'aim.title': 'Aim style',
   'aim.empty': 'Enter a setting',
@@ -529,7 +531,7 @@ export const en = {
   'landing.why.trueBody': 'Aimless converts through each game’s rotation constant, so a full turn takes the same hand movement.',
   'landing.why.same': '{unit} in both games',
   'landing.features.eyebrow': 'Everything in one place',
-  'landing.features.title': 'Built for players and organisers',
+  'landing.features.title': 'Tools for players and organisers',
   'landing.features.lead': 'Every tool runs locally in your browser or on your desktop.',
   'landing.f.converter': 'Sensitivity converter',
   'landing.f.converterBody': '{games} games, each with a labelled accuracy level, plus calibration for anything without verified data.',
@@ -550,8 +552,8 @@ export const en = {
   'landing.play.pad': 'Mousepad and aim style',
   'landing.play.padLead': 'Your converter setting, to scale on your mousepad.',
   'landing.play.fullscreen': 'Open full workspace',
-  'landing.dl.eyebrow': 'Windows desktop app',
-  'landing.dl.title': 'Take it offline',
+  'landing.dl.eyebrow': 'Download',
+  'landing.dl.title': 'Windows desktop app',
   'landing.dl.body': 'A portable Windows app with the same tools. Nothing to install and no administrator rights needed. Your data stays on your PC.',
   'landing.dl.unsigned': 'The builds are not code-signed yet, so Windows SmartScreen may ask you to confirm. Choose More info, then Run anyway. Checksums are listed on each release.',
   'landing.footer.line': 'Aimless · open source under MIT',

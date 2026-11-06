@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { MAX_PARTICIPANTS, type BestOf, type TournamentFormat, type TournamentMode } from '@/core/tournament'
-import { validateNewTournament } from '@/core/tournament'
+import { fillEmptyNames, validateNewTournament } from '@/core/tournament'
 import { useT } from '@/i18n'
 import { useTournaments } from '@/store/tournamentStore'
 import { cn } from '@/utils/cn'
@@ -186,7 +186,12 @@ export function CreateTournamentDialog({ open, onClose }: { open: boolean; onClo
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => setRows((rs) => rs.map((r, i) => (r.name.trim() ? r : { ...r, name: `${label} ${i + 1}` })))}
+                onClick={() =>
+                  setRows((rs) => {
+                    const names = fillEmptyNames(rs.map((r) => r.name), label)
+                    return rs.map((r, i) => ({ ...r, name: names[i]! }))
+                  })
+                }
               >
                 {t('tournament.fillEmpty')}
               </Button>

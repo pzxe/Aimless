@@ -293,6 +293,7 @@ export const ar: Record<TranslationKey, string> = {
   'nav.tournaments': 'البطولات',
   'nav.mousepad': 'لوحة الماوس',
   'nav.presentation': 'العرض التقديمي',
+  'nav.github': 'مستودع GitHub',
   'nav.group.workspace': 'مساحة العمل',
   'nav.group.library': 'المكتبة',
 
@@ -305,6 +306,7 @@ export const ar: Record<TranslationKey, string> = {
   'dashboard.tournaments': 'البطولات',
 
   'tools.eyebrow': 'الحاسبات',
+  'tools.fromConverter': 'استخدام إعداد المحوّل',
 
   'aim.title': 'أسلوب التصويب',
   'aim.empty': 'أدخل إعدادًا',
@@ -531,7 +533,7 @@ export const ar: Record<TranslationKey, string> = {
   'landing.why.trueBody': 'يحوّل Aimless عبر ثابت الدوران لكل لعبة، فتحتاج الدورة الكاملة نفس حركة اليد.',
   'landing.why.same': '{unit} في كلتا اللعبتين',
   'landing.features.eyebrow': 'كل شيء في مكان واحد',
-  'landing.features.title': 'مصمم للاعبين والمنظّمين',
+  'landing.features.title': 'أدوات للاعبين والمنظّمين',
   'landing.features.lead': 'كل أداة تعمل محليًا في متصفحك أو على حاسوبك.',
   'landing.f.converter': 'محوّل الحساسية',
   'landing.f.converterBody': '{games} لعبة، لكل منها مستوى دقة واضح، مع المعايرة لأي لعبة بلا بيانات موثّقة.',
@@ -552,8 +554,8 @@ export const ar: Record<TranslationKey, string> = {
   'landing.play.pad': 'لوحة الماوس وأسلوب التصويب',
   'landing.play.padLead': 'إعداد المحوّل بمقياس حقيقي على لوحة الماوس.',
   'landing.play.fullscreen': 'فتح مساحة العمل الكاملة',
-  'landing.dl.eyebrow': 'تطبيق ويندوز',
-  'landing.dl.title': 'استخدمه دون اتصال',
+  'landing.dl.eyebrow': 'التحميل',
+  'landing.dl.title': 'تطبيق ويندوز لسطح المكتب',
   'landing.dl.body': 'تطبيق ويندوز محمول بنفس الأدوات. لا يحتاج تثبيتًا ولا صلاحيات مسؤول، وتبقى بياناتك على حاسوبك.',
   'landing.dl.unsigned': 'النسخ غير موقّعة رقميًا بعد، لذا قد يطلب منك Windows SmartScreen التأكيد. اختر «مزيد من المعلومات» ثم «التشغيل على أي حال». المجاميع الاختبارية مذكورة في كل إصدار.',
   'landing.footer.line': 'Aimless · مفتوح المصدر برخصة MIT',

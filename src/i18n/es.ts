@@ -293,6 +293,7 @@ export const es: Record<TranslationKey, string> = {
   'nav.tournaments': 'Torneos',
   'nav.mousepad': 'Alfombrilla',
   'nav.presentation': 'Presentación',
+  'nav.github': 'Repositorio en GitHub',
   'nav.group.workspace': 'Espacio de trabajo',
   'nav.group.library': 'Biblioteca',
 
@@ -305,6 +306,7 @@ export const es: Record<TranslationKey, string> = {
   'dashboard.tournaments': 'Torneos',
 
   'tools.eyebrow': 'Calculadoras',
+  'tools.fromConverter': 'Usar el ajuste del conversor',
 
   'aim.title': 'Estilo de apuntado',
   'aim.empty': 'Introduce un ajuste',
@@ -531,7 +533,7 @@ export const es: Record<TranslationKey, string> = {
   'landing.why.trueBody': 'Aimless convierte usando la constante de rotación de cada juego, así que un giro completo pide el mismo movimiento de mano.',
   'landing.why.same': '{unit} en ambos juegos',
   'landing.features.eyebrow': 'Todo en un mismo sitio',
-  'landing.features.title': 'Hecho para jugadores y organizadores',
+  'landing.features.title': 'Herramientas para jugadores y organizadores',
   'landing.features.lead': 'Todas las herramientas funcionan en local, en tu navegador o en tu PC.',
   'landing.f.converter': 'Conversor de sensibilidad',
   'landing.f.converterBody': '{games} juegos, cada uno con su nivel de precisión indicado, y calibración para los que no tienen datos verificados.',
@@ -552,8 +554,8 @@ export const es: Record<TranslationKey, string> = {
   'landing.play.pad': 'Alfombrilla y estilo',
   'landing.play.padLead': 'Tu ajuste del conversor, a escala sobre tu alfombrilla.',
   'landing.play.fullscreen': 'Abrir el espacio completo',
-  'landing.dl.eyebrow': 'App de escritorio para Windows',
-  'landing.dl.title': 'Llévalo sin conexión',
+  'landing.dl.eyebrow': 'Descarga',
+  'landing.dl.title': 'App de escritorio para Windows',
   'landing.dl.body': 'Una app portátil para Windows con las mismas herramientas. Nada que instalar y sin permisos de administrador. Tus datos se quedan en tu PC.',
   'landing.dl.unsigned': 'Las versiones aún no están firmadas, así que Windows SmartScreen puede pedirte confirmación. Elige «Más información» y luego «Ejecutar de todas formas». Cada versión publica sus sumas de verificación.',
   'landing.footer.line': 'Aimless · código abierto con licencia MIT',

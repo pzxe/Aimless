@@ -40,13 +40,20 @@ interface NumberFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, '
   suffix?: ReactNode
   hint?: ReactNode
   large?: boolean
+  /** Enables ArrowUp / ArrowDown stepping (Shift = ×10). */
+  step?: number
+}
+
+function stepDecimals(step: number) {
+  const s = String(step)
+  return s.includes('.') ? s.length - s.indexOf('.') - 1 : 0
 }
 
 /**
  * Text input for numbers. Uses inputMode="decimal" instead of type="number" so partial
  * values and localized separators are preserved while typing.
  */
-export function NumberField({ label, value, onValueChange, error, suffix, hint, large, className, id, ...rest }: NumberFieldProps) {
+export function NumberField({ label, value, onValueChange, error, suffix, hint, large, step, className, id, onKeyDown, ...rest }: NumberFieldProps) {
   const autoId = useId()
   const inputId = id ?? autoId
   const errorId = `${inputId}-error`
@@ -64,6 +71,16 @@ export function NumberField({ label, value, onValueChange, error, suffix, hint, 
           dir="ltr"
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
+          onKeyDown={(e) => {
+            onKeyDown?.(e)
+            if (!step || e.defaultPrevented || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return
+            const current = Number(value.replace(',', '.'))
+            if (!Number.isFinite(current)) return
+            e.preventDefault()
+            const delta = (e.key === 'ArrowUp' ? 1 : -1) * step * (e.shiftKey ? 10 : 1)
+            const next = Math.max(0, current + delta)
+            onValueChange(String(Number(next.toFixed(Math.max(stepDecimals(step), 0)))))
+          }}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
           className={cn(inputClass, 'num text-start', large && 'h-12 text-lg font-semibold', suffix && 'pe-14')}

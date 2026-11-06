@@ -1,10 +1,11 @@
 import { Crosshair } from 'lucide-react'
-import { useState } from 'react'
+import { usePersistentState } from '@/hooks/usePersistentState'
 import { parseNumber, validateSensitivity } from '@/core/sensitivity'
 import { magnification, zoomFovFromMagnification, zoomSensitivityRatio } from '@/core/tools'
 import { useFormat } from '@/hooks/useFormat'
 import { useT } from '@/i18n'
 import { Card, CardBody, CardHeader } from '../ui/Card'
+import { FromConverter } from '@/pages/Tools'
 import { CopyButton } from '../ui/CopyButton'
 import { Label, NumberField } from '../ui/Field'
 import { Segmented } from '../ui/Segmented'
@@ -14,13 +15,13 @@ type Mode = 'fov' | 'magnification' | 'custom'
 export function AdsTool() {
   const t = useT()
   const f = useFormat()
-  const [mode, setMode] = useState<Mode>('fov')
-  const [sens, setSens] = useState('1')
-  const [hip, setHip] = useState('103')
-  const [zoom, setZoom] = useState('70')
-  const [mag, setMag] = useState('4')
-  const [md, setMd] = useState('0')
-  const [custom, setCustom] = useState('1')
+  const [mode, setMode] = usePersistentState<Mode>('ads.mode', 'fov')
+  const [sens, setSens] = usePersistentState('ads.sens', '1')
+  const [hip, setHip] = usePersistentState('ads.hip', '103')
+  const [zoom, setZoom] = usePersistentState('ads.zoom', '70')
+  const [mag, setMag] = usePersistentState('ads.mag', '4')
+  const [md, setMd] = usePersistentState('ads.md', '0')
+  const [custom, setCustom] = usePersistentState('ads.custom', '1')
 
   const s = parseNumber(sens)
   const h = parseNumber(hip)
@@ -33,7 +34,7 @@ export function AdsTool() {
 
   return (
     <Card id="ads" className="scroll-mt-20">
-      <CardHeader title={t('ads.title')} description={t('ads.desc')} icon={<Crosshair />} />
+      <CardHeader title={t('ads.title')} description={t('ads.desc')} icon={<Crosshair />} action={<FromConverter onPick={(c) => c.sourceSensitivity && setSens(c.sourceSensitivity)} />} />
       <CardBody className="space-y-4">
         <Segmented<Mode>
           label={t('ads.mode')}
@@ -46,11 +47,11 @@ export function AdsTool() {
           ]}
         />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <NumberField label={t('ads.hipSens')} value={sens} onValueChange={setSens} />
-          {mode !== 'custom' && <NumberField label={t('ads.hipFov')} value={hip} onValueChange={setHip} suffix="°" />}
-          {mode === 'fov' && <NumberField label={t('ads.zoomFov')} value={zoom} onValueChange={setZoom} suffix="°" />}
-          {mode === 'magnification' && <NumberField label={t('ads.magnification')} value={mag} onValueChange={setMag} suffix="×" />}
-          {mode === 'custom' && <NumberField label={t('ads.multiplier')} value={custom} onValueChange={setCustom} suffix="×" />}
+          <NumberField label={t('ads.hipSens')} value={sens} step={0.01} onValueChange={setSens} />
+          {mode !== 'custom' && <NumberField label={t('ads.hipFov')} value={hip} step={1} onValueChange={setHip} suffix="°" />}
+          {mode === 'fov' && <NumberField label={t('ads.zoomFov')} value={zoom} step={1} onValueChange={setZoom} suffix="°" />}
+          {mode === 'magnification' && <NumberField label={t('ads.magnification')} value={mag} step={0.5} onValueChange={setMag} suffix="×" />}
+          {mode === 'custom' && <NumberField label={t('ads.multiplier')} value={custom} step={0.05} onValueChange={setCustom} suffix="×" />}
         </div>
         {mode !== 'custom' && (
           <div>

@@ -87,11 +87,11 @@ export function MousepadVisualizer({ cm360 }: { cm360: number | null }) {
                 'h-full rounded-full transition-[width] duration-500',
                 fit?.overflow
                   ? 'bg-[linear-gradient(90deg,var(--c-accent)_0,var(--c-accent)_var(--fit),var(--c-danger)_var(--fit))] shadow-[0_0_18px_-2px_var(--c-danger)]'
-                  : 'bg-accent shadow-[0_0_18px_-4px_var(--c-accent)]',
+                  : 'bg-accent-fill shadow-[0_0_18px_-4px_var(--c-accent)]',
               )}
               style={{ ['--fit' as string]: `${Math.min(100, (pad / cm360) * 100)}%` }}
             />
-            <span className="absolute -top-6 right-0 translate-x-1/2 rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-accent-fg num">
+            <span className="absolute -top-6 right-0 translate-x-1/2 rounded-md bg-accent-fill px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-accent-fg num">
               360°
             </span>
             <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-subtle num">180°</span>
@@ -134,7 +134,7 @@ export function MousepadVisualizer({ cm360 }: { cm360: number | null }) {
 
 function Metric({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
-    <div className="rounded-xl bg-surface-2/70 px-3 py-2.5">
+    <div className="min-w-0 rounded-xl bg-surface-2/70 px-3 py-2.5">
       <div className="truncate text-[11px] text-subtle">{label}</div>
       <div className={cn('ltr num mt-0.5 truncate text-start text-base font-semibold', danger && 'text-danger')}>{value}</div>
     </div>

@@ -226,8 +226,9 @@ async function landingDemo(page, ui) {
   await ui.type('0.55')
   await ui.wait(700)
   // Scroll to the stats and the eDPI-vs-cm/360 comparison (counters animate in view).
-  for (let i = 0; i < 14; i++) {
-    await page.mouse.wheel(0, 70)
+  // The hero is exactly one screen: scroll one screen to land on the next section.
+  for (let i = 0; i < 16; i++) {
+    await page.mouse.wheel(0, VIEWPORT.height / 16)
     await ui.wait(45)
   }
   await ui.wait(1900)

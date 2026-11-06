@@ -153,7 +153,7 @@ turns across pad                          = pad width / cm/360
 
 ## 🖥️ Windows desktop app
 
-Download `Aimless-v2.0.1-Portable.exe` (a single file) or `Aimless-v2.0.1-Windows-NoInstall.zip` (extract it and run `Run-Aimless.bat` or `Aimless.exe`) from the [latest release](https://github.com/pzxe/Aimless/releases/latest).
+Download `Aimless-v2.0.2-Portable.exe` (a single file) or `Aimless-v2.0.2-Windows-NoInstall.zip` (extract it and run `Run-Aimless.bat` or `Aimless.exe`) from the [latest release](https://github.com/pzxe/Aimless/releases/latest).
 
 Nothing is installed and the app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
 

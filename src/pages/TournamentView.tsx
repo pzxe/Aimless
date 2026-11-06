@@ -138,8 +138,8 @@ export default function TournamentViewPage() {
 
       {champion && (
         <Card className="mb-5 flex items-center gap-4 overflow-hidden p-5">
-          <div className="pointer-events-none absolute -start-10 -top-16 size-48 rounded-full bg-accent/25 blur-3xl" />
-          <span className="relative flex size-12 items-center justify-center rounded-2xl bg-accent text-accent-fg glow">
+          <div className="pointer-events-none absolute -start-10 -top-16 size-48 rounded-full bg-accent-fill/25 blur-3xl" />
+          <span className="relative flex size-12 items-center justify-center rounded-2xl bg-accent-fill text-accent-fg glow">
             <Crown className="size-6" />
           </span>
           <div className="relative min-w-0">
@@ -152,7 +152,7 @@ export default function TournamentViewPage() {
 
       {resolved.readyCount > 0 && !champion && (
         <p className="mb-4 flex items-center gap-2 text-xs text-muted">
-          <span className="size-2 rounded-full bg-accent shadow-[0_0_8px_var(--c-accent)]" />
+          <span className="size-2 rounded-full bg-accent-fill shadow-[0_0_8px_var(--c-accent)]" />
           {t('tournament.readyHint', { n: resolved.readyCount })}
         </p>
       )}
@@ -211,7 +211,17 @@ function ExportMenu({ onJson, onSvg, onPng }: { onJson: () => void; onSvg: () =>
     { icon: Image, label: t('tournament.exportPng'), run: onPng },
   ]
   return (
-    <div className="relative" onBlur={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setOpen(false)}>
+    <div
+      className="relative"
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setOpen(false)}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && open) {
+          e.stopPropagation()
+          setOpen(false)
+          ;(e.currentTarget.querySelector('button') as HTMLButtonElement | null)?.focus()
+        }
+      }}
+    >
       <Button aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         <Download />
         {t('tournament.export')}

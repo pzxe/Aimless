@@ -43,6 +43,7 @@ import {
 import { cn } from '@/utils/cn'
 import { playSound } from '@/utils/sound'
 import { clearAllStorage } from '@/utils/storage'
+import { clearPersistentTools } from '@/hooks/usePersistentState'
 
 function Row({ label, hint, children }: { label: ReactNode; hint?: ReactNode; children: ReactNode }) {
   return (
@@ -51,7 +52,7 @@ function Row({ label, hint, children }: { label: ReactNode; hint?: ReactNode; ch
         <div className="text-sm font-medium">{label}</div>
         {hint && <div className="mt-0.5 text-xs text-muted">{hint}</div>}
       </div>
-      <div className="scrollbar-thin max-w-full shrink-0 overflow-x-auto">{children}</div>
+      <div className="scrollbar-thin max-w-full min-w-0 overflow-x-auto md:shrink-0">{children}</div>
     </div>
   )
 }
@@ -68,7 +69,7 @@ export default function SettingsPage() {
   return (
     <>
       <PageHeader eyebrow={t('settings.eyebrow')} title={t('settings.title')} description={t('settings.subtitle')} />
-      <div className="grid max-w-4xl gap-4">
+      <div className="grid max-w-4xl grid-cols-1 gap-4">
         <Card>
           <CardHeader title={t('settings.appearance')} icon={<Palette />} />
           <CardBody className="divide-y divide-border">
@@ -295,6 +296,7 @@ export default function SettingsPage() {
           useSettings.getState().reset()
           useConverter.getState().load(initialForm(DEFAULT_SETTINGS.defaultDpi))
           clearAllStorage()
+          clearPersistentTools()
           toast.success(message)
         }}
       />

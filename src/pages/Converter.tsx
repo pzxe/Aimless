@@ -108,6 +108,7 @@ export default function ConverterPage() {
                 onValueChange={(v) => setField('sourceSensitivity', v)}
                 placeholder="1.00"
                 large
+                step={0.01}
                 autoFocus
                 error={issue('sourceSensitivity')}
               />
@@ -116,6 +117,7 @@ export default function ConverterPage() {
                 value={form.sourceDpi}
                 onValueChange={(v) => setField('sourceDpi', v)}
                 large
+                step={50}
                 inputMode="numeric"
                 error={issue('sourceDpi')}
               />
@@ -173,6 +175,7 @@ export default function ConverterPage() {
                   value={form.targetDpi}
                   onValueChange={(v) => setField('targetDpi', v)}
                   large
+                  step={50}
                   inputMode="numeric"
                   error={issue('targetDpi')}
                 />

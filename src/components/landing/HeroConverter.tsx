@@ -32,16 +32,16 @@ export function HeroConverter({ demo, setDemo }: { demo: DemoState; setDemo: (d:
   const text = result.ok ? f.sens(result.target.sensitivity) : ''
 
   return (
-    <div className="card glass relative overflow-hidden rounded-[24px] shadow-pop">
+    <div data-ui="aimless-converter" className="card glass relative overflow-hidden rounded-[24px] shadow-pop">
       <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
         <span className="size-2.5 rounded-full bg-[#ff5f57]" />
         <span className="size-2.5 rounded-full bg-[#febc2e]" />
         <span className="size-2.5 rounded-full bg-[#28c840]" />
-        <span className="ms-3 text-[11px] font-medium tracking-[0.14em] text-subtle uppercase">{t('landing.widget.title')}</span>
+        <span className="ms-3 text-[11px] font-medium tracking-[0.14em] text-muted uppercase">{t('landing.widget.title')}</span>
         {result.ok && <AccuracyBadge accuracy={result.accuracy} className="ms-auto" />}
       </div>
       <div className="space-y-4 p-5">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
           <GameSelector value={demo.source} onChange={(source) => setDemo({ ...demo, source })} label={t('converter.sourceGame')} />
           <button
             type="button"
@@ -58,7 +58,7 @@ export function HeroConverter({ demo, setDemo }: { demo: DemoState; setDemo: (d:
           <NumberField label={t('common.dpi')} value={demo.dpi} onValueChange={(v) => setDemo({ ...demo, dpi: v })} large inputMode="numeric" />
         </div>
         <div className="relative overflow-hidden rounded-2xl border border-accent-line bg-accent-soft p-4">
-          <div className="pointer-events-none absolute -end-10 -top-10 size-32 rounded-full bg-accent/30 blur-2xl" />
+          <div className="pointer-events-none absolute -end-10 -top-10 size-32 rounded-full bg-accent-fill/30 blur-2xl" />
           <div className="relative flex items-end justify-between gap-3">
             <div className="min-w-0">
               <div className="text-[11px] font-medium text-muted">{t('converter.converted')}</div>

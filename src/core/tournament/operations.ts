@@ -33,6 +33,22 @@ export function shuffle<T>(items: T[], rng: () => number = Math.random): T[] {
   return a
 }
 
+/**
+ * Name the empty entries "<label> 1", "<label> 2", … without reusing a name that is
+ * already taken (case-insensitive), so the result always passes validation.
+ */
+export function fillEmptyNames(names: string[], label: string): string[] {
+  const taken = new Set(names.map((n) => n.trim().toLocaleLowerCase()).filter(Boolean))
+  let n = 1
+  return names.map((name) => {
+    if (name.trim()) return name
+    while (taken.has(`${label} ${n}`.toLocaleLowerCase())) n++
+    const next = `${label} ${n}`
+    taken.add(next.toLocaleLowerCase())
+    return next
+  })
+}
+
 export function validateNewTournament(input: NewTournamentInput): TournamentError | null {
   if (!clean(input.name, 80)) return 'name_required'
   const names = input.participants.map((p) => clean(p.name, 40))

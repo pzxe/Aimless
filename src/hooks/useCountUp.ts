@@ -10,7 +10,7 @@ export function useCountUp(target: number, durationMs = 1200) {
 
   useEffect(() => {
     const el = ref.current
-    const motion = document.documentElement.dataset.motion
+    const motion = document.documentElement.dataset.motionPref
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!el || motion !== 'full' || reduced || typeof IntersectionObserver === 'undefined') {
       setValue(target)

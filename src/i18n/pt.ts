@@ -293,6 +293,7 @@ export const pt: Record<TranslationKey, string> = {
   'nav.tournaments': 'Torneios',
   'nav.mousepad': 'Mousepad',
   'nav.presentation': 'Apresentação',
+  'nav.github': 'Repositório no GitHub',
   'nav.group.workspace': 'Área de trabalho',
   'nav.group.library': 'Biblioteca',
 
@@ -305,6 +306,7 @@ export const pt: Record<TranslationKey, string> = {
   'dashboard.tournaments': 'Torneios',
 
   'tools.eyebrow': 'Calculadoras',
+  'tools.fromConverter': 'Usar ajuste do conversor',
 
   'aim.title': 'Estilo de mira',
   'aim.empty': 'Digite uma configuração',
@@ -531,7 +533,7 @@ export const pt: Record<TranslationKey, string> = {
   'landing.why.trueBody': 'O Aimless converte pela constante de rotação de cada jogo, então uma volta completa exige o mesmo movimento de mão.',
   'landing.why.same': '{unit} nos dois jogos',
   'landing.features.eyebrow': 'Tudo em um só lugar',
-  'landing.features.title': 'Feito para jogadores e organizadores',
+  'landing.features.title': 'Ferramentas para jogadores e organizadores',
   'landing.features.lead': 'Todas as ferramentas rodam localmente, no navegador ou no PC.',
   'landing.f.converter': 'Conversor de sensibilidade',
   'landing.f.converterBody': '{games} jogos, cada um com nível de precisão indicado, e calibração para quem não tem dados verificados.',
@@ -552,8 +554,8 @@ export const pt: Record<TranslationKey, string> = {
   'landing.play.pad': 'Mousepad e estilo de mira',
   'landing.play.padLead': 'Sua configuração do conversor, em escala no seu mousepad.',
   'landing.play.fullscreen': 'Abrir área de trabalho completa',
-  'landing.dl.eyebrow': 'App para Windows',
-  'landing.dl.title': 'Leve para o offline',
+  'landing.dl.eyebrow': 'Download',
+  'landing.dl.title': 'App para Windows',
   'landing.dl.body': 'Um app portátil para Windows com as mesmas ferramentas. Nada para instalar e sem permissão de administrador. Seus dados ficam no seu PC.',
   'landing.dl.unsigned': 'As versões ainda não têm assinatura digital, então o Windows SmartScreen pode pedir confirmação. Escolha “Mais informações” e depois “Executar assim mesmo”. As somas de verificação estão em cada release.',
   'landing.footer.line': 'Aimless · código aberto sob licença MIT',

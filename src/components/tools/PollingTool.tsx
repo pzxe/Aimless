@@ -1,5 +1,6 @@
 import { Activity } from 'lucide-react'
-import { useState } from 'react'
+import { usePersistentState } from '@/hooks/usePersistentState'
+import { DpiChips, FromConverter } from '@/pages/Tools'
 import { parseNumber } from '@/core/sensitivity'
 import { pollStats } from '@/core/tools'
 import { useFormat } from '@/hooks/useFormat'
@@ -15,8 +16,8 @@ export function PollingTool() {
   const t = useT()
   const f = useFormat()
   const defaultDpi = useSettings((s) => s.defaultDpi)
-  const [dpi, setDpi] = useState(String(defaultDpi))
-  const [speed, setSpeed] = useState('30')
+  const [dpi, setDpi] = usePersistentState('polling.dpi', String(defaultDpi))
+  const [speed, setSpeed] = usePersistentState('polling.speed', '30')
   const d = parseNumber(dpi)
   const sCm = parseNumber(speed)
   const speedCm = f.units === 'in' ? sCm * 2.54 : sCm
@@ -25,12 +26,13 @@ export function PollingTool() {
 
   return (
     <Card id="polling" className="scroll-mt-20">
-      <CardHeader title={t('polling.title')} description={t('polling.desc')} icon={<Activity />} />
+      <CardHeader title={t('polling.title')} description={t('polling.desc')} icon={<Activity />} action={<FromConverter onPick={(c) => c.sourceDpi && setDpi(c.sourceDpi)} />} />
       <CardBody className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <NumberField label={t('common.dpi')} value={dpi} onValueChange={setDpi} inputMode="numeric" />
-          <NumberField label={t('polling.speed')} value={speed} onValueChange={setSpeed} suffix={speedUnit} />
+          <NumberField label={t('common.dpi')} value={dpi} step={50} onValueChange={setDpi} inputMode="numeric" />
+          <NumberField label={t('polling.speed')} value={speed} step={5} onValueChange={setSpeed} suffix={speedUnit} />
         </div>
+        <DpiChips current={dpi} onPick={setDpi} />
         <div>
           <Label>{t('polling.speedPresets')}</Label>
           <div className="flex flex-wrap gap-1.5">

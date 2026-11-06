@@ -11,7 +11,7 @@ export function useReveal<T extends HTMLElement = HTMLElement>() {
   useEffect(() => {
     const root = ref.current
     if (!root) return
-    const motion = document.documentElement.dataset.motion
+    const motion = document.documentElement.dataset.motionPref
     const prefersReduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
     const animate = typeof IntersectionObserver !== 'undefined' && motion === 'full' && !prefersReduced
     const show = (el: Element) => el.setAttribute('data-shown', '')

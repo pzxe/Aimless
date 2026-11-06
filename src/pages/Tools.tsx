@@ -1,5 +1,9 @@
 import { Calculator, Crosshair, MousePointer2, Ruler, ScanEye } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import { ArrowDownToLine } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { usePersistentState } from '@/hooks/usePersistentState'
+import { useConverter } from '@/store/converterStore'
 import { useLocation } from 'react-router-dom'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { GameSelector } from '@/components/games/GameSelector'
@@ -25,11 +29,12 @@ import { useFormat } from '@/hooks/useFormat'
 import { useGameAccuracy } from '@/hooks/useGameAccuracy'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
+import { cn } from '@/utils/cn'
 
-function ToolCard({ id, icon, title, desc, children }: { id: string; icon: ReactNode; title: string; desc: string; children: ReactNode }) {
+function ToolCard({ id, icon, title, desc, children, action }: { id: string; icon: ReactNode; title: string; desc: string; children: ReactNode; action?: ReactNode }) {
   return (
     <Card id={id} className="scroll-mt-20">
-      <CardHeader title={title} description={desc} icon={icon} />
+      <CardHeader title={title} description={desc} icon={icon} action={action} />
       <CardBody className="space-y-4">{children}</CardBody>
     </Card>
   )
@@ -53,6 +58,39 @@ function Result({ label, value, unit, extra }: { label: string; value: string | 
   )
 }
 
+/** Fills a tool from the converter's current setting. */
+export function FromConverter({ onPick }: { onPick: (c: ReturnType<typeof useConverter.getState>) => void }) {
+  const t = useT()
+  return (
+    <Button size="sm" variant="ghost" onClick={() => onPick(useConverter.getState())} title={t('tools.fromConverter')}>
+      <ArrowDownToLine />
+      <span className="hidden sm:inline">{t('tools.fromConverter')}</span>
+    </Button>
+  )
+}
+
+/** Common DPI values as one-click chips. */
+export function DpiChips({ onPick, current }: { onPick: (dpi: string) => void; current: string }) {
+  return (
+    <div className="-mt-2 flex flex-wrap gap-1.5">
+      {['400', '800', '1600', '3200'].map((d) => (
+        <button
+          key={d}
+          type="button"
+          onClick={() => onPick(d)}
+          aria-pressed={current === d}
+          className={cn(
+            'num rounded-full border px-2.5 py-0.5 text-[11px] transition-colors',
+            current === d ? 'border-accent-line bg-accent-soft text-text' : 'border-border text-muted hover:border-border-strong hover:text-text',
+          )}
+        >
+          {d}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 const err = (t: ReturnType<typeof useT>, code: string | null, show: boolean) =>
   code && show ? t(`validation.${code}` as Parameters<typeof t>[0]) : null
 
@@ -62,23 +100,30 @@ function Cm360Tool() {
   const defaultDpi = useSettings((s) => s.defaultDpi)
   const calibrations = useSettings((s) => s.calibrations)
   const accuracyOf = useGameAccuracy()
-  const [game, setGame] = useState('cs2')
-  const [sens, setSens] = useState('')
-  const [dpi, setDpi] = useState(String(defaultDpi))
+  const [game, setGame] = usePersistentState('cm360.game', 'cs2')
+  const [sens, setSens] = usePersistentState('cm360.sens', '')
+  const [dpi, setDpi] = usePersistentState('cm360.dpi', String(defaultDpi))
   const s = parseNumber(sens)
   const d = parseNumber(dpi)
   const r = describeSetting(game, d, s, calibrations)
   const unsupported = accuracyOf(game) === 'unsupported'
   return (
-    <ToolCard id="cm360" icon={<Ruler />} title={t('tools.cm360.title')} desc={t('tools.cm360.desc')}>
+    <ToolCard
+      id="cm360"
+      icon={<Ruler />}
+      title={t('tools.cm360.title')}
+      desc={t('tools.cm360.desc')}
+      action={<FromConverter onPick={(c) => { setGame(c.sourceGameId); setSens(c.sourceSensitivity); setDpi(c.sourceDpi) }} />}
+    >
       <div>
         <Label>{t('common.game')}</Label>
         <GameSelector value={game} onChange={setGame} label={t('common.game')} />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <NumberField label={t('common.sensitivity')} value={sens} onValueChange={setSens} error={err(t, validateSensitivity(s), sens !== '')} />
-        <NumberField label={t('common.dpi')} value={dpi} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
+        <NumberField label={t('common.sensitivity')} value={sens} step={0.01} onValueChange={setSens} error={err(t, validateSensitivity(s), sens !== '')} />
+        <NumberField label={t('common.dpi')} value={dpi} step={50} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
       </div>
+      <DpiChips current={dpi} onPick={setDpi} />
       {unsupported ? (
         <p className="text-xs text-danger">{t('note.unsupportedGeneric')}</p>
       ) : (
@@ -95,17 +140,24 @@ function EdpiTool() {
   const t = useT()
   const f = useFormat()
   const defaultDpi = useSettings((s) => s.defaultDpi)
-  const [sens, setSens] = useState('')
-  const [dpi, setDpi] = useState(String(defaultDpi))
+  const [sens, setSens] = usePersistentState('edpi.sens', '')
+  const [dpi, setDpi] = usePersistentState('edpi.dpi', String(defaultDpi))
   const s = parseNumber(sens)
   const d = parseNumber(dpi)
   const ok = !validateSensitivity(s) && !validateDpi(d)
   return (
-    <ToolCard id="edpi" icon={<Calculator />} title={t('tools.edpi.title')} desc={t('tools.edpi.desc')}>
+    <ToolCard
+      id="edpi"
+      icon={<Calculator />}
+      title={t('tools.edpi.title')}
+      desc={t('tools.edpi.desc')}
+      action={<FromConverter onPick={(c) => { setSens(c.sourceSensitivity); setDpi(c.sourceDpi) }} />}
+    >
       <div className="grid grid-cols-2 gap-3">
-        <NumberField label={t('common.dpi')} value={dpi} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
-        <NumberField label={t('common.sensitivity')} value={sens} onValueChange={setSens} error={err(t, validateSensitivity(s), sens !== '')} />
+        <NumberField label={t('common.dpi')} value={dpi} step={50} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
+        <NumberField label={t('common.sensitivity')} value={sens} step={0.01} onValueChange={setSens} error={err(t, validateSensitivity(s), sens !== '')} />
       </div>
+      <DpiChips current={dpi} onPick={setDpi} />
       <Result label={t('common.edpi')} value={ok ? f.edpi(calculateEdpi(d, s)) : null} />
     </ToolCard>
   )
@@ -115,20 +167,27 @@ function DpiTool() {
   const t = useT()
   const f = useFormat()
   const defaultDpi = useSettings((s) => s.defaultDpi)
-  const [sens, setSens] = useState('')
-  const [oldDpi, setOldDpi] = useState(String(defaultDpi))
-  const [newDpi, setNewDpi] = useState('1600')
+  const [sens, setSens] = usePersistentState('dpi.sens', '')
+  const [oldDpi, setOldDpi] = usePersistentState('dpi.old', String(defaultDpi))
+  const [newDpi, setNewDpi] = usePersistentState('dpi.new', '1600')
   const s = parseNumber(sens)
   const o = parseNumber(oldDpi)
   const n = parseNumber(newDpi)
   const ok = !validateSensitivity(s) && !validateDpi(o) && !validateDpi(n)
   return (
-    <ToolCard id="dpi" icon={<MousePointer2 />} title={t('tools.dpi.title')} desc={t('tools.dpi.desc')}>
+    <ToolCard
+      id="dpi"
+      icon={<MousePointer2 />}
+      title={t('tools.dpi.title')}
+      desc={t('tools.dpi.desc')}
+      action={<FromConverter onPick={(c) => { setSens(c.sourceSensitivity); setOldDpi(c.sourceDpi) }} />}
+    >
       <div className="grid grid-cols-3 gap-3">
-        <NumberField label={t('common.sensitivity')} value={sens} onValueChange={setSens} error={err(t, validateSensitivity(s), sens !== '')} />
-        <NumberField label={t('tools.dpi.old')} value={oldDpi} onValueChange={setOldDpi} inputMode="numeric" error={err(t, validateDpi(o), true)} />
-        <NumberField label={t('tools.dpi.new')} value={newDpi} onValueChange={setNewDpi} inputMode="numeric" error={err(t, validateDpi(n), true)} />
+        <NumberField label={t('common.sensitivity')} value={sens} step={0.01} onValueChange={setSens} error={err(t, validateSensitivity(s), sens !== '')} />
+        <NumberField label={t('tools.dpi.old')} value={oldDpi} step={50} onValueChange={setOldDpi} inputMode="numeric" error={err(t, validateDpi(o), true)} />
+        <NumberField label={t('tools.dpi.new')} value={newDpi} step={50} onValueChange={setNewDpi} inputMode="numeric" error={err(t, validateDpi(n), true)} />
       </div>
+      <DpiChips current={newDpi} onPick={setNewDpi} />
       {/* Same game, so the yaw cancels out: sens × oldDPI / newDPI. */}
       <Result label={t('tools.dpi.result')} value={ok ? f.sens((s * o) / n) : null} />
     </ToolCard>
@@ -141,15 +200,30 @@ function TargetTool() {
   const defaultDpi = useSettings((s) => s.defaultDpi)
   const calibrations = useSettings((s) => s.calibrations)
   const accuracyOf = useGameAccuracy()
-  const [game, setGame] = useState('valorant')
-  const [cm, setCm] = useState('40')
-  const [dpi, setDpi] = useState(String(defaultDpi))
+  const [game, setGame] = usePersistentState('target.game', 'valorant')
+  const [cm, setCm] = usePersistentState('target.dist', '40')
+  const [dpi, setDpi] = usePersistentState('target.dpi', String(defaultDpi))
   const c = parseNumber(cm) * (f.units === 'in' ? 2.54 : 1)
   const d = parseNumber(dpi)
   const sens = sensitivityForCm360(game, c, d, calibrations)
   const unsupported = accuracyOf(game) === 'unsupported'
   return (
-    <ToolCard id="target" icon={<Crosshair />} title={t('tools.target.title')} desc={t('tools.target.desc')}>
+    <ToolCard
+      id="target"
+      icon={<Crosshair />}
+      title={t('tools.target.title')}
+      desc={t('tools.target.desc')}
+      action={
+        <FromConverter
+          onPick={(c) => {
+            setGame(c.targetGameId)
+            setDpi(c.targetDpi)
+            const src = describeSetting(c.sourceGameId, parseNumber(c.sourceDpi), parseNumber(c.sourceSensitivity), calibrations)
+            if (src) setCm(f.dist(src.cm360))
+          }}
+        />
+      }
+    >
       <div>
         <Label>{t('common.game')}</Label>
         <GameSelector value={game} onChange={setGame} label={t('common.game')} />
@@ -159,11 +233,13 @@ function TargetTool() {
           label={t('tools.target.distance', { unit: f.distLabel })}
           value={cm}
           onValueChange={setCm}
+          step={0.5}
           suffix={f.unit}
           error={cm !== '' && !(c > 0) ? t('validation.cm360') : null}
         />
-        <NumberField label={t('common.dpi')} value={dpi} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
+        <NumberField label={t('common.dpi')} value={dpi} step={50} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
       </div>
+      <DpiChips current={dpi} onPick={setDpi} />
       {unsupported ? (
         <p className="text-xs text-danger">{t('note.unsupportedGeneric')}</p>
       ) : (
@@ -180,11 +256,11 @@ function TargetTool() {
 function FovTool() {
   const t = useT()
   const f = useFormat()
-  const [value, setValue] = useState('90')
-  const [from, setFrom] = useState<FovType>('horizontal-4:3')
-  const [to, setTo] = useState<FovType>('horizontal')
-  const [w, setW] = useState('1920')
-  const [h, setH] = useState('1080')
+  const [value, setValue] = usePersistentState('fov.value', '90')
+  const [from, setFrom] = usePersistentState<FovType>('fov.from', 'horizontal-4:3')
+  const [to, setTo] = usePersistentState<FovType>('fov.to', 'horizontal')
+  const [w, setW] = usePersistentState('fov.w', '1920')
+  const [h, setH] = usePersistentState('fov.h', '1080')
   const v = parseNumber(value)
   const wn = parseNumber(w)
   const hn = parseNumber(h)

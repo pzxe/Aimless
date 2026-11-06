@@ -101,7 +101,7 @@ export default function TournamentsPage() {
                     </span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-surface-3">
-                    <div className="h-full rounded-full bg-accent shadow-[0_0_10px_var(--c-accent-glow)] transition-[width] duration-500" style={{ width: `${progress * 100}%` }} />
+                    <div className="h-full rounded-full bg-accent-fill shadow-[0_0_10px_var(--c-accent-glow)] transition-[width] duration-500" style={{ width: `${progress * 100}%` }} />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-2">

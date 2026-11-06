@@ -36,7 +36,7 @@ export function useDocumentSettings(): 'dark' | 'light' {
     const root = document.documentElement
     root.dataset.accent = accent
     root.dataset.density = density
-    root.dataset.motion = motion
+    root.dataset.motionPref = motion
   }, [accent, density, motion])
 
   useEffect(() => {

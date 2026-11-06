@@ -293,6 +293,7 @@ export const ru: Record<TranslationKey, string> = {
   'nav.tournaments': 'Турниры',
   'nav.mousepad': 'Коврик',
   'nav.presentation': 'Презентация',
+  'nav.github': 'Репозиторий на GitHub',
   'nav.group.workspace': 'Рабочая область',
   'nav.group.library': 'Библиотека',
 
@@ -305,6 +306,7 @@ export const ru: Record<TranslationKey, string> = {
   'dashboard.tournaments': 'Турниры',
 
   'tools.eyebrow': 'Калькуляторы',
+  'tools.fromConverter': 'Взять из конвертера',
 
   'aim.title': 'Стиль прицеливания',
   'aim.empty': 'Введите настройку',
@@ -531,7 +533,7 @@ export const ru: Record<TranslationKey, string> = {
   'landing.why.trueBody': 'Aimless пересчитывает через константу поворота каждой игры, поэтому полный оборот требует одного и того же движения руки.',
   'landing.why.same': '{unit} в обеих играх',
   'landing.features.eyebrow': 'Всё в одном месте',
-  'landing.features.title': 'Для игроков и организаторов',
+  'landing.features.title': 'Инструменты для игроков и организаторов',
   'landing.features.lead': 'Все инструменты работают локально — в браузере или на компьютере.',
   'landing.f.converter': 'Конвертер чувствительности',
   'landing.f.converterBody': '{games} игр с указанной точностью для каждой и калибровка для игр без проверенных данных.',
@@ -552,8 +554,8 @@ export const ru: Record<TranslationKey, string> = {
   'landing.play.pad': 'Коврик и стиль',
   'landing.play.padLead': 'Настройка из конвертера в масштабе на вашем коврике.',
   'landing.play.fullscreen': 'Открыть рабочую область',
-  'landing.dl.eyebrow': 'Приложение для Windows',
-  'landing.dl.title': 'Работает офлайн',
+  'landing.dl.eyebrow': 'Скачать',
+  'landing.dl.title': 'Приложение для Windows',
   'landing.dl.body': 'Портативное приложение для Windows с теми же инструментами. Ничего не нужно устанавливать, права администратора не нужны. Данные остаются на вашем компьютере.',
   'landing.dl.unsigned': 'Сборки пока не подписаны, поэтому Windows SmartScreen может запросить подтверждение. Выберите «Подробнее», затем «Выполнить в любом случае». Контрольные суммы указаны в каждом релизе.',
   'landing.footer.line': 'Aimless · открытый код по лицензии MIT',
