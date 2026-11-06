@@ -17,3 +17,6 @@ skills-lock.json
 
 # Desktop build output
 release/
+
+# Design references (not for distribution)
+inspiration/

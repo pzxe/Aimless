@@ -175,7 +175,7 @@ export default function ProfilesPage() {
                     [t('common.sensitivity'), f.sens(p.sensitivity)],
                     [t('common.dpi'), String(p.dpi)],
                     [t('common.edpi'), f.edpi(p.dpi * p.sensitivity)],
-                    [t('common.cm360'), d ? f.cm(d.cm360) : t('common.notAvailable')],
+                    [f.distLabel, d ? f.dist(d.cm360) : t('common.notAvailable')],
                   ].map(([label, value]) => (
                     <div key={label} className="min-w-0">
                       <dt className="truncate text-[11px] text-subtle">{label}</dt>

@@ -1,8 +1,21 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { isKnownGame, type CalibrationMap } from '@/core/sensitivity'
+import { isDesktopApp } from '@/utils/platform'
 import { persistStorage, STORAGE_KEYS } from '@/utils/storage'
-import type { FovDisplay, Language, Theme } from './types'
+import {
+  ACCENTS,
+  isLanguage,
+  type Accent,
+  type Density,
+  type FovDisplay,
+  type Language,
+  type MotionPref,
+  type MousepadPreset,
+  type StartupView,
+  type Theme,
+  type Units,
+} from './types'
 
 export interface SettingsState {
   language: Language
@@ -11,14 +24,24 @@ export interface SettingsState {
   precision: number
   defaultDpi: number
   fovDisplay: FovDisplay
+  units: Units
+  mousepad: MousepadPreset
+  mousepadCustomCm: number
+  motion: MotionPref
+  density: Density
+  accent: Accent
+  startupView: StartupView
+  sound: boolean
   favoriteGames: string[]
   recentGames: string[]
   /** User-measured yaw values (degrees/count at sens 1). */
   calibrations: CalibrationMap
 }
 
+type Preferences = Omit<SettingsState, 'favoriteGames' | 'recentGames' | 'calibrations'>
+
 interface SettingsActions {
-  set: (patch: Partial<Pick<SettingsState, 'language' | 'theme' | 'precision' | 'defaultDpi' | 'fovDisplay'>>) => void
+  set: (patch: Partial<Preferences>) => void
   toggleFavoriteGame: (id: string) => void
   pushRecentGame: (id: string) => void
   setCalibration: (gameId: string, yaw: number) => void
@@ -32,12 +55,27 @@ export const DEFAULT_SETTINGS: SettingsState = {
   precision: 3,
   defaultDpi: 800,
   fovDisplay: 'horizontal',
+  units: 'cm',
+  mousepad: 'large',
+  mousepadCustomCm: 60,
+  motion: 'full',
+  density: 'comfortable',
+  accent: 'crimson',
+  // The desktop app opens straight into the workspace.
+  startupView: isDesktopApp ? 'dashboard' : 'landing',
+  sound: false,
   favoriteGames: [],
   recentGames: [],
   calibrations: {},
 }
 
+export const PREFERENCE_KEYS = [
+  'language', 'theme', 'precision', 'defaultDpi', 'fovDisplay', 'units', 'mousepad',
+  'mousepadCustomCm', 'motion', 'density', 'accent', 'startupView', 'sound',
+] as const satisfies readonly (keyof Preferences)[]
+
 const RECENT_LIMIT = 5
+const oneOf = <T extends string>(v: unknown, list: readonly T[], fallback: T): T => (list.includes(v as T) ? (v as T) : fallback)
 
 export const useSettings = create<SettingsState & SettingsActions>()(
   persist(
@@ -63,8 +101,8 @@ export const useSettings = create<SettingsState & SettingsActions>()(
     {
       name: STORAGE_KEYS.settings,
       storage: persistStorage,
-      version: 1,
-      // Guard against corrupted or hand-edited storage.
+      version: 2,
+      // Guard against corrupted or hand-edited storage; also upgrades v1 data.
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<SettingsState>
         const calibrations: CalibrationMap = {}
@@ -74,13 +112,23 @@ export const useSettings = create<SettingsState & SettingsActions>()(
           }
         }
         const ids = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && isKnownGame(x)) : [])
+        const num = (v: unknown, min: number, max: number, fallback: number) =>
+          typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : fallback
         return {
           ...current,
-          language: p.language === 'ar' ? 'ar' : 'en',
-          theme: p.theme === 'light' || p.theme === 'system' ? p.theme : 'dark',
-          precision: typeof p.precision === 'number' && p.precision >= 0 && p.precision <= 6 ? Math.round(p.precision) : current.precision,
-          defaultDpi: typeof p.defaultDpi === 'number' && p.defaultDpi > 0 && p.defaultDpi <= 64000 ? p.defaultDpi : current.defaultDpi,
-          fovDisplay: p.fovDisplay === 'vertical' ? 'vertical' : 'horizontal',
+          language: isLanguage(p.language) ? p.language : 'en',
+          theme: oneOf(p.theme, ['dark', 'light', 'system'], 'dark'),
+          precision: Math.round(num(p.precision, 0, 6, current.precision)),
+          defaultDpi: num(p.defaultDpi, 1, 64000, current.defaultDpi),
+          fovDisplay: oneOf(p.fovDisplay, ['horizontal', 'vertical'], 'horizontal'),
+          units: oneOf(p.units, ['cm', 'in'], 'cm'),
+          mousepad: oneOf(p.mousepad, ['small', 'medium', 'large', 'xl', 'custom'], current.mousepad),
+          mousepadCustomCm: num(p.mousepadCustomCm, 5, 300, current.mousepadCustomCm),
+          motion: oneOf(p.motion, ['full', 'reduced', 'instant'], 'full'),
+          density: oneOf(p.density, ['comfortable', 'compact'], 'comfortable'),
+          accent: oneOf(p.accent, ACCENTS.map((a) => a.id), current.accent),
+          startupView: oneOf(p.startupView, ['landing', 'dashboard', 'converter', 'tournaments'], current.startupView),
+          sound: p.sound === true,
           favoriteGames: ids(p.favoriteGames),
           recentGames: ids(p.recentGames).slice(0, RECENT_LIMIT),
           calibrations,

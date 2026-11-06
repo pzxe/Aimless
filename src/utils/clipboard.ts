@@ -1,4 +1,5 @@
 import { toast } from 'sonner'
+import { playSound } from './sound'
 
 /** Copy text and show a toast. Falls back to execCommand for non-secure contexts. */
 export async function copyText(text: string, messages: { success: string; failure: string }): Promise<boolean> {
@@ -26,6 +27,7 @@ export async function copyText(text: string, messages: { success: string; failur
       ok = false
     }
   }
+  if (ok) playSound('success')
   if (ok) toast.success(messages.success, { description: text.length <= 40 ? text : undefined })
   else toast.error(messages.failure)
   return ok

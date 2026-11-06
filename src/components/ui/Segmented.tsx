@@ -22,7 +22,7 @@ export function Segmented<T extends string>({
   className?: string
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className={cn('inline-flex rounded-lg border border-border bg-surface-2 p-0.5', className)}>
+    <div role="radiogroup" aria-label={label} className={cn('inline-flex rounded-xl border border-border bg-surface-2/70 p-0.5', className)}>
       {options.map((o) => {
         const active = o.value === value
         return (
@@ -33,8 +33,8 @@ export function Segmented<T extends string>({
             aria-checked={active}
             onClick={() => onChange(o.value)}
             className={cn(
-              'inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium whitespace-nowrap transition-colors duration-150 [&_svg]:size-3.5',
-              active ? 'bg-surface text-text shadow-sm ring-1 ring-border' : 'text-muted hover:text-text',
+              'inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium whitespace-nowrap transition-colors duration-150 [&_svg]:size-3.5',
+              active ? 'bg-accent-soft text-text ring-1 ring-accent-line' : 'text-muted hover:text-text',
             )}
           >
             {o.icon}

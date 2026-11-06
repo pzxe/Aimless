@@ -1,5 +1,8 @@
 import {
+  Activity,
   ArrowLeftRight,
+  Crosshair,
+  Gauge,
   ArrowRight,
   BarChart3,
   Calculator,
@@ -9,6 +12,7 @@ import {
   Ruler,
   ScanEye,
   Star,
+  Trophy,
   UserRound,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -29,6 +33,9 @@ import { useConverter } from '@/store/converterStore'
 import { useHistory } from '@/store/historyStore'
 import { useProfiles } from '@/store/profilesStore'
 import { useSettings } from '@/store/settingsStore'
+import { useTournaments } from '@/store/tournamentStore'
+import { resolveTournament } from '@/core/tournament'
+import { participantName } from '@/components/tournament/labels'
 
 function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: React.ReactNode; sub?: React.ReactNode }) {
   return (
@@ -96,7 +103,7 @@ function QuickConvert() {
             <div className="flex h-10 items-center rounded-lg border border-accent/30 bg-accent-soft ps-3 pe-0.5">
               <span className="ltr num flex-1 truncate text-start text-lg font-semibold">{result.ok ? text : '—'}</span>
               {result.ok && (
-                <span className="ltr num me-1 text-xs text-muted">{f.cm(result.target.cm360)} cm</span>
+                <span className="ltr num me-1 text-xs text-muted">{f.dist(result.target.cm360)} {f.unit}</span>
               )}
               <CopyButton text={text} label={t('converter.copySens')} variant="ghost" size="icon-sm" />
             </div>
@@ -116,9 +123,10 @@ function QuickConvert() {
 }
 
 const TOOL_LINKS = [
+  { to: '/mousepad', icon: Gauge, key: 'nav.mousepad' },
+  { to: '/tools#ads', icon: Crosshair, key: 'ads.title' },
+  { to: '/tools#polling', icon: Activity, key: 'polling.title' },
   { to: '/tools#cm360', icon: Ruler, key: 'tools.cm360.title' },
-  { to: '/tools#dpi', icon: MousePointer2, key: 'tools.dpi.title' },
-  { to: '/tools#edpi', icon: Calculator, key: 'tools.edpi.title' },
   { to: '/tools#fov', icon: ScanEye, key: 'tools.fov.title' },
   { to: '/compare', icon: BarChart3, key: 'nav.compare' },
 ] as const
@@ -132,6 +140,7 @@ export default function DashboardPage() {
   const calibrations = useSettings((s) => s.calibrations)
   const favoriteGames = useSettings((s) => s.favoriteGames)
   const sourceDpi = useConverter((s) => s.sourceDpi)
+  const tournaments = useTournaments((s) => s.tournaments)
   const { fromHistory, fromProfile } = useLoadIntoConverter()
 
   const supported = getSupportedGames(calibrations).length
@@ -142,12 +151,14 @@ export default function DashboardPage() {
   return (
     <>
       <div className="mb-6 lg:mb-8">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t('dashboard.welcome')}</h1>
-        <p className="mt-1 text-sm text-muted">{t('dashboard.subtitle')}</p>
+        <div className="eyebrow mb-2">{t('dashboard.eyebrow')}</div>
+        <h1 className="display text-3xl sm:text-4xl">{t('dashboard.welcome')}</h1>
+        <p className="mt-2 text-sm text-muted">{t('dashboard.subtitle')}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <StatCard icon={<UserRound />} label={t('dashboard.stats.profiles')} value={<span className="num">{profiles.length}</span>} />
+        <StatCard icon={<Trophy />} label={t('dashboard.stats.tournaments')} value={<span className="num">{tournaments.length}</span>} />
         <StatCard
           icon={<Gamepad2 />}
           label={t('dashboard.stats.games')}
@@ -259,8 +270,39 @@ export default function DashboardPage() {
                             {f.sens(p.sensitivity)} @ {p.dpi}
                           </span>
                         </span>
-                        <span className="ltr num text-xs text-muted">{d ? `${f.cm(d.cm360)} cm` : '—'}</span>
+                        <span className="ltr num text-xs text-muted">{d ? `${f.dist(d.cm360)} ${f.unit}` : '—'}</span>
                       </button>
+                    )
+                  })}
+                </div>
+              )}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader
+              title={t('dashboard.tournaments')}
+              icon={<Trophy />}
+              action={
+                <Link to="/tournaments" className="text-xs font-medium text-accent hover:underline">
+                  {tournaments.length > 0 ? t('common.viewAll') : t('tournament.new')}
+                </Link>
+              }
+            />
+            <CardBody className="pb-3">
+              {tournaments.length === 0 ? (
+                <p className="py-2 text-center text-sm text-subtle">{t('tournament.emptyHint')}</p>
+              ) : (
+                <div className="-mx-2">
+                  {tournaments.slice(0, 3).map((tour) => {
+                    const r = resolveTournament(tour)
+                    const champ = participantName(tour, r.championId)
+                    return (
+                      <Link key={tour.id} to={`/tournaments/${tour.id}`} className="flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-surface-2">
+                        <Trophy className="size-4 shrink-0 text-accent" />
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{tour.name}</span>
+                        <span className="ltr num shrink-0 text-xs text-muted">{champ ? `🏆 ${champ}` : `${r.doneCount}/${r.playableCount}`}</span>
+                      </Link>
                     )
                   })}
                 </div>

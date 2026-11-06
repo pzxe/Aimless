@@ -3,7 +3,7 @@ import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type Selec
 import { cn } from '@/utils/cn'
 
 export const inputClass =
-  'h-10 w-full rounded-lg border border-border bg-surface-2 px-3 text-sm text-text placeholder:text-subtle ' +
+  'h-10 w-full rounded-xl border border-border bg-surface-2/70 px-3 text-sm text-text placeholder:text-subtle ' +
   'transition-[border-color,box-shadow] duration-150 outline-none hover:border-border-strong ' +
   'focus:border-accent focus:ring-3 focus:ring-ring aria-invalid:border-danger aria-invalid:focus:ring-danger/25'
 

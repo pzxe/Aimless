@@ -22,7 +22,7 @@ Game data lives in [`src/data/games/games.ts`](src/data/games/games.ts).
 3. Use `accuracy: 'approximate'` when a value has limited confirmation or depends on settings players may change.
 4. Set `sensitivityStep` only if you know the smallest step the game accepts.
 5. Set `nonLinearSlider: true` if the in-game slider is not linear.
-6. Add a note under `note.<gameId>` (or reuse an existing note) in **both** `src/i18n/en.ts` and `src/i18n/ar.ts`. The i18n tests fail if a key is missing or the placeholders differ.
+6. Add a note under `note.<gameId>` (or reuse an existing note) in **all five** dictionaries in `src/i18n/` (`en`, `ar`, `es`, `ru`, `pt`). The i18n tests fail if a key is missing, empty, or its placeholders differ.
 7. Do not add copyrighted logos or artwork. Games use the text badge (`short` + `color`).
 8. Add or update tests in `src/core/sensitivity/sensitivity.test.ts` for any new formula behaviour.
 
@@ -30,7 +30,7 @@ A non-linear game needs a new formula `kind` in `src/core/sensitivity/types.ts` 
 
 ## Translations
 
-Every UI string lives in `src/i18n`. Don't hardcode user-facing text in components. Keep game names, DPI and units in Latin script in Arabic, since that is what players see in-game.
+Every UI string lives in `src/i18n` (English is the source; Arabic, Spanish, Russian and Portuguese must stay in sync). Native-speaker corrections are very welcome. Don't hardcode user-facing text in components. Keep game names, DPI and units in Latin script in Arabic, since that is what players see in-game.
 
 ## Code style
 

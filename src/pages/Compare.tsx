@@ -131,7 +131,7 @@ export default function ComparePage() {
               <span>{t('common.dpi')}</span>
               <span>{t('common.sensitivity')}</span>
               <span>{t('common.edpi')}</span>
-              <span>{t('common.cm360')}</span>
+              <span>{f.distLabel}</span>
               <span>{t('compare.diff')}</span>
               <span>{t('common.accuracy')}</span>
               <span />
@@ -168,7 +168,7 @@ export default function ComparePage() {
                       placeholder="—"
                     />
                     <Metric label={t('common.edpi')} value={result ? f.edpi(result.edpi) : '—'} />
-                    <Metric label={t('common.cm360')} value={result ? f.cm(result.cm360) : '—'} strong />
+                    <Metric label={f.distLabel} value={result ? f.dist(result.cm360) : '—'} strong />
                     <Metric
                       label={t('compare.diff')}
                       value={diff === null ? (i === 0 ? '' : '—') : Math.abs(diff) < 0.05 ? '0%' : `${diff > 0 ? '+' : ''}${f.num(diff, 1)}%`}
@@ -214,7 +214,7 @@ export default function ComparePage() {
                             }}
                           />
                         </div>
-                        <span className="ltr num text-end font-medium">{f.cm(result.cm360)} cm</span>
+                        <span className="ltr num text-end font-medium">{f.dist(result.cm360)} {f.unit}</span>
                       </li>
                     ) : null,
                   )}

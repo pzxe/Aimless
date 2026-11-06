@@ -1,14 +1,16 @@
-import { ArrowLeftRight, Info, Link2, Link2Off, RotateCcw, Ruler, Save, TriangleAlert } from 'lucide-react'
+import { ArrowLeftRight, Gauge, Info, Link2, Link2Off, RotateCcw, Ruler, Save, TriangleAlert } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { CalibrateDialog } from '@/components/games/CalibrateDialog'
 import { GameSelector } from '@/components/games/GameSelector'
 import { DisplaySettings } from '@/components/converter/DisplaySettings'
 import { Stat } from '@/components/converter/StatPair'
+import { AimStyleMeter } from '@/components/tools/AimStyleMeter'
+import { MousepadVisualizer, PadPicker } from '@/components/tools/MousepadVisualizer'
 import { PageHeader } from '@/components/layout/AppShell'
 import { ProfileDialog, type ProfileDialogInitial } from '@/components/profiles/ProfileDialog'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
+import { Card, CardHeader } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { Label, NumberField } from '@/components/ui/Field'
 import { describeSetting, formatNumber, getGame, isValidFov, isValidResolution, parseNumber } from '@/core/sensitivity'
@@ -60,7 +62,7 @@ export default function ConverterPage() {
       sensitivity: Number(formatNumber(ok.targetRounded?.sensitivity ?? ok.target.sensitivity, Math.max(precision, 3))),
       resolution: isValidResolution(w, h) && Number.isInteger(w) && Number.isInteger(h) ? { width: w, height: h } : undefined,
       fov: isValidFov(fov) ? fov : undefined,
-      notes: `${sourceGame?.name ?? ''} ${f.sens(ok.source.sensitivity)} @ ${ok.source.dpi} DPI → ${f.cm(ok.source.cm360)} cm/360°`,
+      notes: `${sourceGame?.name ?? ''} ${f.sens(ok.source.sensitivity)} @ ${ok.source.dpi} DPI → ${f.dist(ok.source.cm360)} ${f.distLabel}`,
     }
   }, [ok, targetGame, sourceGame, form.resolutionWidth, form.resolutionHeight, form.fov, precision, f])
 
@@ -70,6 +72,7 @@ export default function ConverterPage() {
   return (
     <>
       <PageHeader
+        eyebrow={t('converter.eyebrow')}
         title={t('converter.title')}
         description={t('converter.subtitle')}
         actions={
@@ -119,7 +122,7 @@ export default function ConverterPage() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Stat label={t('common.edpi')} value={sourceSide ? f.edpi(sourceSide.edpi) : '—'} muted={!sourceSide} />
-              <Stat label={t('common.cm360')} value={sourceSide ? f.cm(sourceSide.cm360) : '—'} muted={!sourceSide} />
+              <Stat label={f.distLabel} value={sourceSide ? f.dist(sourceSide.cm360) : '—'} muted={!sourceSide} />
             </div>
             <DisplaySettings />
           </div>
@@ -195,7 +198,7 @@ export default function ConverterPage() {
             )}
             <div className="grid grid-cols-2 gap-2">
               <Stat label={t('common.edpi')} value={ok ? f.edpi(ok.target.edpi) : '—'} muted={!ok} />
-              <Stat label={t('common.cm360')} value={ok ? f.cm(ok.target.cm360) : '—'} muted={!ok} />
+              <Stat label={f.distLabel} value={ok ? f.dist(ok.target.cm360) : '—'} muted={!ok} />
             </div>
 
             {unsupported.length > 0 &&
@@ -225,7 +228,7 @@ export default function ConverterPage() {
               <h2 className="text-sm font-semibold">{t('converter.summary')}</h2>
               <div className="flex flex-wrap gap-1.5">
                 <CopyButton text={f.edpi(ok.target.edpi)} label={t('converter.copyEdpi')} showLabel size="sm" />
-                <CopyButton text={f.cm(ok.target.cm360)} label={t('converter.copyCm')} showLabel size="sm" />
+                <CopyButton text={`${f.dist(ok.target.cm360)} ${f.distLabel}`} label={t('converter.copyCm', { unit: f.distLabel })} showLabel size="sm" />
                 <CopyButton text={conversionSummary(ok, lang, precision)} label={t('converter.copySummary')} showLabel size="sm" />
               </div>
             </div>
@@ -270,6 +273,19 @@ export default function ConverterPage() {
             </ul>
           </Card>
         </div>
+      )}
+
+      {ok && (
+        <Card className="mt-3">
+          <CardHeader title={t('converter.aimProfile')} description={t('converter.aimProfileDesc')} icon={<Gauge />} />
+          <div className="grid grid-cols-1 gap-6 px-5 pb-5 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:items-center">
+            <AimStyleMeter cm360={ok.target.cm360} />
+            <div className="space-y-4">
+              <PadPicker />
+              <MousepadVisualizer cm360={ok.target.cm360} />
+            </div>
+          </div>
+        </Card>
       )}
 
       <CalibrateDialog gameId={calibrateId} open={calibrateId !== null} onClose={() => setCalibrateId(null)} />

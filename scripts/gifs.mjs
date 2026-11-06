@@ -24,10 +24,11 @@ const profile = (id, name, gameId, dpi, sensitivity) => ({
 const seed = (converter) => ({
   'sc.settings': {
     state: {
-      language: 'en', theme: 'dark', precision: 3, defaultDpi: 800, fovDisplay: 'horizontal',
-      favoriteGames: [], recentGames: [], calibrations: {},
+      language: 'en', theme: 'dark', precision: 3, defaultDpi: 800, fovDisplay: 'horizontal', units: 'cm',
+      mousepad: 'large', mousepadCustomCm: 60, motion: 'full', density: 'comfortable', accent: 'crimson',
+      startupView: 'landing', sound: false, favoriteGames: [], recentGames: [], calibrations: {},
     },
-    version: 1,
+    version: 2,
   },
   'sc.converter': {
     state: {
@@ -41,6 +42,7 @@ const seed = (converter) => ({
     version: 1,
   },
   'sc.history': { state: { entries: [] }, version: 1 },
+  'sc.tournaments': { state: { tournaments: [] }, version: 1 },
 })
 
 // A visible cursor, because screencasts don't include the OS pointer.
@@ -64,7 +66,7 @@ function installCursor() {
 }
 
 // ---------------------------------------------------------------- recording
-async function record(browser, baseUrl, path, state, name, script) {
+async function record(browser, baseUrl, path, state, name, script, { captureLoad = false } = {}) {
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, colorScheme: 'dark' })
   await context.addInitScript((entries) => {
     if (sessionStorage.getItem('seeded')) return
@@ -74,19 +76,30 @@ async function record(browser, baseUrl, path, state, name, script) {
   }, state)
   await context.addInitScript(installCursor)
   const page = await context.newPage()
-  await page.goto(baseUrl + '#' + path)
-  await page.waitForLoadState('networkidle')
-  await page.evaluate(() => document.fonts.ready)
-  await page.mouse.move(VIEWPORT.width * 0.55, VIEWPORT.height * 0.55)
-  await page.waitForTimeout(300)
-
   const frames = []
   const cdp = await context.newCDPSession(page)
   cdp.on('Page.screencastFrame', async ({ data, metadata, sessionId }) => {
     frames.push({ png: Buffer.from(data, 'base64'), t: metadata.timestamp * 1000 })
     await cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {})
   })
-  await cdp.send('Page.startScreencast', { format: 'png', maxWidth: GIF_SIZE.width, maxHeight: GIF_SIZE.height, everyNthFrame: 1 })
+  const start = () => cdp.send('Page.startScreencast', { format: 'png', maxWidth: GIF_SIZE.width, maxHeight: GIF_SIZE.height, everyNthFrame: 1 })
+  if (captureLoad) {
+    // Fonts first (an unrelated page), so the entrance animation plays with the real typefaces.
+    await page.goto(baseUrl + '#/settings')
+    await page.waitForLoadState('networkidle')
+    await page.evaluate(() => document.fonts.ready)
+    await page.mouse.move(VIEWPORT.width * 0.3, VIEWPORT.height * 0.35)
+    await start()
+    await page.goto(baseUrl + '#' + path)
+    await page.evaluate(() => document.fonts.ready)
+  } else {
+    await page.goto(baseUrl + '#' + path)
+    await page.waitForLoadState('networkidle')
+    await page.evaluate(() => document.fonts.ready)
+    await page.mouse.move(VIEWPORT.width * 0.55, VIEWPORT.height * 0.55)
+    await page.waitForTimeout(300)
+    await start()
+  }
   const ui = helpers(page)
   await ui.wait(500)
   await script(page, ui)
@@ -190,13 +203,50 @@ async function compareRtlDemo(page, ui) {
   await addProfile.selectOption({ label: 'Siege · R6S' })
   await ui.wait(400)
   await ui.click(page.getByRole('button', { name: /first row/i }))
+  await ui.wait(900)
+  await ui.click(page.getByRole('button', { name: 'Language' }).first())
+  await ui.wait(250)
+  await ui.click(page.getByRole('option', { name: /العربية/ })) // → Arabic (RTL)
   await ui.wait(1100)
-  await ui.click(page.getByRole('button', { name: 'Language' }).first()) // → Arabic (RTL)
-  await ui.wait(1250)
   await ui.click(page.getByRole('button', { name: 'السمة' }).first()) // → light
   await ui.wait(1250)
   await ui.click(page.getByRole('button', { name: 'السمة' }).first()) // → dark
   await ui.wait(1200)
+}
+
+async function landingDemo(page, ui) {
+  await ui.wait(1700) // hero entrance
+  const sens = page.getByLabel('Sensitivity', { exact: true }).first()
+  await ui.click(sens)
+  await ui.press('Control+A')
+  await ui.type('0.55')
+  await ui.wait(700)
+  // Scroll to the stats and the eDPI-vs-cm/360 comparison (counters animate in view).
+  for (let i = 0; i < 14; i++) {
+    await page.mouse.wheel(0, 70)
+    await ui.wait(45)
+  }
+  await ui.wait(1900)
+}
+
+async function tournamentDemo(page, ui) {
+  await ui.click(page.getByRole('button', { name: 'New tournament' }).first())
+  await ui.wait(150)
+  await ui.type('LAN Finals')
+  await ui.click(page.getByRole('radio', { name: 'Double elimination' }))
+  await ui.click(page.getByRole('button', { name: 'Fill empty slots' }))
+  await ui.wait(300)
+  await ui.click(page.getByRole('button', { name: 'Generate bracket' }))
+  await page.waitForURL(/tournaments\//)
+  await page.locator('[data-status="ready"]').first().waitFor()
+  await ui.wait(300)
+  for (const score of ['2–0', '2–1', '0–2']) {
+    await ui.click(page.locator('[data-status="ready"]').first())
+    await ui.wait(200)
+    await ui.click(page.getByRole('button', { name: score, exact: true }))
+    await ui.wait(250)
+  }
+  await ui.wait(700)
 }
 
 // ---------------------------------------------------------------- main
@@ -205,7 +255,9 @@ const server = await preview({ preview: { port: 0, strictPort: false }, logLevel
 const baseUrl = server.resolvedUrls.local[0]
 const browser = await chromium.launch({ channel: 'chrome' })
 try {
+  await record(browser, baseUrl, '/welcome', seed({ sourceGameId: 'cs2', sourceSensitivity: '1', targetGameId: 'valorant' }), 'demo-landing.gif', landingDemo, { captureLoad: true })
   await record(browser, baseUrl, '/converter', seed({}), 'demo-converter.gif', converterDemo)
+  await record(browser, baseUrl, '/tournaments', seed({}), 'demo-tournament.gif', tournamentDemo)
   await record(
     browser,
     baseUrl,

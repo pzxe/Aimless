@@ -1,84 +1,100 @@
-import { Languages, Menu, Moon, ShieldCheck, Sun, X } from 'lucide-react'
+import { Menu, Moon, Presentation, ShieldCheck, Sun, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
 import { cn } from '@/utils/cn'
 import { Button } from '../ui/Button'
-import { LogoMark } from './Logo'
+import { LanguageMenu } from './LanguageMenu'
+import { LogoMark, Wordmark } from './Logo'
 import { NAV_ITEMS } from './nav'
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const t = useT()
+  const groups = [
+    { key: 'main', label: t('nav.group.workspace') },
+    { key: 'library', label: t('nav.group.library') },
+  ] as const
   return (
-    <nav className="flex flex-col gap-0.5" aria-label={t('nav.menu')}>
-      {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={to === '/'}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            cn(
-              'relative flex h-9 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors duration-150',
-              isActive ? 'bg-surface-2 text-text' : 'text-muted hover:bg-surface-2/60 hover:text-text',
-            )
-          }
-        >
-          {({ isActive }) => (
-            <>
-              {isActive && <span className="absolute inset-y-2 start-0 w-0.5 rounded-full bg-accent" aria-hidden="true" />}
-              <Icon className={cn('size-4', isActive && 'text-accent')} />
-              {t(label)}
-            </>
-          )}
-        </NavLink>
+    <nav className="flex flex-col gap-5" aria-label={t('nav.menu')}>
+      {groups.map((g) => (
+        <div key={g.key}>
+          <div className="mb-2 px-3 text-[10px] font-semibold tracking-[0.18em] text-subtle uppercase">{g.label}</div>
+          <div className="flex flex-col gap-1">
+            {NAV_ITEMS.filter((i) => i.group === g.key).map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  cn(
+                    'relative flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-[background-color,color,box-shadow] duration-200',
+                    isActive
+                      ? 'bg-accent-soft text-text shadow-[inset_0_0_0_1px_var(--c-accent-line),0_8px_24px_-12px_var(--c-accent-glow)]'
+                      : 'text-muted hover:bg-surface-2/70 hover:text-text',
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span
+                        className="absolute inset-y-2.5 -start-3 w-1 rounded-full bg-accent shadow-[0_0_12px_2px_var(--c-accent-glow)]"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <Icon className={cn('size-[18px]', isActive && 'text-accent')} />
+                    {t(label)}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </div>
+        </div>
       ))}
     </nav>
   )
 }
 
-function Brand({ compact }: { compact?: boolean }) {
-  const t = useT()
+function Brand() {
   return (
-    <div className="flex items-center gap-2.5">
+    <Link to="/dashboard" className="flex items-center gap-2.5" aria-label="Aimless">
       <LogoMark />
-      <div className="leading-tight">
-        <div className="text-sm font-semibold tracking-tight">{t('app.name')}</div>
-        {!compact && <div className="text-[11px] text-subtle">{t('app.tagline')}</div>}
-      </div>
-    </div>
+      <Wordmark />
+    </Link>
   )
 }
 
-function QuickToggles({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
+export function ThemeToggle({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
   const t = useT()
-  const language = useSettings((s) => s.language)
-
   const set = useSettings((s) => s.set)
   const isDark = resolvedTheme === 'dark'
   return (
-    <div className="flex items-center gap-1">
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={t('settings.theme')}
-        title={t('settings.theme')}
-        onClick={() => set({ theme: isDark ? 'light' : 'dark' })}
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label={t('settings.theme')}
+      title={t('settings.theme')}
+      onClick={() => set({ theme: isDark ? 'light' : 'dark' })}
+    >
+      {isDark ? <Sun /> : <Moon />}
+    </Button>
+  )
+}
+
+function TopBarActions({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
+  const t = useT()
+  return (
+    <div className="flex items-center gap-1.5">
+      <Link
+        to="/welcome"
+        className="hidden h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium text-muted transition-colors hover:bg-surface-2 hover:text-text sm:inline-flex"
       >
-        {isDark ? <Sun /> : <Moon />}
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        aria-label={t('settings.language')}
-        title={t('settings.language')}
-        onClick={() => set({ language: language === 'en' ? 'ar' : 'en' })}
-        className="px-2"
-      >
-        <Languages />
-        <span className="hidden sm:inline">{language === 'en' ? 'العربية' : 'English'}</span>
-      </Button>
+        <Presentation className="size-3.5" />
+        {t('nav.presentation')}
+      </Link>
+      <LanguageMenu />
+      <ThemeToggle resolvedTheme={resolvedTheme} />
     </div>
   )
 }
@@ -101,65 +117,99 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
   }, [drawer])
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[248px_1fr]">
+    <div className="min-h-dvh lg:grid lg:grid-cols-[264px_1fr]">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-e border-border bg-surface/50 px-3 py-4 lg:flex">
-        <div className="px-2 pb-6">
-          <Brand />
-        </div>
-        <NavList />
-        <div className="mt-auto space-y-3 px-1">
-          <QuickToggles resolvedTheme={resolvedTheme} />
-          <p className="flex items-center gap-1.5 px-1 text-[11px] text-subtle">
-            <ShieldCheck className="size-3.5" />
+      <aside className="sticky top-0 hidden h-dvh flex-col p-3 lg:flex">
+        <div className="card flex h-full flex-col rounded-[24px] px-3 py-5">
+          <div className="px-3 pb-7">
+            <Brand />
+          </div>
+          <div className="scrollbar-thin -mx-1 flex-1 overflow-y-auto px-1">
+            <NavList />
+          </div>
+          <div className="hairline my-4" />
+          <p className="flex items-center gap-1.5 px-3 text-[11px] text-subtle">
+            <ShieldCheck className="size-3.5 text-success" />
             {t('nav.localOnly')}
           </p>
         </div>
       </aside>
 
-      {/* Mobile header */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-bg/85 px-4 backdrop-blur lg:hidden">
-        <Brand compact />
-        <div className="flex items-center gap-1">
-          <QuickToggles resolvedTheme={resolvedTheme} />
-          <Button variant="ghost" size="icon" aria-label={t('nav.menu')} aria-expanded={drawer} onClick={() => setDrawer(true)}>
-            <Menu />
-          </Button>
-        </div>
-      </header>
+      <div className="min-w-0">
+        {/* Top bar */}
+        <header className="glass sticky top-0 z-30 border-b border-border/60 lg:border-none lg:bg-transparent lg:backdrop-blur-none">
+          <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
+            <div className="lg:hidden">
+              <Brand />
+            </div>
+            <div className="hidden lg:block" />
+            <div className="flex items-center gap-1">
+              <TopBarActions resolvedTheme={resolvedTheme} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden"
+                aria-label={t('nav.menu')}
+                aria-expanded={drawer}
+                onClick={() => setDrawer(true)}
+              >
+                <Menu />
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-6xl px-4 pt-2 pb-10 sm:px-6 lg:px-10 lg:pb-14">{children}</main>
+      </div>
 
       {drawer && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50 animate-[fade-in_150ms_ease-out]" onClick={() => setDrawer(false)} />
-          <div className="absolute inset-y-0 end-0 flex w-72 max-w-[85vw] flex-col border-s border-border bg-surface p-3 shadow-pop">
-            <div className="flex items-center justify-between px-2 pb-4">
+          <div className="absolute inset-0 bg-black/60 animate-[fade-in_150ms_ease-out]" onClick={() => setDrawer(false)} />
+          <div className="absolute inset-y-0 end-0 flex w-72 max-w-[85vw] flex-col border-s border-border bg-surface p-4 shadow-pop">
+            <div className="flex items-center justify-between px-2 pb-6">
               <Brand />
               <Button variant="ghost" size="icon-sm" aria-label={t('common.close')} onClick={() => setDrawer(false)}>
                 <X />
               </Button>
             </div>
-            <NavList onNavigate={() => setDrawer(false)} />
-            <p className="mt-auto flex items-center gap-1.5 px-2 text-[11px] text-subtle">
-              <ShieldCheck className="size-3.5" />
+            <div className="scrollbar-thin flex-1 overflow-y-auto">
+              <NavList onNavigate={() => setDrawer(false)} />
+              <Link
+                to="/welcome"
+                className="mt-4 flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted hover:bg-surface-2 hover:text-text"
+              >
+                <Presentation className="size-[18px]" />
+                {t('nav.presentation')}
+              </Link>
+            </div>
+            <p className="mt-4 flex items-center gap-1.5 px-2 text-[11px] text-subtle">
+              <ShieldCheck className="size-3.5 text-success" />
               {t('nav.localOnly')}
             </p>
           </div>
         </div>
       )}
-
-      <main className="min-w-0">
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">{children}</div>
-      </main>
     </div>
   )
 }
 
-export function PageHeader({ title, description, actions }: { title: ReactNode; description?: ReactNode; actions?: ReactNode }) {
+export function PageHeader({
+  title,
+  description,
+  actions,
+  eyebrow,
+}: {
+  title: ReactNode
+  description?: ReactNode
+  actions?: ReactNode
+  eyebrow?: ReactNode
+}) {
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between lg:mb-8">
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
-        {description && <p className="mt-1 max-w-2xl text-sm text-muted">{description}</p>}
+        {eyebrow && <div className="eyebrow mb-2">{eyebrow}</div>}
+        <h1 className="display text-3xl sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-sm text-muted">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
@@ -168,8 +218,8 @@ export function PageHeader({ title, description, actions }: { title: ReactNode; 
 
 export function EmptyState({ icon, title, hint, action }: { icon: ReactNode; title: ReactNode; hint?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border px-6 py-12 text-center">
-      <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-surface-2 text-muted [&_svg]:size-5">{icon}</div>
+    <div className="flex flex-col items-center justify-center rounded-[20px] border border-dashed border-border-strong px-6 py-14 text-center">
+      <div className="mb-3 flex size-11 items-center justify-center rounded-full bg-accent-soft text-accent [&_svg]:size-5">{icon}</div>
       <p className="text-sm font-medium">{title}</p>
       {hint && <p className="mt-1 max-w-sm text-xs text-muted">{hint}</p>}
       {action && <div className="mt-4">{action}</div>}

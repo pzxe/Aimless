@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en" dir="ltr" class="dark">
+<html lang="en" dir="ltr" class="dark" data-accent="crimson" data-motion="full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Convert mouse sensitivity between FPS games. cm/360, eDPI, profiles and comparison — all calculated locally." />
-    <meta name="theme-color" content="#0b0e14" />
+    <meta name="theme-color" content="#09090b" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <title>Sensitivity Converter</title>
+    <title>Aimless · FPS sensitivity converter</title>
     <script>
       // Apply the saved theme/language before first paint to avoid a flash.
       try {
@@ -14,7 +14,12 @@
         var t = s.theme || 'dark';
         var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', dark);
-        if (s.language === 'ar') { document.documentElement.lang = 'ar'; document.documentElement.dir = 'rtl'; }
+        var r = document.documentElement;
+        if (s.language) r.lang = s.language;
+        if (s.language === 'ar') r.dir = 'rtl';
+        r.dataset.accent = s.accent || 'crimson';
+        r.dataset.density = s.density || 'comfortable';
+        r.dataset.motion = s.motion || 'full';
       } catch (e) {}
     </script>
   </head>

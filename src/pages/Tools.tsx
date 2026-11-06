@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { GameSelector } from '@/components/games/GameSelector'
 import { PageHeader } from '@/components/layout/AppShell'
+import { AdsTool } from '@/components/tools/AdsTool'
+import { PollingTool } from '@/components/tools/PollingTool'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { Label, NumberField, Select } from '@/components/ui/Field'
@@ -142,7 +144,7 @@ function TargetTool() {
   const [game, setGame] = useState('valorant')
   const [cm, setCm] = useState('40')
   const [dpi, setDpi] = useState(String(defaultDpi))
-  const c = parseNumber(cm)
+  const c = parseNumber(cm) * (f.units === 'in' ? 2.54 : 1)
   const d = parseNumber(dpi)
   const sens = sensitivityForCm360(game, c, d, calibrations)
   const unsupported = accuracyOf(game) === 'unsupported'
@@ -154,10 +156,10 @@ function TargetTool() {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <NumberField
-          label={t('tools.target.distance')}
+          label={t('tools.target.distance', { unit: f.distLabel })}
           value={cm}
           onValueChange={setCm}
-          suffix="cm"
+          suffix={f.unit}
           error={cm !== '' && !(c > 0) ? t('validation.cm360') : null}
         />
         <NumberField label={t('common.dpi')} value={dpi} onValueChange={setDpi} inputMode="numeric" error={err(t, validateDpi(d), true)} />
@@ -234,13 +236,17 @@ export default function ToolsPage() {
   }, [hash])
   return (
     <>
-      <PageHeader title={t('tools.title')} description={t('tools.subtitle')} />
+      <PageHeader eyebrow={t('tools.eyebrow')} title={t('tools.title')} description={t('tools.subtitle')} />
       <div className="grid gap-3 lg:grid-cols-2">
         <Cm360Tool />
         <TargetTool />
         <DpiTool />
         <EdpiTool />
         <FovTool />
+        <AdsTool />
+        <div className="lg:col-span-2">
+          <PollingTool />
+        </div>
       </div>
     </>
   )

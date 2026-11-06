@@ -5,8 +5,8 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger'
 type Size = 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-fg hover:bg-accent-hover',
-  secondary: 'bg-surface-2 text-text hover:bg-surface-3 border border-border',
+  primary: 'bg-accent text-accent-fg hover:bg-accent-hover glow',
+  secondary: 'bg-surface-2/80 text-text hover:bg-surface-3 border border-border',
   outline: 'border border-border-strong text-text hover:bg-surface-2',
   ghost: 'text-muted hover:text-text hover:bg-surface-2',
   danger: 'bg-danger-soft text-danger hover:bg-danger hover:text-white',
@@ -34,8 +34,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-lg font-medium whitespace-nowrap select-none',
-        'transition-[background-color,color,border-color,transform] duration-150 active:scale-[0.97]',
+        'inline-flex shrink-0 items-center justify-center rounded-xl font-medium whitespace-nowrap select-none',
+        'transition-[background-color,color,border-color,transform,box-shadow] duration-150 active:scale-[0.97]',
         'disabled:pointer-events-none disabled:opacity-45 [&_svg]:size-4 [&_svg]:shrink-0',
         variants[variant],
         sizes[size],

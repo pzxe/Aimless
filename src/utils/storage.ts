@@ -38,6 +38,7 @@ export const STORAGE_KEYS = {
   profiles: 'sc.profiles',
   history: 'sc.history',
   converter: 'sc.converter',
+  tournaments: 'sc.tournaments',
 } as const
 
 export function clearAllStorage() {

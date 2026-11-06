@@ -1,8 +1,8 @@
 {
-  "name": "sensitivity-converter",
+  "name": "aimless",
   "private": true,
-  "version": "1.0.0",
-  "description": "Local-first FPS mouse sensitivity converter: cm/360, eDPI, profiles, comparison. English & Arabic.",
+  "version": "2.0.0",
+  "description": "Aimless: local-first FPS sensitivity toolkit. cm/360 converter, tournament brackets, mousepad visualizer, ADS and polling tools. 5 languages.",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/noto-sans-arabic": "^5.3.0",
+    "@fontsource-variable/oswald": "^5.3.0",
     "@tailwindcss/vite": "^4.3.4",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",

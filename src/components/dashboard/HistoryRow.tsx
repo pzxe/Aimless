@@ -32,7 +32,7 @@ export function HistoryRow({ entry, actions, onClick }: { entry: HistoryEntry; a
       <div className="hidden shrink-0 text-end sm:block">
         <div className="ltr num flex items-center justify-end gap-1.5 text-sm font-medium">
           <AccuracyDot accuracy={entry.accuracy} />
-          {f.cm(entry.cm360)} <span className="text-xs font-normal text-subtle">cm</span>
+          {f.dist(entry.cm360)} <span className="text-xs font-normal text-subtle">{f.unit}</span>
         </div>
         <div className="text-[11px] text-subtle">{f.relativeTime(entry.at)}</div>
       </div>
