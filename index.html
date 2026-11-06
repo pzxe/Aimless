@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Convert mouse sensitivity between FPS games. cm/360, eDPI, profiles and comparison — all calculated locally." />
+    <meta name="theme-color" content="#0b0e14" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Sensitivity Converter</title>
+    <script>
+      // Apply the saved theme/language before first paint to avoid a flash.
+      try {
+        var s = JSON.parse(localStorage.getItem('sc.settings') || '{}').state || {};
+        var t = s.theme || 'dark';
+        var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+        if (s.language === 'ar') { document.documentElement.lang = 'ar'; document.documentElement.dir = 'rtl'; }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

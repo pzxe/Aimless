@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens. Light is the base; .dark overrides. */
+:root {
+  --c-bg: #f5f6fa;
+  --c-surface: #ffffff;
+  --c-surface-2: #f0f2f7;
+  --c-surface-3: #e7eaf1;
+  --c-border: #e1e5ee;
+  --c-border-strong: #cbd1dd;
+  --c-text: #0e1220;
+  --c-muted: #586174;
+  --c-subtle: #8a92a3;
+  --c-accent: #5b47f5;
+  --c-accent-hover: #4b37e6;
+  --c-accent-soft: #ece9ff;
+  --c-accent-fg: #ffffff;
+  --c-success: #0f9d63;
+  --c-success-soft: #e3f6ee;
+  --c-warning: #b7791f;
+  --c-warning-soft: #fdf3e1;
+  --c-danger: #d93a3a;
+  --c-danger-soft: #fdeaea;
+  --c-info: #2878d6;
+  --c-info-soft: #e5f0fc;
+  --c-ring: rgb(91 71 245 / 0.35);
+  --shadow-pop: 0 12px 32px -12px rgb(15 20 40 / 0.25), 0 2px 6px rgb(15 20 40 / 0.06);
+  color-scheme: light;
+}
+
+.dark {
+  --c-bg: #0a0d13;
+  --c-surface: #10141c;
+  --c-surface-2: #151a24;
+  --c-surface-3: #1c2230;
+  --c-border: #1f2633;
+  --c-border-strong: #2c3445;
+  --c-text: #e7e9f0;
+  --c-muted: #9098aa;
+  --c-subtle: #646d80;
+  --c-accent: #8b7cff;
+  --c-accent-hover: #9d90ff;
+  --c-accent-soft: rgb(139 124 255 / 0.12);
+  --c-accent-fg: #0a0d13;
+  --c-success: #3fcf8e;
+  --c-success-soft: rgb(63 207 142 / 0.12);
+  --c-warning: #f0b450;
+  --c-warning-soft: rgb(240 180 80 / 0.12);
+  --c-danger: #ff6b6b;
+  --c-danger-soft: rgb(255 107 107 / 0.12);
+  --c-info: #5aa9ff;
+  --c-info-soft: rgb(90 169 255 / 0.12);
+  --c-ring: rgb(139 124 255 / 0.45);
+  --shadow-pop: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.03);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-surface-3: var(--c-surface-3);
+  --color-border: var(--c-border);
+  --color-border-strong: var(--c-border-strong);
+  --color-text: var(--c-text);
+  --color-muted: var(--c-muted);
+  --color-subtle: var(--c-subtle);
+  --color-accent: var(--c-accent);
+  --color-accent-hover: var(--c-accent-hover);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-accent-fg: var(--c-accent-fg);
+  --color-success: var(--c-success);
+  --color-success-soft: var(--c-success-soft);
+  --color-warning: var(--c-warning);
+  --color-warning-soft: var(--c-warning-soft);
+  --color-danger: var(--c-danger);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-info: var(--c-info);
+  --color-info-soft: var(--c-info-soft);
+  --color-ring: var(--c-ring);
+  --shadow-pop: var(--shadow-pop);
+  --font-sans: "Inter Variable", "Noto Sans Arabic Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-arabic: "Noto Sans Arabic Variable", "Inter Variable", "Segoe UI", Tahoma, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  html[lang="ar"] body {
+    font-family: var(--font-arabic);
+  }
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    background: var(--c-accent-soft);
+  }
+  :focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 2px;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@layer utilities {
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "cv11";
+  }
+  /* Numbers and Latin identifiers stay left-to-right inside RTL text. */
+  .ltr {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-border-strong) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
