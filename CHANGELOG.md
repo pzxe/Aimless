@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows [Kee
 - Windows desktop app (Electron). Ships as a portable `.exe` and a no-install `.zip` with a `Run-Aimless.bat` launcher. Runs as invoker, with no admin prompt.
 - Real screenshots in the README, generated with `npm run screenshots`.
 - App icon generated from the SVG logo (`npm run icon`).
+- Live web version on GitHub Pages, deployed automatically on every push to `main`.
+- Animated GIF demos in the README (`npm run gifs`) and a redesigned README with an Arabic summary.
+
+### Fixed
+- The Compare table overflowed its card at window widths around 1280px. It now switches to the table layout only when there is room.
 
 ### Changed
 - Runtime libraries moved to `devDependencies`. Vite bundles them into `dist/`, so the desktop package ships no `node_modules`.

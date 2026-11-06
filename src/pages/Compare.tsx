@@ -126,7 +126,7 @@ export default function ComparePage() {
         <>
           <Card className="overflow-hidden">
             {/* Header row (desktop) */}
-            <div className="hidden grid-cols-[minmax(220px,1.6fr)_100px_120px_90px_100px_90px_110px_40px] gap-3 border-b border-border bg-surface-2/50 px-4 py-2.5 text-[11px] font-medium tracking-wide text-subtle uppercase lg:grid">
+            <div className="hidden xl:grid xl:grid-cols-[minmax(180px,1.6fr)_88px_104px_80px_88px_72px_108px_32px] gap-3 border-b border-border bg-surface-2/50 px-4 py-2.5 text-[11px] font-medium tracking-wide text-subtle uppercase">
               <span>{t('common.game')}</span>
               <span>{t('common.dpi')}</span>
               <span>{t('common.sensitivity')}</span>
@@ -144,9 +144,9 @@ export default function ComparePage() {
                 return (
                   <li
                     key={row.id}
-                    className="grid grid-cols-2 items-center gap-3 px-4 py-3 lg:grid-cols-[minmax(220px,1.6fr)_100px_120px_90px_100px_90px_110px_40px]"
+                    className="grid grid-cols-2 items-center gap-3 px-4 py-3 sm:grid-cols-4 xl:grid-cols-[minmax(180px,1.6fr)_88px_104px_80px_88px_72px_108px_32px]"
                   >
-                    <div className="col-span-2 lg:col-span-1">
+                    <div className="col-span-2 xl:col-span-1">
                       <div className="mb-1 flex items-center gap-2 text-[11px] text-subtle">
                         {i === 0 && <span className="rounded bg-accent-soft px-1.5 py-0.5 font-medium text-accent">{t('compare.reference')}</span>}
                         {row.label && <span className="truncate">{row.label}</span>}
@@ -154,14 +154,14 @@ export default function ComparePage() {
                       <GameSelector value={row.gameId} onChange={(id) => update(row.id, { gameId: id })} label={t('common.game')} />
                     </div>
                     <NumberField
-                      label={<span className="lg:sr-only">{t('common.dpi')}</span>}
+                      label={<span className="xl:sr-only">{t('common.dpi')}</span>}
                       value={row.dpi}
                       inputMode="numeric"
                       onValueChange={(v) => update(row.id, { dpi: v })}
                       aria-invalid={dpiInvalid || undefined}
                     />
                     <NumberField
-                      label={<span className="lg:sr-only">{t('common.sensitivity')}</span>}
+                      label={<span className="xl:sr-only">{t('common.sensitivity')}</span>}
                       value={row.sens}
                       onValueChange={(v) => update(row.id, { sens: v })}
                       aria-invalid={sensInvalid || undefined}
@@ -231,7 +231,7 @@ export default function ComparePage() {
 function Metric({ label, value, strong, className }: { label: string; value: string; strong?: boolean; className?: string }) {
   return (
     <div className="min-w-0">
-      <div className="mb-1 text-[11px] text-subtle lg:hidden">{label}</div>
+      <div className="mb-1 text-[11px] text-subtle xl:hidden">{label}</div>
       <div className={cn('ltr num truncate text-start text-sm', strong && 'font-semibold', className)}>{value}</div>
     </div>
   )
