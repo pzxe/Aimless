@@ -33,8 +33,8 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 
 **Aimless** أداة مجانية ومفتوحة المصدر للاعبي ألعاب التصويب. تطابق **المسافة الفعلية التي يتحركها الماوس لدورة كاملة 360°** (سم/360°) بين الألعاب باستخدام ثابت الدوران الخاص بكل لعبة.
 
-- **محوّل دقيق** لـ 20 لعبة، لكل منها مستوى دقة واضح: *موثّق* أو *تقريبي* أو *معايَر* أو *غير مدعوم*. لا نخمّن أي ثابت.
-- **جداول بطولات** بنظام الإقصاء الفردي أو المزدوج، لمواجهات 1v1 أو فرق 5v5، مع النتائج والتصدير.
+- **محوّل دقيق** لـ 125 لعبة، لكل منها مستوى دقة واضح: *موثّق* أو *تقريبي* أو *معايَر* أو *غير مدعوم*. لا نخمّن أي ثابت.
+- **جداول بطولات** بنظام الإقصاء الفردي أو المزدوج، فردي أو ثنائي أو فرق مخصصة، مع سحب عشوائي وسلاسل من Bo1 إلى Bo15 ونتيجة كل مباراة.
 - **مُصوِّر لوحة الماوس** و**مقياس أسلوب التصويب** وحاسبات **التصويب بالمنظار** و**معدل الاستطلاع**.
 - **خصوصية كاملة:** كل البيانات تبقى على جهازك، بلا حسابات ولا تتبّع ولا اتصال بالإنترنت.
 - **خمس لغات** مع واجهة عربية كاملة من اليمين إلى اليسار.
@@ -50,15 +50,16 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 
 | | |
 |---|---|
-| 🎯 **Sensitivity converter** | 20 games, independent DPI, live cm/360° and eDPI, the nearest value the target game accepts, and a step-by-step calculation. |
+| 🎯 **Sensitivity converter** | 125 games, independent DPI, live cm/360° and eDPI, the nearest value the target game accepts, and a step-by-step calculation. |
 | 🏷️ **Honest accuracy labels** | Every result is *Verified*, *Approximate*, *Calibrated* or *Unsupported*, with notes explaining why. No constants are invented. |
-| 🏆 **Tournament brackets** | Single or double elimination (upper and lower brackets, grand final with optional bracket reset), 1v1 or 5v5, rosters, manual or random seeding, automatic byes, scores, map notes and JSON / SVG / PNG export. |
+| 🏆 **Tournament brackets** | Solo (1v1), duo (2v2) or custom team sizes; single or double elimination with an optional grand-final reset; a 🎲 Randomize draw; Bo1 to Bo15 series set per stage; game-by-game results (map, score, overtime) that decide the series automatically; byes, rosters and JSON / SVG / PNG export. |
 | 🖱️ **Mousepad visualizer** | Your 360° turn drawn to scale on a small, medium, large, XL or custom pad, with an overflow warning. |
 | 🎚️ **Aim style meter** | Classifies your cm/360° as wrist (< 25 cm), hybrid (25–40 cm) or arm (> 40 cm) aim, with ergonomic notes. |
 | 🔭 **ADS / scope calculator** | Focal-length (0%) and monitor-distance matching from FOV, magnification or a custom multiplier. |
 | 📶 **Polling rate calculator** | Counts per report and the minimum hand speed at 1000, 2000, 4000 and 8000 Hz. |
 | 📊 **Compare, profiles, history** | Match several games to one reference, save and share profiles, and reuse past conversions. |
 | 🌐 **Five languages** | English, العربية (full RTL), Español, Русский and Português. |
+| ⓘ **Help everywhere** | Hover or focus the ⓘ next to any field, calculator, tournament control or setting for a plain explanation, in all five languages. |
 | 🎨 **Settings that matter** | cm or inches, pad size, five accent colours, comfortable or compact density, full / reduced / instant (0 ms) motion, startup view and optional sound feedback. |
 | 🔒 **Local-first** | No accounts, no telemetry, no network requests. Runs in the browser or as an offline Windows app. |
 
@@ -74,8 +75,8 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 
 | | |
 |---|---|
-| ![Presentation landing page](docs/screenshots/landing-hero.png) | ![Converter: Valorant to Overwatch 2](docs/screenshots/converter-dark.png) |
-| **Presentation page.** A live converter in the hero, with direct access to the workspace. | **Converter.** Valorant → Overwatch 2, with the nearest value the game accepts and the step-by-step calculation. |
+| ![Landing page](docs/screenshots/landing-hero.png) | ![Converter: Valorant to Overwatch 2](docs/screenshots/converter-dark.png) |
+| **Landing page.** The converter, a tournament series and the aim tools in one hero, with a live converter below. | **Converter.** Valorant → Overwatch 2, with the nearest value the game accepts and the step-by-step calculation. |
 | ![Double-elimination tournament bracket](docs/screenshots/tournament-bracket.png) | ![Mousepad visualizer and aim style meter](docs/screenshots/mousepad-visualizer.png) |
 | **Tournaments.** Double elimination with scores, connectors and highlighted ready matches. | **Mousepad.** One full turn to scale on a 45 cm pad, and the aim style it suits. |
 | ![Compare view with cm/360° chart](docs/screenshots/compare-dark.png) | ![Arabic right-to-left interface](docs/screenshots/converter-rtl-ar.png) |
@@ -85,28 +86,140 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 
 ## 🎮 Supported games
 
+**125 games:** 25 verified, 24 approximate and 76 unsupported. Each game has its own original emblem, bundled with the app (no official logos, no hotlinks).
+
+<details>
+<summary><b>Show all 125 games and their constants</b></summary>
+
 | Game | Yaw (°/count at sens 1) | Accuracy |
 |---|---|---|
 | Valorant | 0.07 | ✅ Verified |
 | Counter-Strike 2 | 0.022 | ✅ Verified |
 | Counter-Strike: Global Offensive | 0.022 | ✅ Verified |
 | Apex Legends | 0.022 | ✅ Verified |
-| Team Fortress 2 | 0.022 | ✅ Verified |
-| Quake Live | 0.022 | ✅ Verified |
 | Overwatch 2 | 0.0066 | ✅ Verified |
+| Fortnite | 0.005555 | 🟡 Approximate |
+| Rainbow Six Siege | 0.00572957795 | 🟡 Approximate |
 | Call of Duty: Warzone | 0.0066 | ✅ Verified |
 | Call of Duty: Black Ops 6 | 0.0066 | ✅ Verified |
-| Call of Duty: Black Ops 7 | 0.0066 (assumed same as BO6) | 🟡 Approximate |
+| Call of Duty: Black Ops 7 | 0.0066 | 🟡 Approximate |
+| PUBG: Battlegrounds | — | ⛔ Unsupported |
+| Team Fortress 2 | 0.022 | ✅ Verified |
+| Quake Live | 0.022 | ✅ Verified |
 | Quake Champions | 0.022 | 🟡 Approximate |
 | Destiny 2 | 0.0066 | 🟡 Approximate |
-| Fortnite | 0.005555 per 1 % of “Mouse Sensitivity X” | 🟡 Approximate |
-| Rainbow Six Siege | 0.00572957795 (multiplier 0.02) | 🟡 Approximate |
-| PUBG: Battlegrounds | — (non-linear slider, sources disagree) | ⛔ Unsupported |
 | Battlefield 6 | — | ⛔ Unsupported |
 | The Finals | — | ⛔ Unsupported |
-| XDefiant (servers shut down) | — | ⛔ Unsupported |
+| XDefiant | — | ⛔ Unsupported |
 | Halo Infinite | — | ⛔ Unsupported |
 | Splitgate 2 | — | ⛔ Unsupported |
+| Counter-Strike: Source | 0.022 | ✅ Verified |
+| Counter-Strike 1.6 | 0.022 | ✅ Verified |
+| Day of Defeat: Source | 0.022 | ✅ Verified |
+| Insurgency (2014) | 0.022 | 🟡 Approximate |
+| Insurgency: Sandstorm | — | ⛔ Unsupported |
+| Rainbow Six Extraction | — | ⛔ Unsupported |
+| Ready or Not | — | ⛔ Unsupported |
+| Ground Branch | — | ⛔ Unsupported |
+| Spectre Divide | — | ⛔ Unsupported |
+| FragPunk | — | ⛔ Unsupported |
+| CrossFire | — | ⛔ Unsupported |
+| Warface | — | ⛔ Unsupported |
+| Black Mesa | 0.022 | ✅ Verified |
+| Battlefield 2042 | — | ⛔ Unsupported |
+| Battlefield V | — | ⛔ Unsupported |
+| Battlefield 1 | — | ⛔ Unsupported |
+| Battlefield 4 | — | ⛔ Unsupported |
+| Battlefield 3 | — | ⛔ Unsupported |
+| Squad | — | ⛔ Unsupported |
+| Hell Let Loose | — | ⛔ Unsupported |
+| Arma 3 | — | ⛔ Unsupported |
+| Arma Reforger | — | ⛔ Unsupported |
+| Rising Storm 2: Vietnam | — | ⛔ Unsupported |
+| Verdun | — | ⛔ Unsupported |
+| Enlisted | — | ⛔ Unsupported |
+| Delta Force (2024) | — | ⛔ Unsupported |
+| Star Wars Battlefront II (2017) | — | ⛔ Unsupported |
+| Call of Duty: Modern Warfare (2019) | 0.0066 | 🟡 Approximate |
+| Call of Duty: Modern Warfare II (2022) | 0.0066 | 🟡 Approximate |
+| Call of Duty: Modern Warfare III (2023) | 0.0066 | 🟡 Approximate |
+| Call of Duty: Black Ops Cold War | 0.0066 | 🟡 Approximate |
+| Call of Duty: Vanguard | 0.0066 | 🟡 Approximate |
+| Call of Duty: Black Ops 4 | — | ⛔ Unsupported |
+| Call of Duty 4: Modern Warfare | 0.022 | 🟡 Approximate |
+| Call of Duty: Modern Warfare 2 (2009) | 0.022 | 🟡 Approximate |
+| Call of Duty: Black Ops (2010) | 0.022 | 🟡 Approximate |
+| Farlight 84 | — | ⛔ Unsupported |
+| Blood Strike | — | ⛔ Unsupported |
+| Realm Royale | — | ⛔ Unsupported |
+| Bloodhunt | — | ⛔ Unsupported |
+| Super People | — | ⛔ Unsupported |
+| Z1 Battle Royale | — | ⛔ Unsupported |
+| Call of Duty: Warzone Mobile | — | ⛔ Unsupported |
+| Quake (1996) | 0.022 | ✅ Verified |
+| Quake II | 0.022 | ✅ Verified |
+| Quake III Arena | 0.022 | ✅ Verified |
+| Quake 4 | 0.022 | 🟡 Approximate |
+| Wolfenstein: Enemy Territory | 0.022 | ✅ Verified |
+| Return to Castle Wolfenstein | 0.022 | ✅ Verified |
+| Star Wars Jedi Knight: Jedi Academy | 0.022 | 🟡 Approximate |
+| Medal of Honor: Allied Assault | 0.022 | 🟡 Approximate |
+| Xonotic | 0.022 | 🟡 Approximate |
+| Warsow | 0.022 | 🟡 Approximate |
+| Diabotical | — | ⛔ Unsupported |
+| Reflex Arena | — | ⛔ Unsupported |
+| Unreal Tournament 2004 | — | ⛔ Unsupported |
+| Unreal Tournament 3 | — | ⛔ Unsupported |
+| Unreal Tournament (1999) | — | ⛔ Unsupported |
+| Toxikk | — | ⛔ Unsupported |
+| Krunker | — | ⛔ Unsupported |
+| Splitgate (2019) | — | ⛔ Unsupported |
+| Halo: The Master Chief Collection | — | ⛔ Unsupported |
+| Titanfall 2 | 0.022 | 🟡 Approximate |
+| Titanfall | 0.022 | 🟡 Approximate |
+| Doom (2016) | 0.022 | 🟡 Approximate |
+| Doom Eternal | 0.022 | 🟡 Approximate |
+| Doom 3 | 0.022 | 🟡 Approximate |
+| Overwatch (2016) | 0.0066 | ✅ Verified |
+| Team Fortress Classic | 0.022 | ✅ Verified |
+| Paladins | — | ⛔ Unsupported |
+| Marvel Rivals | — | ⛔ Unsupported |
+| Deadlock | — | ⛔ Unsupported |
+| Concord | — | ⛔ Unsupported |
+| Strinova | — | ⛔ Unsupported |
+| Rogue Company | — | ⛔ Unsupported |
+| Battleborn | — | ⛔ Unsupported |
+| Escape from Tarkov | — | ⛔ Unsupported |
+| Hunt: Showdown 1896 | — | ⛔ Unsupported |
+| Arena Breakout: Infinite | — | ⛔ Unsupported |
+| Gray Zone Warfare | — | ⛔ Unsupported |
+| ARC Raiders | — | ⛔ Unsupported |
+| The Cycle: Frontier | — | ⛔ Unsupported |
+| Rust | — | ⛔ Unsupported |
+| DayZ | — | ⛔ Unsupported |
+| Half-Life | 0.022 | ✅ Verified |
+| Half-Life 2 | 0.022 | ✅ Verified |
+| Portal 2 | 0.022 | ✅ Verified |
+| Left 4 Dead 2 | 0.022 | ✅ Verified |
+| Garry's Mod | 0.022 | ✅ Verified |
+| Deep Rock Galactic | — | ⛔ Unsupported |
+| Payday 2 | — | ⛔ Unsupported |
+| Payday 3 | — | ⛔ Unsupported |
+| Back 4 Blood | — | ⛔ Unsupported |
+| Killing Floor 2 | — | ⛔ Unsupported |
+| Borderlands 3 | — | ⛔ Unsupported |
+| Borderlands 2 | — | ⛔ Unsupported |
+| Metro Exodus | — | ⛔ Unsupported |
+| Far Cry 6 | — | ⛔ Unsupported |
+| Far Cry 5 | — | ⛔ Unsupported |
+| Cyberpunk 2077 | — | ⛔ Unsupported |
+| Atomic Heart | — | ⛔ Unsupported |
+| Wolfenstein II: The New Colossus | — | ⛔ Unsupported |
+| Serious Sam 4 | — | ⛔ Unsupported |
+| Ultrakill | — | ⛔ Unsupported |
+| Prey (2017) | — | ⛔ Unsupported |
+
+</details>
 
 Unsupported games can be used after you calibrate them with your own measurement. Corrections with sources are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -153,7 +266,7 @@ turns across pad                          = pad width / cm/360
 
 ## 🖥️ Windows desktop app
 
-Download `Aimless-v2.0.2-Portable.exe` (a single file) or `Aimless-v2.0.2-Windows-NoInstall.zip` (extract it and run `Run-Aimless.bat` or `Aimless.exe`) from the [latest release](https://github.com/pzxe/Aimless/releases/latest).
+Download `Aimless-v2.1.0-Portable.exe` (a single file) or `Aimless-v2.1.0-Windows-NoInstall.zip` (extract it and run `Run-Aimless.bat` or `Aimless.exe`) from the [latest release](https://github.com/pzxe/Aimless/releases/latest).
 
 Nothing is installed and the app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
 

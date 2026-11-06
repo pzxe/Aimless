@@ -65,6 +65,7 @@ function QuickConvert() {
       <CardHeader
         title={t('dashboard.quickConvert')}
         icon={<ArrowLeftRight />}
+        help={t('help.dashboard.quickConvert')}
         action={
           <Link to="/converter" className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline">
             {t('dashboard.openConverter')}

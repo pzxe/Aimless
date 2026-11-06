@@ -6,6 +6,13 @@ export function roundName(t: TFunction, tournament: Tournament, side: BracketSid
   return l.custom ?? t(`tournament.round.${l.key}`, { n: l.n })
 }
 
+/** "Solo · 1v1", "Duo · 2v2" or "3v3". */
+export function teamSizeLabel(t: TFunction, n: number): string {
+  if (n === 1) return t('tournament.size.solo')
+  if (n === 2) return t('tournament.size.duo')
+  return `${n}v${n}`
+}
+
 export function participantName(tournament: Tournament, id: string | null | undefined): string | null {
   if (!id) return null
   return tournament.participants.find((p) => p.id === id)?.name ?? null

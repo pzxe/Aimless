@@ -23,6 +23,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { ConfirmDialog } from '@/components/ui/Dialog'
 import { NumberField } from '@/components/ui/Field'
 import { Segmented } from '@/components/ui/Segmented'
+import { InfoTip } from '@/components/ui/InfoTip'
 import { parseNumber, validateDpi } from '@/core/sensitivity'
 import { useT } from '@/i18n'
 import { initialForm, useConverter } from '@/store/converterStore'
@@ -43,13 +44,17 @@ import {
 import { cn } from '@/utils/cn'
 import { playSound } from '@/utils/sound'
 import { clearAllStorage } from '@/utils/storage'
+import { isDesktopApp } from '@/utils/platform'
 import { clearPersistentTools } from '@/hooks/usePersistentState'
 
-function Row({ label, hint, children }: { label: ReactNode; hint?: ReactNode; children: ReactNode }) {
+function Row({ label, hint, help, children }: { label: ReactNode; hint?: ReactNode; help?: ReactNode; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 md:flex-row md:items-center md:justify-between">
       <div className="min-w-0 md:max-w-xs">
-        <div className="text-sm font-medium">{label}</div>
+        <div className="flex items-center gap-1.5 text-sm font-medium">
+          {label}
+          {help && <InfoTip>{help}</InfoTip>}
+        </div>
         {hint && <div className="mt-0.5 text-xs text-muted">{hint}</div>}
       </div>
       <div className="scrollbar-thin max-w-full min-w-0 overflow-x-auto md:shrink-0">{children}</div>
@@ -73,7 +78,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader title={t('settings.appearance')} icon={<Palette />} />
           <CardBody className="divide-y divide-border">
-            <Row label={t('settings.language')}>
+            <Row label={t('settings.language')} help={t('help.settings.language')}>
               <div role="radiogroup" aria-label={t('settings.language')} className="flex flex-wrap gap-1.5">
                 {LANGUAGES.map((l) => (
                   <button
@@ -93,7 +98,7 @@ export default function SettingsPage() {
                 ))}
               </div>
             </Row>
-            <Row label={t('settings.theme')}>
+            <Row label={t('settings.theme')} help={t('help.settings.theme')}>
               <Segmented<Theme>
                 label={t('settings.theme')}
                 value={s.theme}
@@ -105,7 +110,7 @@ export default function SettingsPage() {
                 ]}
               />
             </Row>
-            <Row label={t('settings.accent')} hint={t('settings.accentHint')}>
+            <Row label={t('settings.accent')} hint={t('settings.accentHint')} help={t('help.settings.accent')}>
               <div role="radiogroup" aria-label={t('settings.accent')} className="flex gap-2">
                 {ACCENTS.map((a) => (
                   <button
@@ -127,7 +132,7 @@ export default function SettingsPage() {
                 ))}
               </div>
             </Row>
-            <Row label={t('settings.density')} hint={t('settings.densityHint')}>
+            <Row label={t('settings.density')} hint={t('settings.densityHint')} help={t('help.settings.density')}>
               <Segmented<Density>
                 label={t('settings.density')}
                 value={s.density}
@@ -138,7 +143,7 @@ export default function SettingsPage() {
                 ]}
               />
             </Row>
-            <Row label={t('settings.motion')} hint={t('settings.motionHint')}>
+            <Row label={t('settings.motion')} hint={t('settings.motionHint')} help={t('help.settings.motion')}>
               <Segmented<MotionPref>
                 label={t('settings.motion')}
                 value={s.motion}
@@ -156,7 +161,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader title={t('settings.measurement')} icon={<RectangleHorizontal />} />
           <CardBody className="divide-y divide-border">
-            <Row label={t('settings.units')} hint={t('settings.unitsHint')}>
+            <Row label={t('settings.units')} hint={t('settings.unitsHint')} help={t('help.settings.units')}>
               <Segmented<Units>
                 label={t('settings.units')}
                 value={s.units}
@@ -167,7 +172,7 @@ export default function SettingsPage() {
                 ]}
               />
             </Row>
-            <Row label={t('mousepad.size')} hint={t('settings.mousepadHint')}>
+            <Row label={t('mousepad.size')} hint={t('settings.mousepadHint')} help={t('help.settings.mousepad')}>
               <PadPicker />
             </Row>
           </CardBody>
@@ -176,20 +181,20 @@ export default function SettingsPage() {
         <Card>
           <CardHeader title={t('settings.defaults')} icon={<SlidersHorizontal />} />
           <CardBody className="divide-y divide-border">
-            <Row label={t('settings.startup')} hint={t('settings.startupHint')}>
+            <Row label={t('settings.startup')} hint={t('settings.startupHint')} help={t('help.settings.startup')}>
               <Segmented<StartupView>
                 label={t('settings.startup')}
                 value={s.startupView}
                 onChange={(startupView) => s.set({ startupView })}
                 options={[
-                  { value: 'landing', label: t('nav.presentation'), icon: <Rocket /> },
+                  ...(isDesktopApp ? [] : [{ value: 'landing' as const, label: t('nav.presentation'), icon: <Rocket /> }]),
                   { value: 'dashboard', label: t('nav.dashboard') },
                   { value: 'converter', label: t('nav.converter') },
                   { value: 'tournaments', label: t('nav.tournaments') },
                 ]}
               />
             </Row>
-            <Row label={t('settings.precision')} hint={t('settings.precisionHint')}>
+            <Row label={t('settings.precision')} hint={t('settings.precisionHint')} help={t('help.settings.precision')}>
               <Segmented
                 label={t('settings.precision')}
                 value={String(s.precision)}
@@ -197,7 +202,7 @@ export default function SettingsPage() {
                 options={['2', '3', '4', '5', '6'].map((v) => ({ value: v, label: <span className="num">{v}</span> }))}
               />
             </Row>
-            <Row label={t('settings.defaultDpi')} hint={t('settings.defaultDpiHint')}>
+            <Row label={t('settings.defaultDpi')} hint={t('settings.defaultDpiHint')} help={t('help.settings.defaultDpi')}>
               <NumberField
                 label={<span className="sr-only">{t('settings.defaultDpi')}</span>}
                 value={dpiText}
@@ -211,7 +216,7 @@ export default function SettingsPage() {
                 error={dpiErr ? t(`validation.${dpiErr}`) : null}
               />
             </Row>
-            <Row label={t('settings.fovDisplay')} hint={t('settings.fovDisplayHint')}>
+            <Row label={t('settings.fovDisplay')} hint={t('settings.fovDisplayHint')} help={t('help.settings.fovDisplay')}>
               <Segmented<FovDisplay>
                 label={t('settings.fovDisplay')}
                 value={s.fovDisplay}
@@ -222,7 +227,7 @@ export default function SettingsPage() {
                 ]}
               />
             </Row>
-            <Row label={t('settings.sound')} hint={t('settings.soundHint')}>
+            <Row label={t('settings.sound')} hint={t('settings.soundHint')} help={t('help.settings.sound')}>
               <div className="flex items-center gap-2">
                 <Segmented<'on' | 'off'>
                   label={t('settings.sound')}

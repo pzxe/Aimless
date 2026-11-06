@@ -4,7 +4,7 @@ import { useFormat } from '@/hooks/useFormat'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
 import { cn } from '@/utils/cn'
-import { NumberField } from '../ui/Field'
+import { Label, NumberField } from '../ui/Field'
 import { Segmented } from '../ui/Segmented'
 import { parseNumber } from '@/core/sensitivity'
 import { useEffect, useState } from 'react'
@@ -22,6 +22,7 @@ export function PadPicker() {
   return (
     <div className="flex min-w-0 flex-wrap items-end gap-3">
       <div className="scrollbar-thin max-w-full min-w-0 overflow-x-auto">
+        <Label help={t('help.mousepad.size')}>{t('mousepad.size')}</Label>
         <Segmented<MousepadPreset>
           label={t('mousepad.size')}
           value={preset}
@@ -94,7 +95,7 @@ export function MousepadVisualizer({ cm360 }: { cm360: number | null }) {
             <span className="absolute -top-6 right-0 translate-x-1/2 rounded-md bg-accent-fill px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-accent-fg num">
               360°
             </span>
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-subtle num">180°</span>
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-muted num">180°</span>
             <span className="absolute top-0 left-1/2 h-full w-px bg-white/40" />
           </div>
         )}

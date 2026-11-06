@@ -5,7 +5,7 @@ import { magnification, zoomFovFromMagnification, zoomSensitivityRatio } from '@
 import { useFormat } from '@/hooks/useFormat'
 import { useT } from '@/i18n'
 import { Card, CardBody, CardHeader } from '../ui/Card'
-import { FromConverter } from '@/pages/Tools'
+import { FromConverter } from './shared'
 import { CopyButton } from '../ui/CopyButton'
 import { Label, NumberField } from '../ui/Field'
 import { Segmented } from '../ui/Segmented'
@@ -34,7 +34,7 @@ export function AdsTool() {
 
   return (
     <Card id="ads" className="scroll-mt-20">
-      <CardHeader title={t('ads.title')} description={t('ads.desc')} icon={<Crosshair />} action={<FromConverter onPick={(c) => c.sourceSensitivity && setSens(c.sourceSensitivity)} />} />
+      <CardHeader title={t('ads.title')} description={t('ads.desc')} icon={<Crosshair />} help={t('help.tools.ads')} action={<FromConverter onPick={(c) => c.sourceSensitivity && setSens(c.sourceSensitivity)} />} />
       <CardBody className="space-y-4">
         <Segmented<Mode>
           label={t('ads.mode')}
@@ -55,7 +55,7 @@ export function AdsTool() {
         </div>
         {mode !== 'custom' && (
           <div>
-            <Label hint={<span className="ltr num">{f.num(p, 0)}%</span>}>{t('ads.monitorDistance')}</Label>
+            <Label help={t('help.tools.monitorDistance')} hint={<span className="ltr num">{f.num(p, 0)}%</span>}>{t('ads.monitorDistance')}</Label>
             <input
               type="range"
               min={0}

@@ -3,11 +3,15 @@ import { persist } from 'zustand/middleware'
 import {
   clearResult,
   createTournament,
+  randomizeSeeds,
+  setSeriesLength,
   renameRound,
   reportResult,
   reseed,
   sanitizeTournament,
   type BracketSide,
+  type GameInput,
+  type StageKey,
   type NewTournamentInput,
   type Result,
   type Tournament,
@@ -22,7 +26,10 @@ interface TournamentState {
   add: (t: Tournament) => void
   remove: (id: string) => void
   duplicate: (id: string, suffix: string) => Tournament | undefined
-  report: (id: string, matchId: string, score: [number, number], note?: string) => Result<Tournament>
+  report: (id: string, matchId: string, score: [number, number], note?: string, games?: GameInput[]) => Result<Tournament>
+  /** Shuffle the seeds into a fresh random bracket (clears results). */
+  randomize: (id: string) => void
+  setSeries: (id: string, stage: StageKey | null, bestOf: number | null) => Result<Tournament>
   clearMatch: (id: string, matchId: string) => void
   renameRound: (id: string, side: BracketSide, round: number, label: string) => void
   rename: (id: string, name: string) => void
@@ -51,10 +58,21 @@ export const useTournaments = create<TournamentState>()(
           set((s) => ({ tournaments: [r.value, ...s.tournaments].slice(0, LIMIT) }))
           return r.value
         },
-        report: (id, matchId, score, note) => {
+        report: (id, matchId, score, note, games) => {
           const t = find(id)
           if (!t) return { ok: false, error: 'unknown_match' }
-          const r = reportResult(t, matchId, score, note)
+          const r = reportResult(t, matchId, score, note, Date.now(), games)
+          if (r.ok) replace(r.value)
+          return r
+        },
+        randomize: (id) => {
+          const t = find(id)
+          if (t) replace(randomizeSeeds(t))
+        },
+        setSeries: (id, stage, bestOf) => {
+          const t = find(id)
+          if (!t) return { ok: false, error: 'unknown_match' }
+          const r = setSeriesLength(t, stage, bestOf)
           if (r.ok) replace(r.value)
           return r
         },

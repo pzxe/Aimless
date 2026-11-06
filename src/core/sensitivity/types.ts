@@ -41,11 +41,17 @@ export interface LinearFormula {
 
 export type SensitivityFormula = LinearFormula
 
+/** Genre, for filtering and for the game's emblem. */
+export type Genre = 'tactical' | 'battle-royale' | 'arena' | 'hero' | 'extraction' | 'military' | 'coop' | 'singleplayer' | 'classic'
+
+export const GENRES: Genre[] = ['tactical', 'battle-royale', 'arena', 'hero', 'extraction', 'military', 'coop', 'singleplayer', 'classic']
+
 export interface GameDefinition {
   id: string
   name: string
-  /** Short text badge used instead of copyrighted artwork. */
+  /** Short code shown on the game's original emblem (no copyrighted artwork). */
   short: string
+  genre: Genre
   /** Badge color (hex). Original, not a brand color requirement. */
   color: string
   /** Formula, or null when no reliable constant is known. */

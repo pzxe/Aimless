@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { Label, NumberField } from '@/components/ui/Field'
+import { InfoTip } from '@/components/ui/InfoTip'
 import { describeSetting, formatNumber, getGame, isValidFov, isValidResolution, parseNumber } from '@/core/sensitivity'
 import { useConversion } from '@/hooks/useConversion'
 import { useFormat } from '@/hooks/useFormat'
@@ -97,12 +98,13 @@ export default function ConverterPage() {
           </div>
           <div className="space-y-4">
             <div>
-              <Label>{t('converter.sourceGame')}</Label>
+              <Label help={t('help.converter.sourceGame')}>{t('converter.sourceGame')}</Label>
               <GameSelector value={form.sourceGameId} onChange={(id) => setField('sourceGameId', id)} label={t('converter.sourceGame')} />
             </div>
             <div className="grid grid-cols-[1.4fr_1fr] gap-3">
               <NumberField
                 label={t('converter.inGameSens')}
+                help={t('help.converter.sens')}
                 hint={sourceGame?.scaleLabel !== 'Sensitivity' ? sourceGame?.scaleLabel : undefined}
                 value={form.sourceSensitivity}
                 onValueChange={(v) => setField('sourceSensitivity', v)}
@@ -114,6 +116,7 @@ export default function ConverterPage() {
               />
               <NumberField
                 label={t('converter.mouseDpi')}
+                help={t('help.converter.dpi')}
                 value={form.sourceDpi}
                 onValueChange={(v) => setField('sourceDpi', v)}
                 large
@@ -153,7 +156,7 @@ export default function ConverterPage() {
           </div>
           <div className="space-y-4">
             <div>
-              <Label>{t('converter.targetGame')}</Label>
+              <Label help={t('help.converter.targetGame')}>{t('converter.targetGame')}</Label>
               <GameSelector value={form.targetGameId} onChange={(id) => setField('targetGameId', id)} label={t('converter.targetGame')} />
             </div>
             <div className="grid grid-cols-[1.4fr_1fr] gap-3">
@@ -172,6 +175,7 @@ export default function ConverterPage() {
               <div>
                 <NumberField
                   label={t('converter.targetDpi')}
+                  help={t('help.converter.targetDpi')}
                   value={form.targetDpi}
                   onValueChange={(v) => setField('targetDpi', v)}
                   large
@@ -190,6 +194,7 @@ export default function ConverterPage() {
               {form.linkDpi ? <Link2 className="size-3.5 text-accent" /> : <Link2Off className="size-3.5" />}
               {t('converter.linkDpi')}
             </button>
+            <InfoTip className="-mt-2 ms-1.5 align-middle">{t('help.converter.linkDpi')}</InfoTip>
             {ok?.targetRounded &&
               (f.sens(ok.targetRounded.sensitivity) !== targetSensText || Math.abs(ok.targetRounded.errorPercent) >= 0.1) && (
               <p className="ltr num -mt-1 text-start text-xs text-muted">
@@ -228,7 +233,10 @@ export default function ConverterPage() {
         <div className="mt-3 grid gap-3 lg:grid-cols-[1.3fr_1fr]">
           <Card className="p-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">{t('converter.summary')}</h2>
+              <h2 className="flex items-center gap-1.5 text-sm font-semibold">
+                {t('converter.summary')}
+                <InfoTip>{t('help.converter.summary')}</InfoTip>
+              </h2>
               <div className="flex flex-wrap gap-1.5">
                 <CopyButton text={f.edpi(ok.target.edpi)} label={t('converter.copyEdpi')} showLabel size="sm" />
                 <CopyButton text={`${f.dist(ok.target.cm360)} ${f.distLabel}`} label={t('converter.copyCm', { unit: f.distLabel })} showLabel size="sm" />
@@ -280,7 +288,7 @@ export default function ConverterPage() {
 
       {ok && (
         <Card className="mt-3">
-          <CardHeader title={t('converter.aimProfile')} description={t('converter.aimProfileDesc')} icon={<Gauge />} />
+          <CardHeader title={t('converter.aimProfile')} description={t('converter.aimProfileDesc')} icon={<Gauge />} help={t('help.converter.aimProfile')} />
           <div className="grid grid-cols-1 gap-6 px-5 pb-5 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:items-center">
             <AimStyleMeter cm360={ok.target.cm360} />
             <div className="space-y-4">

@@ -1,30 +1,25 @@
 import { getGame } from '@/core/sensitivity'
 import { cn } from '@/utils/cn'
+import { GameArt } from './GameArt'
 
 /**
- * Text-based game identifier. Original placeholder instead of copyrighted artwork.
+ * A game's emblem with its short code: original, locally generated artwork
+ * (see GameArt), never copyrighted game art.
  */
 export function GameBadge({ gameId, size = 'md', className }: { gameId: string; size?: 'sm' | 'md' | 'lg'; className?: string }) {
   const game = getGame(gameId)
-  const label = game?.short ?? '?'
-  const color = game?.color ?? '#888'
+  const dims = size === 'sm' ? 'h-6 w-[30px]' : size === 'md' ? 'h-8 w-10' : 'h-11 w-14'
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'ltr inline-flex shrink-0 items-center justify-center rounded-md font-bold tracking-tight',
-        size === 'sm' && 'h-6 w-8 text-[9px]',
-        size === 'md' && 'h-8 w-10 text-[10px]',
-        size === 'lg' && 'h-11 w-14 text-xs',
-        className,
+    <span aria-hidden="true" className={cn('relative inline-flex shrink-0', dims, className)}>
+      <GameArt gameId={gameId} className="size-full" />
+      {size !== 'sm' && (
+        <span
+          className="ltr absolute inset-x-0 -bottom-1 mx-auto w-fit rounded px-1 text-[8px] leading-[11px] font-bold tracking-wide whitespace-nowrap"
+          style={{ color: '#fff', background: game?.color ?? '#888' }}
+        >
+          {game?.short ?? '?'}
+        </span>
       )}
-      style={{
-        color,
-        backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`,
-        boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 28%, transparent)`,
-      }}
-    >
-      {label}
     </span>
   )
 }

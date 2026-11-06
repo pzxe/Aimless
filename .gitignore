@@ -20,3 +20,7 @@ release/
 
 # Design references (not for distribution)
 inspiration/
+
+# Design-skill inspection output
+.taste-skill/
+scripts/*.local.mjs

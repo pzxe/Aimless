@@ -1,14 +1,16 @@
 import { generateMatches, MAX_PARTICIPANTS, MIN_PARTICIPANTS, nextPowerOfTwo, roundCounts } from './generate'
 import { resolveTournament } from './resolve'
+import { bestOfFor, isValidBestOf, isValidTeamSize, MAX_TEAM_SIZE, seriesFromGames, STAGE_KEYS } from './series'
 import type {
-  BestOf,
   BracketSide,
   NewTournamentInput,
   Participant,
   Tournament,
   TournamentError,
   TournamentFormat,
-  TournamentMode,
+  GameInput,
+  GameRecord,
+  StageKey,
 } from './types'
 
 export type Result<T> = { ok: true; value: T } | { ok: false; error: TournamentError }
@@ -57,7 +59,21 @@ export function validateNewTournament(input: NewTournamentInput): TournamentErro
   if (names.length > MAX_PARTICIPANTS) return 'too_many'
   const lower = names.map((n) => n.toLocaleLowerCase())
   if (new Set(lower).size !== lower.length) return 'duplicate_names'
+  if (!isValidTeamSize(input.teamSize)) return 'invalid_team_size'
+  if (!isValidBestOf(input.bestOf)) return 'invalid_series'
+  if (Object.values(input.stageBestOf ?? {}).some((v) => v !== undefined && !isValidBestOf(v))) return 'invalid_series'
   return null
+}
+
+/** Keep only known stages with valid series lengths. */
+export function cleanStageBestOf(raw: unknown): Partial<Record<StageKey, number>> {
+  const out: Partial<Record<StageKey, number>> = {}
+  if (!raw || typeof raw !== 'object') return out
+  for (const k of STAGE_KEYS) {
+    const v = (raw as Record<string, unknown>)[k]
+    if (isValidBestOf(v)) out[k] = v
+  }
+  return out
 }
 
 export function createTournament(
@@ -71,7 +87,7 @@ export function createTournament(
   let participants: Participant[] = input.participants.map((p) => ({
     id: makeId(),
     name: clean(p.name, 40),
-    members: (p.members ?? []).map((m) => clean(m, 40)).filter(Boolean).slice(0, 10),
+    members: (p.members ?? []).map((m) => clean(m, 40)).filter(Boolean).slice(0, input.teamSize),
   }))
   if (input.seeding === 'random') participants = shuffle(participants, opts.rng)
   const size = nextPowerOfTwo(Math.max(input.format === 'double' ? 4 : 2, participants.length))
@@ -80,9 +96,10 @@ export function createTournament(
     id: makeId(),
     name: clean(input.name, 80),
     gameId: input.gameId,
-    mode: input.mode,
+    teamSize: input.teamSize,
     format: input.format,
     bestOf: input.bestOf,
+    stageBestOf: cleanStageBestOf(input.stageBestOf),
     grandFinalReset,
     participants,
     bracketSize: size,
@@ -110,11 +127,35 @@ export function pruneResults(t: Tournament): Tournament {
   return current
 }
 
-export function reportResult(t: Tournament, matchId: string, score: [number, number], note?: string, now = Date.now()): Result<Tournament> {
+/**
+ * Record a match result. Pass `games` for a game-by-game breakdown: the series score is then
+ * calculated from it and the series must be decided. Without games, `score` is used as is.
+ */
+export function reportResult(
+  t: Tournament,
+  matchId: string,
+  score: [number, number],
+  note?: string,
+  now = Date.now(),
+  games?: GameInput[],
+): Result<Tournament> {
   const m = resolveTournament(t).matches.get(matchId)
   if (!m) return fail('unknown_match')
   if ((m.status !== 'ready' && m.status !== 'done') || m.slots[0].kind !== 'filled' || m.slots[1].kind !== 'filled') {
     return fail('match_not_ready')
+  }
+  let records: GameRecord[] | undefined
+  if (games && games.length > 0) {
+    const series = seriesFromGames(games, bestOfFor(t, m.def))
+    if (!series.ok) return fail(series.error)
+    if (!series.value.decided) return fail('series_incomplete')
+    score = series.value.wins
+    records = games.map((g) => ({
+      map: clean(g.map, 40),
+      score: g.score,
+      overtime: g.overtime === true,
+      winner: g.score[0] > g.score[1] ? 0 : 1,
+    }))
   }
   if (!score.every((s) => Number.isInteger(s) && s >= 0 && s <= 999)) return fail('invalid_score')
   if (score[0] === score[1]) return fail('tied_score')
@@ -127,11 +168,30 @@ export function reportResult(t: Tournament, matchId: string, score: [number, num
         score,
         winner: score[0] > score[1] ? 0 : 1,
         ...(note ? { note: clean(note, 120) } : {}),
+        ...(records ? { games: records } : {}),
       },
     },
     updatedAt: now,
   }
   return ok(pruneResults(next))
+}
+
+/**
+ * Shuffle the seeds into a fresh random bracket. Results no longer match the new
+ * pairings, so they are cleared.
+ */
+export function randomizeSeeds(t: Tournament, rng: () => number = Math.random, now = Date.now()): Tournament {
+  return { ...t, participants: shuffle(t.participants, rng), results: {}, updatedAt: now }
+}
+
+/** Change a stage's series length (or the default with stage = null). Clears no results. */
+export function setSeriesLength(t: Tournament, stage: StageKey | null, bestOf: number | null, now = Date.now()): Result<Tournament> {
+  if (bestOf !== null && !isValidBestOf(bestOf)) return fail('invalid_series')
+  if (stage === null) return bestOf === null ? fail('invalid_series') : ok({ ...t, bestOf, updatedAt: now })
+  const stageBestOf = { ...t.stageBestOf }
+  if (bestOf === null) delete stageBestOf[stage]
+  else stageBestOf[stage] = bestOf
+  return ok({ ...t, stageBestOf, updatedAt: now })
 }
 
 export function clearResult(t: Tournament, matchId: string, now = Date.now()): Tournament {
@@ -199,8 +259,7 @@ export function exportTournament(t: Tournament) {
 }
 
 const FORMATS: TournamentFormat[] = ['single', 'double']
-const MODES: TournamentMode[] = ['1v1', '5v5']
-const BEST_OF: BestOf[] = [1, 3, 5, 7]
+const LEGACY_MODES: Record<string, number> = { '1v1': 1, '5v5': 5 }
 
 /**
  * Parse an untrusted tournament file. The match graph is never taken from the file:
@@ -234,8 +293,9 @@ export function sanitizeTournament(data: unknown, opts: ImportOptions = {}): Res
   if (root && 'app' in root && root.app !== TOURNAMENT_EXPORT_ID) return fail('invalid_file')
 
   const format = FORMATS.includes(raw.format as TournamentFormat) ? (raw.format as TournamentFormat) : null
-  const mode = MODES.includes(raw.mode as TournamentMode) ? (raw.mode as TournamentMode) : '1v1'
-  const bestOf = BEST_OF.includes(raw.bestOf as BestOf) ? (raw.bestOf as BestOf) : 1
+  const teamSize = isValidTeamSize(raw.teamSize) ? raw.teamSize : (LEGACY_MODES[String(raw.mode)] ?? 1)
+  const bestOf = isValidBestOf(raw.bestOf) ? raw.bestOf : 1
+  const stageBestOf = cleanStageBestOf(raw.stageBestOf)
   if (!format || !Array.isArray(raw.participants)) return fail('invalid_file')
 
   const makeId = opts.idFactory ?? defaultId
@@ -254,7 +314,7 @@ export function sanitizeTournament(data: unknown, opts: ImportOptions = {}): Res
     participants.push({
       id,
       name,
-      members: Array.isArray(r.members) ? r.members.map((m) => clean(m, 40)).filter(Boolean).slice(0, 10) : [],
+      members: Array.isArray(r.members) ? r.members.map((m) => clean(m, 40)).filter(Boolean).slice(0, MAX_TEAM_SIZE) : [],
     })
   }
   if (participants.length < MIN_PARTICIPANTS[format]) return fail('too_few')
@@ -282,6 +342,7 @@ export function sanitizeTournament(data: unknown, opts: ImportOptions = {}): Res
         score: [s0 as number, s1 as number],
         winner: (s0 as number) > (s1 as number) ? 0 : 1,
         ...(typeof v.note === 'string' && clean(v.note, 120) ? { note: clean(v.note, 120) } : {}),
+        ...(sanitizeGames(v.games) ? { games: sanitizeGames(v.games)! } : {}),
       }
     }
   }
@@ -299,9 +360,10 @@ export function sanitizeTournament(data: unknown, opts: ImportOptions = {}): Res
       id: opts.keepIds && typeof raw.id === 'string' && SAFE_ID.test(raw.id) ? raw.id : makeId(),
       name: clean(raw.name, 80) || 'Tournament',
       gameId: typeof raw.gameId === 'string' ? raw.gameId.slice(0, 40) : null,
-      mode,
+      teamSize,
       format,
       bestOf,
+      stageBestOf,
       grandFinalReset,
       participants,
       bracketSize: size,
@@ -312,4 +374,19 @@ export function sanitizeTournament(data: unknown, opts: ImportOptions = {}): Res
       updatedAt: opts.keepIds && typeof raw.updatedAt === 'number' ? raw.updatedAt : now,
     }),
   )
+}
+
+function sanitizeGames(raw: unknown): GameRecord[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null
+  const out: GameRecord[] = []
+  for (const g of raw.slice(0, 15)) {
+    if (!g || typeof g !== 'object') continue
+    const r = g as Record<string, unknown>
+    const sc = r.score
+    if (!Array.isArray(sc) || sc.length !== 2) continue
+    const [a, b] = sc
+    if (!Number.isInteger(a) || !Number.isInteger(b) || a === b || (a as number) < 0 || (b as number) < 0 || (a as number) > 999 || (b as number) > 999) continue
+    out.push({ map: clean(r.map, 40), score: [a as number, b as number], overtime: r.overtime === true, winner: (a as number) > (b as number) ? 0 : 1 })
+  }
+  return out.length ? out : null
 }

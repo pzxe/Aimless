@@ -7,6 +7,7 @@ import { EmptyState, PageHeader } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { NumberField, Select } from '@/components/ui/Field'
+import { InfoTip } from '@/components/ui/InfoTip'
 import { describeSetting, getGame, parseNumber, sensitivityForCm360, type SideResult } from '@/core/sensitivity'
 import { useFormat } from '@/hooks/useFormat'
 import { useGameAccuracy } from '@/hooks/useGameAccuracy'
@@ -116,6 +117,7 @@ export default function ComparePage() {
               <Wand2 />
               {t('compare.match')}
             </Button>
+            <InfoTip>{t('help.compare.match')}</InfoTip>
           </>
         }
       />

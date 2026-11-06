@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Field'
+import { InfoTip } from '@/components/ui/InfoTip'
 import { Segmented } from '@/components/ui/Segmented'
 import { formatNumber, getAllGames, type ResultAccuracy } from '@/core/sensitivity'
 import { useGameAccuracy } from '@/hooks/useGameAccuracy'
@@ -57,14 +58,14 @@ export default function GamesPage() {
       </div>
       <p className="mb-3 text-xs text-subtle">{t('games.count', { count: games.length })}</p>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {games.map((g) => {
           const acc = accuracyOf(g.id)
           const calibrated = calibrations[g.id]
           const yaw = calibrated ?? g.formula?.yaw
           const fav = favorites.includes(g.id)
           return (
-            <Card key={g.id} className="flex flex-col p-4">
+            <Card key={g.id} className="flex min-w-0 flex-col p-4">
               <div className="flex items-start gap-3">
                 <GameBadge gameId={g.id} size="lg" />
                 <div className="min-w-0 flex-1">
@@ -132,6 +133,7 @@ export default function GamesPage() {
                   <Ruler />
                   {t('games.calibrate')}
                 </Button>
+                <InfoTip>{t('help.games.calibrate')}</InfoTip>
                 {calibrated !== undefined && (
                   <Button
                     size="sm"

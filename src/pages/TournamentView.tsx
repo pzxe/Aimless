@@ -1,17 +1,19 @@
-import { ArrowLeft, Crown, Download, FileImage, FileJson, Image, Shuffle, Trash2, Trophy } from 'lucide-react'
+import { ArrowLeft, Crown, Download, FileImage, FileJson, Image, ListOrdered, Trash2, Trophy } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { gameName } from '@/components/games/GameBadge'
 import { EmptyState } from '@/components/layout/AppShell'
 import { BracketView } from '@/components/tournament/BracketView'
-import { participantName, roundName } from '@/components/tournament/labels'
+import { participantName, roundName, teamSizeLabel } from '@/components/tournament/labels'
+import { SeriesDialog } from '@/components/tournament/SeriesDialog'
+import { InfoTip } from '@/components/ui/InfoTip'
 import { MatchDialog } from '@/components/tournament/MatchDialog'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { ConfirmDialog } from '@/components/ui/Dialog'
-import { exportTournament, resolveTournament, shuffle, type BracketSide } from '@/core/tournament'
+import { exportTournament, resolveTournament, type BracketSide } from '@/core/tournament'
 import { useT } from '@/i18n'
 import { useTournaments } from '@/store/tournamentStore'
 import { bracketSvg, bracketText, downloadBlob, svgToPng, type BracketSvgLabels } from '@/utils/bracketExport'
@@ -23,7 +25,9 @@ export default function TournamentViewPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const tournament = useTournaments((s) => s.tournaments.find((x) => x.id === id))
-  const { renameRound, reseed, remove, rename } = useTournaments()
+  const { renameRound, randomize, remove, rename } = useTournaments()
+  const [confirmRandom, setConfirmRandom] = useState(false)
+  const [seriesOpen, setSeriesOpen] = useState(false)
   const [openMatch, setOpenMatch] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [editingName, setEditingName] = useState(false)
@@ -73,7 +77,7 @@ export default function TournamentViewPage() {
         <div className="min-w-0">
           <div className="eyebrow mb-2">
             {tournament.gameId ? `${gameName(tournament.gameId)} · ` : ''}
-            {t(`tournament.format.${tournament.format}`)} · {t(`tournament.mode.${tournament.mode}`)} · Bo{tournament.bestOf}
+            {t(`tournament.format.${tournament.format}`)} · {teamSizeLabel(t, tournament.teamSize)} · Bo{tournament.bestOf}
           </div>
           {editingName ? (
             <form
@@ -107,17 +111,23 @@ export default function TournamentViewPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {!hasResults && (
-            <Button
-              onClick={() => {
-                const r = reseed(tournament.id, shuffle(tournament.participants.map((p) => p.id)))
-                if (r.ok) toast.success(t('tournament.shuffled'))
-              }}
-            >
-              <Shuffle />
-              {t('tournament.shuffleSeeds')}
-            </Button>
-          )}
+          <Button
+            onClick={() => {
+              if (hasResults) setConfirmRandom(true)
+              else {
+                randomize(tournament.id)
+                toast.success(t('tournament.shuffled'))
+              }
+            }}
+          >
+            <span aria-hidden="true">🎲</span>
+            {t('tournament.randomize')}
+          </Button>
+          <InfoTip>{t('help.tournament.randomizeBracket')}</InfoTip>
+          <Button onClick={() => setSeriesOpen(true)}>
+            <ListOrdered />
+            {t('tournament.series.button')}
+          </Button>
           <ExportMenu
             onJson={() => downloadJson(`${file}.json`, exportTournament(tournament))}
             onSvg={() => downloadBlob(`${file}.svg`, new Blob([bracketSvg(tournament, labels, accent)], { type: 'image/svg+xml' }))}
@@ -186,6 +196,18 @@ export default function TournamentViewPage() {
       </Card>
 
       <MatchDialog tournament={tournament} match={match} onClose={() => setOpenMatch(null)} />
+      <SeriesDialog tournament={tournament} open={seriesOpen} onClose={() => setSeriesOpen(false)} />
+      <ConfirmDialog
+        open={confirmRandom}
+        onClose={() => setConfirmRandom(false)}
+        title={t('tournament.randomize')}
+        description={t('tournament.randomizeConfirm')}
+        confirmLabel={t('tournament.randomize')}
+        onConfirm={() => {
+          randomize(tournament.id)
+          toast.success(t('tournament.shuffled'))
+        }}
+      />
       <ConfirmDialog
         open={confirmDelete}
         onClose={() => setConfirmDelete(false)}

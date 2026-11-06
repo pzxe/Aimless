@@ -15,7 +15,7 @@ function cup(): Tournament {
   const r = createTournament({
     name: 'Night <Cup> & "Co"',
     gameId: null,
-    mode: '5v5',
+    teamSize: 5,
     format: 'single',
     bestOf: 3,
     grandFinalReset: false,

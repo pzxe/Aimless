@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { GameBadge, gameName } from '@/components/games/GameBadge'
 import { EmptyState, PageHeader } from '@/components/layout/AppShell'
 import { CreateTournamentDialog } from '@/components/tournament/CreateTournamentDialog'
-import { participantName } from '@/components/tournament/labels'
+import { participantName, teamSizeLabel } from '@/components/tournament/labels'
 import { Button } from '@/components/ui/Button'
 import { ConfirmDialog } from '@/components/ui/Dialog'
 import { exportTournament, importTournament, MAX_TOURNAMENT_IMPORT_BYTES, resolveTournament, type Tournament } from '@/core/tournament'
@@ -89,7 +89,7 @@ export default function TournamentsPage() {
                     <h3 className="truncate text-base font-semibold">{tour.name}</h3>
                     <p className="truncate text-xs text-muted">
                       {tour.gameId ? `${gameName(tour.gameId)} · ` : ''}
-                      {t(`tournament.format.${tour.format}`)} · {t(`tournament.mode.${tour.mode}`)} · <span className="num">Bo{tour.bestOf}</span>
+                      {t(`tournament.format.${tour.format}`)} · {teamSizeLabel(t, tour.teamSize)} · <span className="num">Bo{tour.bestOf}</span>
                     </p>
                   </div>
                 </div>

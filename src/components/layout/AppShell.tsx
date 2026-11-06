@@ -1,6 +1,7 @@
-import { Menu, Moon, Presentation, ShieldCheck, Sun, X } from 'lucide-react'
+import { Menu, Moon, ShieldCheck, Sun, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useAutoHideHeader } from '@/hooks/useAutoHideHeader'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
 import { cn } from '@/utils/cn'
@@ -84,16 +85,8 @@ export function ThemeToggle({ resolvedTheme }: { resolvedTheme: 'dark' | 'light'
 }
 
 function TopBarActions({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
-  const t = useT()
   return (
     <div className="flex items-center gap-1.5">
-      <Link
-        to="/welcome"
-        className="hidden h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium text-muted transition-colors hover:bg-surface-2 hover:text-text sm:inline-flex"
-      >
-        <Presentation className="size-3.5" />
-        {t('nav.presentation')}
-      </Link>
       <GitHubLink />
       <LanguageMenu />
       <ThemeToggle resolvedTheme={resolvedTheme} />
@@ -105,6 +98,7 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
   const t = useT()
   const [drawer, setDrawer] = useState(false)
   const location = useLocation()
+  const { hidden, atTop } = useAutoHideHeader()
 
   useEffect(() => {
     setDrawer(false)
@@ -139,7 +133,13 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
 
       <div className="min-w-0">
         {/* Top bar */}
-        <header className="glass sticky top-0 z-30 border-b border-border/60">
+        <header
+          className={cn(
+            'sticky top-0 z-30 border-b transition-[transform,background-color,border-color,backdrop-filter] duration-300 ease-out',
+            hidden && !drawer ? '-translate-y-full' : 'translate-y-0',
+            atTop ? 'border-transparent bg-transparent' : 'border-border/40 bg-bg/40 backdrop-blur-md',
+          )}
+        >
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
             <div className="lg:hidden">
               <Brand />
@@ -176,13 +176,6 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
             </div>
             <div className="scrollbar-thin flex-1 overflow-y-auto">
               <NavList onNavigate={() => setDrawer(false)} />
-              <Link
-                to="/welcome"
-                className="mt-4 flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium text-muted hover:bg-surface-2 hover:text-text"
-              >
-                <Presentation className="size-[18px]" />
-                {t('nav.presentation')}
-              </Link>
             </div>
             <p className="mt-4 flex items-center gap-1.5 px-2 text-[11px] text-subtle">
               <ShieldCheck className="size-3.5 text-success" />

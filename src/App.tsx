@@ -5,6 +5,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { useDocumentSettings } from '@/hooks/useDocumentSettings'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
+import { isDesktopApp } from '@/utils/platform'
 import ConverterPage from '@/pages/Converter'
 import DashboardPage from '@/pages/Dashboard'
 import LandingPage from '@/pages/Landing'
@@ -23,7 +24,9 @@ const TournamentViewPage = lazy(() => import('@/pages/TournamentView'))
 const STARTUP_PATHS = { landing: '/welcome', dashboard: '/dashboard', converter: '/converter', tournaments: '/tournaments' } as const
 
 function StartupRedirect() {
-  const view = useSettings((s) => s.startupView)
+  const stored = useSettings((s) => s.startupView)
+  // The desktop app focuses on the tools: it never opens the presentation page.
+  const view = isDesktopApp && stored === 'landing' ? 'dashboard' : stored
   return <Navigate to={STARTUP_PATHS[view]} replace />
 }
 

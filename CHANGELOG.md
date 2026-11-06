@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] - 2026-11-06
+
+### Added
+- **125 games** (up from 20), each with an original illustrated emblem bundled with the app and shown in the game picker, Games page, converter and compare. The honesty rules are unchanged: 25 verified, 24 approximate with a note explaining why, and 76 unsupported that you can calibrate with one measured 360° turn. No constants were invented.
+- **Tournament overhaul:**
+  - Team size: Solo (1v1), Duo (2v2) or Custom (any size up to 10), with any number of entrants.
+  - 🎲 **Randomize** replaces the seeding option. It works while creating a tournament and on an existing bracket (with a confirmation when results would be cleared).
+  - Series length from Bo1 to Bo15, set as a default and per stage (for example Bo1 early and Bo5 in the final). Each round shows its Bo chip.
+  - Game-by-game results: map, score and overtime for each game. The series score and winner are worked out automatically, and games after the decider are locked. Quick series-score buttons are still there.
+- **ⓘ help tips** next to fields, calculators, tournament controls and settings. They open on hover, focus or tap, close with Escape, and are translated into all five languages.
+- Genre filter on the landing page's game wall.
+
+### Changed
+- **Landing page redesign:** a new hero (headline, a crossfading collage of real converter, tournament and tool pieces with a pause button, and one large call to action), a filterable wall of game emblems, a reworked feature grid and closing download section. The type system is now Geist and Geist Mono.
+- The top bar is transparent at the top of the page, hides when you scroll down and comes back when you scroll up.
+- The "Presentation" button was removed from the app. The landing page stays at `#/welcome`, and the desktop app opens on the dashboard.
+- Scroll-in animations were removed from the landing page. Content is shown at rest.
+- Visual polish across pages: spacing, select chevrons, arrow-key stepping in number fields.
+
+### Fixed
+- The tournament creator's error message was out of view at the bottom of the form, so "Generate bracket" seemed to do nothing. Errors now show beside the buttons, and an empty name falls back to the placeholder.
+- The Games page overflowed sideways on phones.
+- In Arabic, the hero collage reversed "1.00 · 800".
+
 ## [2.0.2] - 2026-11-06
 
 ### Added

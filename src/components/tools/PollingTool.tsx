@@ -1,6 +1,6 @@
 import { Activity } from 'lucide-react'
 import { usePersistentState } from '@/hooks/usePersistentState'
-import { DpiChips, FromConverter } from '@/pages/Tools'
+import { DpiChips, FromConverter } from './shared'
 import { parseNumber } from '@/core/sensitivity'
 import { pollStats } from '@/core/tools'
 import { useFormat } from '@/hooks/useFormat'
@@ -26,11 +26,11 @@ export function PollingTool() {
 
   return (
     <Card id="polling" className="scroll-mt-20">
-      <CardHeader title={t('polling.title')} description={t('polling.desc')} icon={<Activity />} action={<FromConverter onPick={(c) => c.sourceDpi && setDpi(c.sourceDpi)} />} />
+      <CardHeader title={t('polling.title')} description={t('polling.desc')} icon={<Activity />} help={t('help.tools.polling')} action={<FromConverter onPick={(c) => c.sourceDpi && setDpi(c.sourceDpi)} />} />
       <CardBody className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <NumberField label={t('common.dpi')} value={dpi} step={50} onValueChange={setDpi} inputMode="numeric" />
-          <NumberField label={t('polling.speed')} value={speed} step={5} onValueChange={setSpeed} suffix={speedUnit} />
+          <NumberField label={t('polling.speed')} help={t('help.tools.speed')} value={speed} step={5} onValueChange={setSpeed} suffix={speedUnit} />
         </div>
         <DpiChips current={dpi} onPick={setDpi} />
         <div>

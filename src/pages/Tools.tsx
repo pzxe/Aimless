@@ -1,15 +1,13 @@
 import { Calculator, Crosshair, MousePointer2, Ruler, ScanEye } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
-import { ArrowDownToLine } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
 import { usePersistentState } from '@/hooks/usePersistentState'
-import { useConverter } from '@/store/converterStore'
 import { useLocation } from 'react-router-dom'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { GameSelector } from '@/components/games/GameSelector'
 import { PageHeader } from '@/components/layout/AppShell'
 import { AdsTool } from '@/components/tools/AdsTool'
 import { PollingTool } from '@/components/tools/PollingTool'
+import { DpiChips, FromConverter } from '@/components/tools/shared'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { Label, NumberField, Select } from '@/components/ui/Field'
@@ -29,12 +27,11 @@ import { useFormat } from '@/hooks/useFormat'
 import { useGameAccuracy } from '@/hooks/useGameAccuracy'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
-import { cn } from '@/utils/cn'
 
-function ToolCard({ id, icon, title, desc, children, action }: { id: string; icon: ReactNode; title: string; desc: string; children: ReactNode; action?: ReactNode }) {
+function ToolCard({ id, icon, title, desc, children, action, help }: { id: string; icon: ReactNode; title: string; desc: string; children: ReactNode; action?: ReactNode; help?: ReactNode }) {
   return (
     <Card id={id} className="scroll-mt-20">
-      <CardHeader title={title} description={desc} icon={icon} action={action} />
+      <CardHeader title={title} description={desc} icon={icon} action={action} help={help} />
       <CardBody className="space-y-4">{children}</CardBody>
     </Card>
   )
@@ -54,39 +51,6 @@ function Result({ label, value, unit, extra }: { label: string; value: string | 
         {extra}
         {value && <CopyButton text={value} label={label} variant="ghost" size="icon-sm" />}
       </div>
-    </div>
-  )
-}
-
-/** Fills a tool from the converter's current setting. */
-export function FromConverter({ onPick }: { onPick: (c: ReturnType<typeof useConverter.getState>) => void }) {
-  const t = useT()
-  return (
-    <Button size="sm" variant="ghost" onClick={() => onPick(useConverter.getState())} title={t('tools.fromConverter')}>
-      <ArrowDownToLine />
-      <span className="hidden sm:inline">{t('tools.fromConverter')}</span>
-    </Button>
-  )
-}
-
-/** Common DPI values as one-click chips. */
-export function DpiChips({ onPick, current }: { onPick: (dpi: string) => void; current: string }) {
-  return (
-    <div className="-mt-2 flex flex-wrap gap-1.5">
-      {['400', '800', '1600', '3200'].map((d) => (
-        <button
-          key={d}
-          type="button"
-          onClick={() => onPick(d)}
-          aria-pressed={current === d}
-          className={cn(
-            'num rounded-full border px-2.5 py-0.5 text-[11px] transition-colors',
-            current === d ? 'border-accent-line bg-accent-soft text-text' : 'border-border text-muted hover:border-border-strong hover:text-text',
-          )}
-        >
-          {d}
-        </button>
-      ))}
     </div>
   )
 }
@@ -112,7 +76,7 @@ function Cm360Tool() {
       id="cm360"
       icon={<Ruler />}
       title={t('tools.cm360.title')}
-      desc={t('tools.cm360.desc')}
+      desc={t('tools.cm360.desc')} help={t('help.tools.cm360')}
       action={<FromConverter onPick={(c) => { setGame(c.sourceGameId); setSens(c.sourceSensitivity); setDpi(c.sourceDpi) }} />}
     >
       <div>
@@ -150,7 +114,7 @@ function EdpiTool() {
       id="edpi"
       icon={<Calculator />}
       title={t('tools.edpi.title')}
-      desc={t('tools.edpi.desc')}
+      desc={t('tools.edpi.desc')} help={t('help.tools.edpi')}
       action={<FromConverter onPick={(c) => { setSens(c.sourceSensitivity); setDpi(c.sourceDpi) }} />}
     >
       <div className="grid grid-cols-2 gap-3">
@@ -179,7 +143,7 @@ function DpiTool() {
       id="dpi"
       icon={<MousePointer2 />}
       title={t('tools.dpi.title')}
-      desc={t('tools.dpi.desc')}
+      desc={t('tools.dpi.desc')} help={t('help.tools.dpi')}
       action={<FromConverter onPick={(c) => { setSens(c.sourceSensitivity); setOldDpi(c.sourceDpi) }} />}
     >
       <div className="grid grid-cols-3 gap-3">
@@ -212,7 +176,7 @@ function TargetTool() {
       id="target"
       icon={<Crosshair />}
       title={t('tools.target.title')}
-      desc={t('tools.target.desc')}
+      desc={t('tools.target.desc')} help={t('help.tools.target')}
       action={
         <FromConverter
           onPick={(c) => {
@@ -268,7 +232,7 @@ function FovTool() {
   const out = ok ? convertFov(v, from, to, wn, hn) : null
   const types: FovType[] = ['horizontal', 'vertical', 'horizontal-4:3']
   return (
-    <ToolCard id="fov" icon={<ScanEye />} title={t('tools.fov.title')} desc={t('tools.fov.desc')}>
+    <ToolCard id="fov" icon={<ScanEye />} title={t('tools.fov.title')} desc={t('tools.fov.desc')} help={t('help.tools.fov')}>
       <div className="grid grid-cols-3 gap-3">
         <NumberField label={t('common.fov')} value={value} onValueChange={setValue} suffix="°" error={value !== '' && !isValidFov(v) ? t('validation.fov') : null} />
         <NumberField label={t('common.width')} value={w} onValueChange={setW} inputMode="numeric" />

@@ -1,7 +1,26 @@
 export type TournamentFormat = 'single' | 'double'
+/** Legacy (v2.0) mode field, still accepted on import. */
 export type TournamentMode = '1v1' | '5v5'
 export type BracketSide = 'upper' | 'lower' | 'grand'
-export type BestOf = 1 | 3 | 5 | 7
+/** Series length: best of an odd number of games (1–15). */
+export type BestOf = number
+
+/** Stages that can have their own series length. */
+export type StageKey = 'early' | 'quarterfinal' | 'semifinal' | 'final' | 'lower' | 'grandFinal'
+
+/** One game (map) of a series as entered by the user. */
+export interface GameInput {
+  map?: string
+  score: [number, number]
+  overtime?: boolean
+}
+
+export interface GameRecord {
+  map: string
+  score: [number, number]
+  overtime: boolean
+  winner: 0 | 1
+}
 
 export interface Participant {
   id: string
@@ -31,15 +50,21 @@ export interface MatchResult {
   score: [number, number]
   winner: 0 | 1
   note?: string
+  /** Game-by-game breakdown, when entered. `score` is then the series score (games won). */
+  games?: GameRecord[]
 }
 
 export interface Tournament {
   id: string
   name: string
   gameId: string | null
-  mode: TournamentMode
+  /** Players per side: 1 = solo, 2 = duo, up to 10. */
+  teamSize: number
   format: TournamentFormat
+  /** Default series length. */
   bestOf: BestOf
+  /** Per-stage series lengths that override `bestOf`. */
+  stageBestOf: Partial<Record<StageKey, number>>
   grandFinalReset: boolean
   /** In seed order: index 0 is seed 1. */
   participants: Participant[]
@@ -86,12 +111,14 @@ export interface ResolvedTournament {
 export interface NewTournamentInput {
   name: string
   gameId: string | null
-  mode: TournamentMode
+  teamSize: number
   format: TournamentFormat
   bestOf: BestOf
+  stageBestOf?: Partial<Record<StageKey, number>>
   grandFinalReset: boolean
   participants: { name: string; members?: string[] }[]
-  seeding: 'manual' | 'random'
+  /** Order of entry is the seed order unless 'random'. */
+  seeding?: 'manual' | 'random'
 }
 
 export type TournamentError =
@@ -107,3 +134,8 @@ export type TournamentError =
   | 'has_results'
   | 'invalid_file'
   | 'too_large'
+  | 'invalid_team_size'
+  | 'invalid_series'
+  | 'invalid_game'
+  | 'game_after_decided'
+  | 'series_incomplete'

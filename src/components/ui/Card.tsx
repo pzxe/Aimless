@@ -1,5 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/utils/cn'
+import { InfoTip } from './InfoTip'
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={cn('card', className)} {...props} />
@@ -11,19 +12,25 @@ export function CardHeader({
   icon,
   action,
   className,
+  help,
 }: {
   title: ReactNode
   description?: ReactNode
   icon?: ReactNode
   action?: ReactNode
   className?: string
+  /** Explanation shown in an ⓘ tooltip next to the title. */
+  help?: ReactNode
 }) {
   return (
     <div className={cn('flex items-start justify-between gap-3 px-5 pt-4 pb-3', className)}>
       <div className="flex min-w-0 items-start gap-2.5">
         {icon && <span className="mt-0.5 text-muted [&_svg]:size-4">{icon}</span>}
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+            {title}
+            {help && <InfoTip>{help}</InfoTip>}
+          </h2>
           {description && <p className="mt-0.5 text-xs text-muted">{description}</p>}
         </div>
       </div>

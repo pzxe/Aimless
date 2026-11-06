@@ -31,7 +31,7 @@ export default function MousepadPage() {
       <PageHeader eyebrow={t('mousepad.eyebrow')} title={t('mousepad.title')} description={t('mousepad.subtitle')} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
         <Card>
-          <CardHeader title={t('mousepad.yourSetup')} icon={<Gauge />} />
+          <CardHeader title={t('mousepad.yourSetup')} icon={<Gauge />} help={t('help.mousepad.aimStyle')} />
           <CardBody className="space-y-4">
             <div>
               <Label>{t('common.game')}</Label>
@@ -47,7 +47,7 @@ export default function MousepadPage() {
           </CardBody>
         </Card>
         <Card>
-          <CardHeader title={t('mousepad.visualizer')} description={t('mousepad.visualizerDesc')} icon={<RectangleHorizontal />} />
+          <CardHeader title={t('mousepad.visualizer')} description={t('mousepad.visualizerDesc')} icon={<RectangleHorizontal />} help={t('help.mousepad.visualizer')} />
           <CardBody className="space-y-5">
             <PadPicker />
             <MousepadVisualizer cm360={result?.cm360 ?? null} />

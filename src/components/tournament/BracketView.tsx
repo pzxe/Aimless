@@ -1,6 +1,6 @@
 import { Check, Pencil } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
-import type { BracketSide, ResolvedMatch, ResolvedTournament, Tournament } from '@/core/tournament'
+import { bestOfFor, type BracketSide, type ResolvedMatch, type ResolvedTournament, type Tournament } from '@/core/tournament'
 import { useT } from '@/i18n'
 import { cn } from '@/utils/cn'
 import { roundName, seedOf } from './labels'
@@ -74,6 +74,7 @@ export function BracketView({ tournament, resolved, side, onOpen, onRename }: Pr
         {rounds.map((round, ri) => (
           <div key={round} className="w-[216px] shrink-0">
             <RoundHeader
+              bo={bestOfFor(tournament, { side, round })}
               label={roundName(t, tournament, side, round)}
               onRename={(label) => onRename(side, round, label)}
               editLabel={t('tournament.renameRound')}
@@ -102,7 +103,7 @@ export function BracketView({ tournament, resolved, side, onOpen, onRename }: Pr
   )
 }
 
-function RoundHeader({ label, onRename, editLabel }: { label: string; onRename: (label: string) => void; editLabel: string }) {
+function RoundHeader({ label, onRename, editLabel, bo }: { label: string; onRename: (label: string) => void; editLabel: string; bo: number }) {
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(label)
   if (editing) {
@@ -142,6 +143,7 @@ function RoundHeader({ label, onRename, editLabel }: { label: string; onRename: 
       className="group mb-3 flex h-7 w-full items-center gap-1.5 text-start text-[11px] font-semibold tracking-[0.16em] text-subtle uppercase hover:text-text"
     >
       <span className="truncate">{label}</span>
+      <span className="ltr num shrink-0 rounded-md bg-surface-3 px-1.5 py-0.5 text-[9px] tracking-wider text-muted">Bo{bo}</span>
       <Pencil className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
     </button>
   )

@@ -7,6 +7,7 @@ import {
   convertSensitivity,
   describeSetting,
   formatNumber,
+  GENRES,
   getAllGames,
   getGame,
   isEdpiComparable,
@@ -262,5 +263,35 @@ describe('non-linear calibration warning', () => {
     )
     if (!r.ok) throw new Error('expected ok')
     expect(r.notes).toContain('note.calibratedNonLinear')
+  })
+})
+
+describe('game database (v2.1)', () => {
+  const games = getAllGames()
+  it('lists more than 100 games', () => {
+    expect(games.length).toBeGreaterThanOrEqual(100)
+  })
+  it('has unique ids and emblem codes', () => {
+    expect(new Set(games.map((g) => g.id)).size).toBe(games.length)
+    expect(new Set(games.map((g) => g.short)).size).toBe(games.length)
+  })
+  it('gives every game a genre and a colour', () => {
+    for (const g of games) {
+      expect(GENRES, g.id).toContain(g.genre)
+      expect(g.color, g.id).toMatch(/^#[0-9a-f]{6}$/i)
+    }
+  })
+  it('never invents a constant: approximate games explain themselves, unsupported ones have none', () => {
+    for (const g of games) {
+      if (g.accuracy === 'unsupported') expect(g.formula, g.id).toBeNull()
+      else expect(g.formula!.yaw, g.id).toBeGreaterThan(0)
+      if (g.accuracy === 'approximate') expect(g.noteKey, g.id).not.toBe('note.unsupportedGeneric')
+    }
+  })
+  it('converts between a new verified title and an original one', () => {
+    const r = convert('css', 2, 400, 'cs2', 800)
+    if (!r.ok) throw new Error('expected ok')
+    expect(r.target.sensitivity).toBeCloseTo(1, 12)
+    expect(r.accuracy).toBe('verified')
   })
 })

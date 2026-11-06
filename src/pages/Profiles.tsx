@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { ConfirmDialog } from '@/components/ui/Dialog'
 import { Input } from '@/components/ui/Field'
+import { InfoTip } from '@/components/ui/InfoTip'
 import { describeSetting } from '@/core/sensitivity'
 import { useFormat } from '@/hooks/useFormat'
 import { useGameAccuracy } from '@/hooks/useGameAccuracy'
@@ -96,6 +97,7 @@ export default function ProfilesPage() {
               <Upload />
               {t('profiles.import')}
             </Button>
+            <InfoTip>{t('help.profiles.importExport')}</InfoTip>
             <Button
               disabled={profiles.length === 0}
               onClick={() => downloadJson(`sensitivity-profiles-${new Date().toISOString().slice(0, 10)}.json`, buildExport(profiles))}

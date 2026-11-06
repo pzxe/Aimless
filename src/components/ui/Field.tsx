@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { cn } from '@/utils/cn'
+import { InfoTip } from './InfoTip'
 
 export const inputClass =
   'h-10 w-full rounded-xl border border-border bg-surface-2/70 px-3 text-sm text-text placeholder:text-subtle ' +
@@ -14,12 +15,17 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   return <input ref={ref} className={cn(inputClass, className)} {...props} />
 })
 
-export function Label({ children, htmlFor, hint }: { children: ReactNode; htmlFor?: string; hint?: ReactNode }) {
+export function Label({ children, htmlFor, hint, help }: { children: ReactNode; htmlFor?: string; hint?: ReactNode; help?: ReactNode }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1.5 flex items-baseline justify-between gap-2 text-xs font-medium text-muted">
-      <span>{children}</span>
-      {hint && <span className="font-normal text-subtle">{hint}</span>}
-    </label>
+    <div className="mb-1.5 flex items-center justify-between gap-2 text-xs font-medium text-muted">
+      <span className="flex min-w-0 items-center gap-1.5">
+        <label htmlFor={htmlFor} className="truncate">
+          {children}
+        </label>
+        {help && <InfoTip>{help}</InfoTip>}
+      </span>
+      {hint && <span className="truncate font-normal text-subtle">{hint}</span>}
+    </div>
   )
 }
 
@@ -42,6 +48,8 @@ interface NumberFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, '
   large?: boolean
   /** Enables ArrowUp / ArrowDown stepping (Shift = ×10). */
   step?: number
+  /** Explanation shown in an ⓘ tooltip next to the label. */
+  help?: ReactNode
 }
 
 function stepDecimals(step: number) {
@@ -53,13 +61,13 @@ function stepDecimals(step: number) {
  * Text input for numbers. Uses inputMode="decimal" instead of type="number" so partial
  * values and localized separators are preserved while typing.
  */
-export function NumberField({ label, value, onValueChange, error, suffix, hint, large, step, className, id, onKeyDown, ...rest }: NumberFieldProps) {
+export function NumberField({ label, value, onValueChange, error, suffix, hint, large, step, help, className, id, onKeyDown, ...rest }: NumberFieldProps) {
   const autoId = useId()
   const inputId = id ?? autoId
   const errorId = `${inputId}-error`
   return (
     <div className={className}>
-      <Label htmlFor={inputId} hint={hint}>
+      <Label htmlFor={inputId} hint={hint} help={help}>
         {label}
       </Label>
       <div className="relative">

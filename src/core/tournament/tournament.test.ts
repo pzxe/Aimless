@@ -3,6 +3,12 @@ import {
   clearResult,
   createTournament,
   fillEmptyNames,
+  isValidBestOf,
+  winsNeeded,
+  stageOf,
+  bestOfFor,
+  seriesFromGames,
+  randomizeSeeds,
   validateNewTournament,
   exportTournament,
   generateMatches,
@@ -25,7 +31,7 @@ const names = (count: number) => Array.from({ length: count }, (_, i) => ({ name
 
 function make(count: number, format: 'single' | 'double', extra: Partial<NewTournamentInput> = {}): Tournament {
   const r = createTournament(
-    { name: 'Cup', gameId: null, mode: '1v1', format, bestOf: 3, grandFinalReset: true, participants: names(count), seeding: 'manual', ...extra },
+    { name: 'Cup', gameId: null, teamSize: 1, format, bestOf: 3, grandFinalReset: true, participants: names(count), seeding: 'manual', ...extra },
     { idFactory: ids, now: 0 },
   )
   if (!r.ok) throw new Error(r.error)
@@ -94,7 +100,7 @@ describe('bracket structure', () => {
 
 describe('validation', () => {
   it('rejects bad input', () => {
-    const base = { name: 'Cup', gameId: null, mode: '1v1', format: 'single', bestOf: 1, grandFinalReset: false, seeding: 'manual' } as const
+    const base = { name: 'Cup', gameId: null, teamSize: 1, format: 'single', bestOf: 1, grandFinalReset: false, seeding: 'manual' } as const
     expect(createTournament({ ...base, participants: names(1) })).toEqual({ ok: false, error: 'too_few' })
     expect(createTournament({ ...base, format: 'double', participants: names(2) })).toEqual({ ok: false, error: 'too_few' })
     expect(createTournament({ ...base, participants: names(65) })).toEqual({ ok: false, error: 'too_many' })
@@ -278,9 +284,100 @@ describe('fillEmptyNames', () => {
     const names = fillEmptyNames(['Team 5', 'Team 2', '', '', '', '', '', ''], 'Team')
     expect(
       validateNewTournament({
-        name: 'Cup', gameId: null, mode: '5v5', format: 'double', bestOf: 3, grandFinalReset: true, seeding: 'manual',
+        name: 'Cup', gameId: null, teamSize: 5, format: 'double', bestOf: 3, grandFinalReset: true, seeding: 'manual',
         participants: names.map((name) => ({ name })),
       }),
     ).toBeNull()
+  })
+})
+
+describe('series length and game-by-game results', () => {
+  it('validates series lengths and team sizes', () => {
+    expect(isValidBestOf(1)).toBe(true)
+    expect(isValidBestOf(9)).toBe(true)
+    expect(isValidBestOf(2)).toBe(false)
+    expect(isValidBestOf(17)).toBe(false)
+    expect(winsNeeded(1)).toBe(1)
+    expect(winsNeeded(5)).toBe(3)
+    const base = { name: 'Cup', gameId: null, format: 'single', bestOf: 3, grandFinalReset: false, participants: names(4) } as const
+    expect(validateNewTournament({ ...base, teamSize: 0 })).toBe('invalid_team_size')
+    expect(validateNewTournament({ ...base, teamSize: 11 })).toBe('invalid_team_size')
+    expect(validateNewTournament({ ...base, teamSize: 3, bestOf: 4 })).toBe('invalid_series')
+    expect(validateNewTournament({ ...base, teamSize: 3, stageBestOf: { final: 6 } })).toBe('invalid_series')
+    expect(validateNewTournament({ ...base, teamSize: 3, stageBestOf: { final: 5 } })).toBeNull()
+  })
+  it('uses per-stage series lengths', () => {
+    const t = make(8, 'double', { bestOf: 1, stageBestOf: { semifinal: 3, final: 5, grandFinal: 7, lower: 3 } })
+    const def = (id: string) => t.matches.find((m) => m.id === id)!
+    expect(stageOf(t, def('U1-0'))).toBe('quarterfinal')
+    expect(bestOfFor(t, def('U1-0'))).toBe(1)
+    expect(bestOfFor(t, def('U2-0'))).toBe(3)
+    expect(bestOfFor(t, def('U3-0'))).toBe(5)
+    expect(bestOfFor(t, def('L1-0'))).toBe(3)
+    expect(bestOfFor(t, def('GF'))).toBe(7)
+  })
+  it('scores a series game by game and stops at the target', () => {
+    const s = seriesFromGames([{ score: [13, 11] }, { score: [9, 13] }, { score: [16, 14], overtime: true }], 3)
+    expect(s).toEqual({ ok: true, value: { wins: [2, 1], winner: 0, decided: true } })
+    expect(seriesFromGames([{ score: [13, 5] }], 3)).toEqual({ ok: true, value: { wins: [1, 0], winner: null, decided: false } })
+    expect(seriesFromGames([{ score: [13, 5] }, { score: [13, 5] }, { score: [1, 13] }], 3)).toEqual({ ok: false, error: 'game_after_decided' })
+    expect(seriesFromGames([{ score: [12, 12] }], 3)).toEqual({ ok: false, error: 'tied_score' })
+    expect(seriesFromGames([{ score: [-1, 3] }], 3)).toEqual({ ok: false, error: 'invalid_game' })
+  })
+  it('records a breakdown and derives the series score', () => {
+    const t = make(4, 'single', { bestOf: 3 })
+    const games = [{ map: 'Ascent', score: [13, 11] as [number, number] }, { map: 'Bind', score: [8, 13] as [number, number] }, { map: 'Haven', score: [14, 12] as [number, number], overtime: true }]
+    const r = reportResult(t, 'U1-0', [0, 0], undefined, 0, games)
+    if (!r.ok) throw new Error(r.error)
+    const res = r.value.results['U1-0']!
+    expect(res.score).toEqual([2, 1])
+    expect(res.winner).toBe(0)
+    expect(res.games?.map((g) => g.map)).toEqual(['Ascent', 'Bind', 'Haven'])
+    expect(res.games?.[2]?.overtime).toBe(true)
+    expect(reportResult(t, 'U1-0', [0, 0], undefined, 0, [{ score: [13, 2] }])).toEqual({ ok: false, error: 'series_incomplete' })
+  })
+  it('keeps the breakdown through export and import', () => {
+    const t = make(4, 'single', { bestOf: 3 })
+    const r = reportResult(t, 'U1-0', [0, 0], undefined, 0, [{ map: 'Mirage', score: [13, 9] }, { map: 'Inferno', score: [13, 7] }])
+    if (!r.ok) throw new Error(r.error)
+    const back = importTournament(JSON.stringify(exportTournament(r.value)), { idFactory: ids, now: 0 })
+    if (!back.ok) throw new Error(back.error)
+    expect(Object.values(back.value.results)[0]?.games?.map((g) => g.map)).toEqual(['Mirage', 'Inferno'])
+  })
+})
+
+describe('randomizer', () => {
+  it('shuffles the seeds and clears results that no longer apply', () => {
+    let t = make(8, 'single')
+    t = playAll(t, higherSeedWins(t))
+    const r = randomizeSeeds(t, lcg(42), 0)
+    expect(r.results).toEqual({})
+    expect(r.participants.map((p) => p.name).sort()).toEqual(t.participants.map((p) => p.name).sort())
+    expect(r.participants.map((p) => p.name)).not.toEqual(t.participants.map((p) => p.name))
+    expect(resolveTournament(r).readyCount).toBe(4)
+  })
+  it('gives different orders on different clicks', () => {
+    const t = make(16, 'double')
+    const rng = lcg(7)
+    const a = randomizeSeeds(t, rng, 0).participants.map((p) => p.id).join()
+    const b = randomizeSeeds(t, rng, 0).participants.map((p) => p.id).join()
+    expect(a).not.toEqual(b)
+  })
+})
+
+describe('team sizes and legacy files', () => {
+  it('limits rosters to the team size', () => {
+    const r = createTournament(
+      { name: 'Duo Cup', gameId: null, teamSize: 2, format: 'single', bestOf: 1, grandFinalReset: false, participants: [{ name: 'A', members: ['a1', 'a2', 'a3'] }, { name: 'B' }] },
+      { idFactory: ids },
+    )
+    if (!r.ok) throw new Error(r.error)
+    expect(r.value.participants[0]!.members).toEqual(['a1', 'a2'])
+  })
+  it('imports v2.0 files that used "mode"', () => {
+    const r = importTournament(JSON.stringify({ name: 'Old', format: 'single', mode: '5v5', bestOf: 3, participants: [{ name: 'A' }, { name: 'B' }] }), { idFactory: ids })
+    if (!r.ok) throw new Error(r.error)
+    expect(r.value.teamSize).toBe(5)
+    expect(r.value.bestOf).toBe(3)
   })
 })
