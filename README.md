@@ -10,10 +10,14 @@ It matches the **physical mouse distance for a full 360° turn (cm/360°)** betw
 
 ## Screenshots
 
-_Screenshots will be added here._
+| | |
+|---|---|
+| ![Converter: Valorant to Overwatch 2](docs/screenshots/converter-dark.png) | ![Compare view with cm/360° chart](docs/screenshots/compare-dark.png) |
+| **Converter.** Valorant → Overwatch 2, with the nearest value the game accepts and the step-by-step calculation. | **Compare.** Four games matched to the same cm/360°, with the distance chart. |
+| ![Arabic right-to-left interface](docs/screenshots/converter-rtl-ar.png) | ![Games database with accuracy badges](docs/screenshots/games-calibration.png) |
+| **Arabic (RTL).** The full interface mirrors for right-to-left reading. | **Games.** Every constant is labelled Verified, Approximate or Unsupported, and any game can be calibrated. |
 
-<!-- ![Converter](docs/screenshots/converter.png) -->
-<!-- ![Dashboard](docs/screenshots/dashboard.png) -->
+Screenshots are generated from the real production build with `npm run screenshots` (see [`scripts/screenshots.mjs`](scripts/screenshots.mjs)).
 
 ## Features
 
@@ -100,6 +104,32 @@ npm run preview    # serve the production build
 ```
 
 The build is a static site with a relative base path and hash routing, so `dist/` can be hosted anywhere, including GitHub Pages.
+
+## Windows desktop app
+
+Aimless also ships as an offline Windows app, built with Electron. Nothing needs installing and it never asks for administrator rights.
+
+| File | What it is |
+|---|---|
+| `Aimless-v1.0.0-Portable.exe` | A single file. Double-click to run. |
+| `Aimless-v1.0.0-Windows-NoInstall.zip` | The unpacked app. Extract it anywhere and run `Run-Aimless.bat` (or `Aimless.exe`). |
+
+`Run-Aimless.bat` runs `Unblock-File` on `Aimless.exe` before starting it. This removes the "downloaded from the internet" mark, so the exe itself starts without the SmartScreen prompt. **The builds are not code-signed**, so Windows can still warn:
+
+- The `.bat` you extracted also carries the internet mark, so Windows may show a warning when you open it the first time.
+- The portable `.exe` is unsigned and new, so SmartScreen may show "Windows protected your PC". Choose **More info → Run anyway**.
+- Windows 11 **Smart App Control**, when enabled, blocks unsigned apps entirely.
+
+The only reliable way to remove these warnings is to sign the builds with a code-signing certificate.
+
+Build it yourself:
+
+```bash
+npm run dist:win   # builds dist/ then writes both files to release/
+npm run icon       # regenerates build/icon.png and build/icon.ico from public/favicon.svg
+```
+
+The executables use `requestedExecutionLevel: asInvoker` (no UAC shield). The window can't navigate away from the bundled files, and every permission request (camera, microphone, notifications and so on) is denied.
 
 ## Project structure
 

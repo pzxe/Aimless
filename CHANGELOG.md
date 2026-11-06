@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Windows desktop app (Electron). Ships as a portable `.exe` and a no-install `.zip` with a `Run-Aimless.bat` launcher. Runs as invoker, with no admin prompt.
+- Real screenshots in the README, generated with `npm run screenshots`.
+- App icon generated from the SVG logo (`npm run icon`).
+
+### Changed
+- Runtime libraries moved to `devDependencies`. Vite bundles them into `dist/`, so the desktop package ships no `node_modules`.
+
 ## [1.0.0] - 2026-11-06
 
 ### Added
