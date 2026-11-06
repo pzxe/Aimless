@@ -5,7 +5,7 @@
 # Aimless
 
 **One aim. Every game.**<br />
-**تصويب واحد. لكل الألعاب.**
+**سنس واحد. لكل الألعاب.**
 
 The local-first FPS toolkit: a mouse sensitivity converter that matches the real distance of a 360° turn, plus tournament brackets, a mousepad visualizer and aim calculators. Five languages, honest accuracy labels for every game.
 
