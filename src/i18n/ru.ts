@@ -520,7 +520,7 @@ export const ru: Record<TranslationKey, string> = {
   'landing.stat.languages': 'Языков',
   'landing.stat.requests': 'Сетевых запросов',
   'landing.why.eyebrow': 'Почему Aimless',
-  'landing.why.title': 'Одно число, разные ощущения',
+  'landing.why.title': 'Те же ощущения, другое число',
   'landing.why.lead': 'Переносить eDPI между играми — это угадывание: каждая игра поворачивает на свой угол за отсчёт мыши. Aimless сохраняет физическое расстояние.',
   'landing.why.guess': 'Наугад',
   'landing.why.guessTitle': 'Одинаковый eDPI',

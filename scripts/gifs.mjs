@@ -66,7 +66,11 @@ function installCursor() {
 }
 
 // ---------------------------------------------------------------- recording
+// ONLY=demo-landing.gif npm run gifs  records a single demo.
+const ONLY = process.env.ONLY
+
 async function record(browser, baseUrl, path, state, name, script, { captureLoad = false } = {}) {
+  if (ONLY && ONLY !== name) return
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, colorScheme: 'dark' })
   await context.addInitScript((entries) => {
     if (sessionStorage.getItem('seeded')) return

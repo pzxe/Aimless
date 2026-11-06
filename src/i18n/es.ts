@@ -520,7 +520,7 @@ export const es: Record<TranslationKey, string> = {
   'landing.stat.languages': 'Idiomas',
   'landing.stat.requests': 'Peticiones de red',
   'landing.why.eyebrow': 'Por qué Aimless',
-  'landing.why.title': 'Mismo número, otra sensación',
+  'landing.why.title': 'Misma sensación, otro número',
   'landing.why.lead': 'Copiar tu eDPI entre juegos es adivinar: cada juego gira una cantidad distinta por cuenta del ratón. Aimless iguala la distancia física.',
   'landing.why.guess': 'A ojo',
   'landing.why.guessTitle': 'Igualar el eDPI',

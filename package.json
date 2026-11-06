@@ -1,7 +1,7 @@
 {
   "name": "aimless",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Aimless: local-first FPS sensitivity toolkit. cm/360 converter, tournament brackets, mousepad visualizer, ADS and polling tools. 5 languages.",
   "license": "MIT",
   "type": "module",

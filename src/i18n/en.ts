@@ -518,7 +518,7 @@ export const en = {
   'landing.stat.languages': 'Languages',
   'landing.stat.requests': 'Network requests',
   'landing.why.eyebrow': 'Why Aimless',
-  'landing.why.title': 'Same number, different feel',
+  'landing.why.title': 'Same feeling, different number',
   'landing.why.lead': 'Copying your eDPI between games is guesswork: every game turns by a different amount per mouse count. Aimless matches the physical distance instead.',
   'landing.why.guess': 'Guesswork',
   'landing.why.guessTitle': 'Matching eDPI',

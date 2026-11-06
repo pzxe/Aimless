@@ -520,7 +520,7 @@ export const ar: Record<TranslationKey, string> = {
   'landing.stat.languages': 'لغات',
   'landing.stat.requests': 'طلبات شبكة',
   'landing.why.eyebrow': 'لماذا Aimless',
-  'landing.why.title': 'نفس الرقم، إحساس مختلف',
+  'landing.why.title': 'نفس الإحساس، رقم مختلف',
   'landing.why.lead': 'نسخ قيمة eDPI بين الألعاب مجرد تخمين: كل لعبة تدور بمقدار مختلف لكل نقطة من الماوس. Aimless يطابق المسافة الفعلية بدلًا من ذلك.',
   'landing.why.guess': 'تخمين',
   'landing.why.guessTitle': 'مطابقة eDPI',
