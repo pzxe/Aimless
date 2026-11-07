@@ -12,12 +12,15 @@ interface Props {
   tournament: Tournament
   resolved: ResolvedTournament
   side: BracketSide
-  onOpen: (matchId: string) => void
-  onRename: (side: BracketSide, round: number, label: string) => void
+  /** Omit both callbacks for a read-only bracket (live viewer, OBS). */
+  onOpen?: (matchId: string) => void
+  onRename?: (side: BracketSide, round: number, label: string) => void
+  /** Matches to highlight right now (a score or a slot just changed). */
+  flash?: ReadonlySet<string>
 }
 
 /** One side of a bracket: rounds as columns, with connector lines between matches. */
-export function BracketView({ tournament, resolved, side, onOpen, onRename }: Props) {
+export function BracketView({ tournament, resolved, side, onOpen, onRename, flash }: Props) {
   const t = useT()
   const matches = tournament.matches.filter((m) => m.side === side)
   const rounds = [...new Set(matches.map((m) => m.round))].sort((a, b) => a - b)
@@ -76,7 +79,7 @@ export function BracketView({ tournament, resolved, side, onOpen, onRename }: Pr
             <RoundHeader
               bo={bestOfFor(tournament, { side, round })}
               label={roundName(t, tournament, side, round)}
-              onRename={(label) => onRename(side, round, label)}
+              onRename={onRename ? (label) => onRename(side, round, label) : undefined}
               editLabel={t('tournament.renameRound')}
             />
             <div className="flex flex-col justify-around" style={{ height }}>
@@ -91,7 +94,8 @@ export function BracketView({ tournament, resolved, side, onOpen, onRename }: Pr
                       if (el) cardRefs.current.set(m.id, el)
                       else cardRefs.current.delete(m.id)
                     }}
-                    onOpen={() => onOpen(m.id)}
+                    onOpen={onOpen ? () => onOpen(m.id) : undefined}
+                    flashing={flash?.has(m.id) ?? false}
                   />
                 )
               })}
@@ -103,9 +107,17 @@ export function BracketView({ tournament, resolved, side, onOpen, onRename }: Pr
   )
 }
 
-function RoundHeader({ label, onRename, editLabel, bo }: { label: string; onRename: (label: string) => void; editLabel: string; bo: number }) {
+function RoundHeader({ label, onRename, editLabel, bo }: { label: string; onRename?: (label: string) => void; editLabel: string; bo: number }) {
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(label)
+  if (!onRename) {
+    return (
+      <div className="mb-3 flex h-7 w-full items-center gap-1.5 text-[11px] font-semibold tracking-[0.16em] text-subtle uppercase">
+        <span className="truncate">{label}</span>
+        <span className="ltr num shrink-0 rounded-md bg-surface-3 px-1.5 py-0.5 text-[9px] tracking-wider text-muted">Bo{bo}</span>
+      </div>
+    )
+  }
   if (editing) {
     return (
       <form
@@ -153,15 +165,17 @@ const MatchCard = ({
   tournament,
   match,
   onOpen,
+  flashing,
   ref,
 }: {
   tournament: Tournament
   match: ResolvedMatch
-  onOpen: () => void
+  onOpen?: () => void
+  flashing: boolean
   ref: (el: HTMLElement | null) => void
 }) => {
   const t = useT()
-  const clickable = match.status === 'ready' || match.status === 'done'
+  const clickable = !!onOpen && (match.status === 'ready' || match.status === 'done')
   const isVoid = match.status === 'void'
   const Row = ({ i }: { i: 0 | 1 }) => {
     const slot = match.slots[i]
@@ -194,9 +208,13 @@ const MatchCard = ({
       type="button"
       disabled={!clickable}
       data-status={match.status}
+      data-flash={flashing ? 'true' : undefined}
+      tabIndex={onOpen ? undefined : -1}
       onClick={onOpen}
-      aria-label={t('tournament.openMatch')}
+      aria-label={onOpen ? t('tournament.openMatch') : undefined}
       className={cn(
+        flashing && 'match-flash',
+        !onOpen && 'cursor-default',
         'card relative flex w-full flex-col justify-center overflow-hidden rounded-xl text-start transition-[transform,border-color,box-shadow] duration-200',
         clickable && 'lift cursor-pointer',
         match.status === 'ready' && 'border-accent-line shadow-[0_0_0_1px_var(--c-accent-line),0_10px_30px_-18px_var(--c-accent-glow)]',

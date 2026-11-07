@@ -1,4 +1,4 @@
-import { ArrowLeft, Crown, Download, FileImage, FileJson, Image, ListOrdered, Trash2, Trophy } from 'lucide-react'
+import { ArrowLeft, Crown, Download, FileImage, FileJson, Image, ListOrdered, Share2, Trash2, Trophy } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -6,7 +6,10 @@ import { gameName } from '@/components/games/GameBadge'
 import { EmptyState } from '@/components/layout/AppShell'
 import { BracketView } from '@/components/tournament/BracketView'
 import { participantName, roundName, teamSizeLabel } from '@/components/tournament/labels'
+import { LiveStatusBadge, RoleBadge } from '@/components/tournament/LiveBadges'
 import { SeriesDialog } from '@/components/tournament/SeriesDialog'
+import { ShareDialog } from '@/components/tournament/ShareDialog'
+import { useMatchFlash } from '@/components/tournament/useMatchFlash'
 import { InfoTip } from '@/components/ui/InfoTip'
 import { MatchDialog } from '@/components/tournament/MatchDialog'
 import { Button } from '@/components/ui/Button'
@@ -15,6 +18,7 @@ import { CopyButton } from '@/components/ui/CopyButton'
 import { ConfirmDialog } from '@/components/ui/Dialog'
 import { exportTournament, resolveTournament, type BracketSide } from '@/core/tournament'
 import { useT } from '@/i18n'
+import { useLiveStatus, useShares } from '@/store/shareStore'
 import { useTournaments } from '@/store/tournamentStore'
 import { bracketSvg, bracketText, downloadBlob, svgToPng, type BracketSvgLabels } from '@/utils/bracketExport'
 import { cn } from '@/utils/cn'
@@ -31,7 +35,11 @@ export default function TournamentViewPage() {
   const [openMatch, setOpenMatch] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [editingName, setEditingName] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const share = useShares((s) => (id ? s.shares[id] : undefined))
+  const liveInfo = useLiveStatus((s) => (id ? s.info[id] : undefined))
   const resolved = useMemo(() => (tournament ? resolveTournament(tournament) : null), [tournament])
+  const flash = useMatchFlash(resolved, tournament?.id ?? '')
 
   if (!tournament || !resolved) {
     return (
@@ -105,12 +113,22 @@ export default function TournamentViewPage() {
               {tournament.name}
             </h1>
           )}
+          {share && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <RoleBadge role={share.role} />
+              <LiveStatusBadge status={liveInfo?.status ?? 'connecting'} lastSync={liveInfo?.lastSync} />
+            </div>
+          )}
           <p className="mt-2 text-sm text-muted">
             {t('tournament.progress', { done: resolved.doneCount, total: resolved.playableCount })} ·{' '}
             {t('tournament.participantsCount', { n: tournament.participants.length })}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button variant={share ? 'secondary' : 'primary'} onClick={() => setShareOpen(true)}>
+            <Share2 />
+            {t('share.button')}
+          </Button>
           <Button
             onClick={() => {
               if (hasResults) setConfirmRandom(true)
@@ -177,6 +195,7 @@ export default function TournamentViewPage() {
               side={side}
               onOpen={setOpenMatch}
               onRename={(s, round, label) => renameRound(tournament.id, s, round, label)}
+              flash={flash}
             />
           </Card>
         ))}
@@ -197,6 +216,7 @@ export default function TournamentViewPage() {
 
       <MatchDialog tournament={tournament} match={match} onClose={() => setOpenMatch(null)} />
       <SeriesDialog tournament={tournament} open={seriesOpen} onClose={() => setSeriesOpen(false)} />
+      <ShareDialog tournament={tournament} open={shareOpen} onClose={() => setShareOpen(false)} />
       <ConfirmDialog
         open={confirmRandom}
         onClose={() => setConfirmRandom(false)}

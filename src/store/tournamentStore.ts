@@ -34,6 +34,8 @@ interface TournamentState {
   renameRound: (id: string, side: BracketSide, round: number, label: string) => void
   rename: (id: string, name: string) => void
   reseed: (id: string, order: string[]) => Result<Tournament>
+  /** A validated state received from a live share: replaces the local copy (or adds it). */
+  applyRemote: (t: Tournament) => void
 }
 
 export const useTournaments = create<TournamentState>()(
@@ -89,6 +91,12 @@ export const useTournaments = create<TournamentState>()(
           const clean = name.trim().slice(0, 80)
           if (t && clean) replace({ ...t, name: clean, updatedAt: Date.now() })
         },
+        applyRemote: (t) =>
+          set((s) =>
+            s.tournaments.some((x) => x.id === t.id)
+              ? { tournaments: s.tournaments.map((x) => (x.id === t.id ? t : x)) }
+              : { tournaments: [t, ...s.tournaments].slice(0, LIMIT) },
+          ),
         reseed: (id, order) => {
           const t = find(id)
           if (!t) return { ok: false, error: 'unknown_match' }

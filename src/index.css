@@ -335,3 +335,27 @@ html[data-motion-pref="instant"] *::after {
   0% { transform: scale(0.85); opacity: 0.55; }
   100% { transform: scale(1.35); opacity: 0; }
 }
+
+/* Live tournaments: a match whose score or slots just changed. */
+@keyframes match-flash {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 var(--c-accent-glow); }
+  18% { transform: scale(1.045); box-shadow: 0 0 0 3px var(--c-accent), 0 0 38px 6px var(--c-accent-glow); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+}
+.match-flash { animation: match-flash 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) 1; z-index: 2; }
+@keyframes live-dot {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-success) 55%, transparent); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+.live-dot-on { animation: live-dot 1.8s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .match-flash, .live-dot-on { animation: none; }
+}
+/* OBS browser source: nothing but the bracket, on a transparent page. */
+html.obs-mode, html.obs-mode body, html.obs-mode #root { background: transparent !important; }
+html.obs-mode body::before, html.obs-mode body::after { display: none !important; }
+html.obs-mode ::-webkit-scrollbar { display: none; }
+html.obs-mode { scrollbar-width: none; }
+html.obs-mode h1, html.obs-mode h2, html.obs-mode .eyebrow, html.obs-mode [class*='uppercase'] { text-shadow: 0 1px 10px rgb(0 0 0 / 0.9), 0 0 2px rgb(0 0 0 / 0.8); }
+html.obs-mode .text-subtle, html.obs-mode .text-muted { color: #d4d7e0; }
+html.obs-mode svg path { stroke: rgb(255 255 255 / 0.4); }

@@ -44,6 +44,7 @@ export const STORAGE_KEYS = {
   history: 'sc.history',
   converter: 'sc.converter',
   tournaments: 'sc.tournaments',
+  shares: 'sc.shares',
   vault: 'sc.vault',
   rankSettings: 'sc.rank',
   valorantTiers: 'sc.valorantTiers',

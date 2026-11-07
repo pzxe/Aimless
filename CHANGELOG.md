@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] - 2026-11-07
+
+### Added
+- **Live tournaments.** A new **Share & Collaborate** button on every tournament opens a host dashboard. **Go live** creates private links; the bracket then syncs in real time to everyone who has one. Works in the web app and the Windows app, with no accounts.
+  - **Viewer link** (`#/view/:id`, also `#/tournament/live/:id`): a responsive, read-only page for any browser or phone with the bracket tree, rosters, live scores and the current stage (Quarterfinals, Semifinals, Final…). It updates by itself, with a short highlight on every match that changes. Nothing is stored on the viewer's device.
+  - **Editor links** (`#/edit/:id`): give a referee or co-host full control. Opening the link in Aimless joins them to the tournament; every score they enter syncs back to the host and all viewers. The host can add up to 8 named editors, copy their links again and **revoke** any of them at any time.
+  - **OBS Browser Source** (`#/obs/:id`): a frameless bracket on a transparent page for OBS Studio and Streamlabs, with a glow and pop animation whenever a score changes or a team advances. Options: `?scale=1.25`, `?bg=dark`, `?side=upper|lower|all`, `?title=0`.
+  - Role badges (**Host**, **Editor**, **Guest**) and a live connection indicator (connecting, live, offline, relay limit) on the tournament page and the viewer.
+  - **Open a shared link** field on the Tournaments page.
+- `src/services/tournamentSync.ts`: the sync engine. Zero-config transport over a public ntfy.sh topic (fetch streaming, works in browsers and Electron). The topic is an unguessable random id, and every message is **signed** (ECDSA P-256, Web Crypto), because anyone who knows a topic could also publish to it:
+  - The viewer link carries the fingerprint of the host's public key; viewers accept state only from the host key or from editor keys listed in a host-signed grant. Forged, tampered, replayed (other topic) or revoked-editor messages are ignored.
+  - Tournaments are deflated and split into signed chunks below the relay's 4 KB message limit; incoming state goes through the same sanitiser as a file import and decompression is size-capped.
+  - The host app re-sends the state every 3 hours while open, because the relay keeps messages for about 12 hours.
+- 50 new strings in all five languages.
+- 20 new tests (219 in total, plus an opt-in test against the real relay): link generation and parsing, key and signature handling, tamper and forgery rejection, editor grant and revoke, chunk sizes, rate-limit reporting, late joiners.
+
+### Changed
+- The privacy text now says the only network requests are rank lookups, update checks and live tournaments you choose to share.
+- `BracketView` can render read-only and can highlight changed matches.
+
+### Known limitations
+- Live sharing depends on the free public relay ntfy.sh: it keeps data for about 12 hours (viewers opening a link later than that see nothing until the host app is open again) and limits a publisher to roughly 250 messages per day, which a large bracket uses at 2 to 3 messages per change.
+- Anyone with an editor link can edit; if two people edit at the same moment the last change wins.
+- Links are secrets: anyone who has the viewer link can watch.
+
 ## [2.3.0] - 2026-11-07
 
 ### Added

@@ -6,6 +6,7 @@ import { DesktopShortcutPrompt } from '@/components/layout/DesktopShortcut'
 import { TitleBar } from '@/components/layout/TitleBar'
 import { useDocumentSettings } from '@/hooks/useDocumentSettings'
 import { useT } from '@/i18n'
+import { startLiveRuntime } from '@/services/liveRuntime'
 import { useSettings } from '@/store/settingsStore'
 import { useUpdates } from '@/store/updateStore'
 import { isDesktopApp } from '@/utils/platform'
@@ -24,6 +25,8 @@ const SettingsPage = lazy(() => import('@/pages/Settings'))
 const MousepadPage = lazy(() => import('@/pages/Mousepad'))
 const TournamentsPage = lazy(() => import('@/pages/Tournaments'))
 const TournamentViewPage = lazy(() => import('@/pages/TournamentView'))
+const LiveViewPage = lazy(() => import('@/pages/LiveView'))
+const JoinEditPage = lazy(() => import('@/pages/JoinEdit'))
 
 const STARTUP_PATHS = { landing: '/welcome', dashboard: '/dashboard', converter: '/converter', tournaments: '/tournaments' } as const
 
@@ -60,6 +63,7 @@ function Workspace({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
 export default function App() {
   const resolvedTheme = useDocumentSettings()
   useEffect(() => useUpdates.getState().init(), [])
+  useEffect(() => startLiveRuntime(), [])
   const language = useSettings((s) => s.language)
   const rtl = language === 'ar'
   return (
@@ -69,6 +73,11 @@ export default function App() {
       <Routes>
         <Route path="/" element={<StartupRedirect />} />
         <Route path="/welcome" element={<LandingPage resolvedTheme={resolvedTheme} />} />
+        {/* Live tournaments: public viewer, OBS browser source and editor invite (no app chrome). */}
+        <Route path="/view/:id" element={<Suspense fallback={null}><LiveViewPage mode="view" /></Suspense>} />
+        <Route path="/tournament/live/:id" element={<Suspense fallback={null}><LiveViewPage mode="view" /></Suspense>} />
+        <Route path="/obs/:id" element={<Suspense fallback={null}><LiveViewPage mode="obs" /></Suspense>} />
+        <Route path="/edit/:id" element={<Suspense fallback={null}><JoinEditPage /></Suspense>} />
         <Route element={<Workspace resolvedTheme={resolvedTheme} />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/converter" element={<ConverterPage />} />

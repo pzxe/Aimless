@@ -39,9 +39,11 @@ Save all your main and alt accounts on your own PC, with one-click username and 
 
 ## 🏆 Tournament Bracket Maker
 
-Host 1v1, 2v2 or 5v5 single and double elimination brackets with a built-in team randomizer, series score tracking and instant image export.
+Host 1v1, 2v2 or 5v5 single and double elimination brackets with a built-in team randomizer, series score tracking and instant image export. Go live to share a link: friends and fans watch the bracket update in real time from any browser or phone, a referee can enter scores from an editor link, and one more link drops a clean overlay straight into OBS.
 
 <p align="center"><img src="docs/screenshots/gif-tournaments.gif" width="820" alt="Creating a tournament, randomizing the teams and advancing a winner" /></p>
+
+<p align="center"><img src="docs/screenshots/live-share-dialog.png" width="400" alt="Share & Collaborate: viewer, OBS and editor links" /> <img src="docs/screenshots/live-viewer-phone.png" width="200" alt="The live bracket on a phone" /></p>
 
 ## 📏 Mousepad Visualizer & Multi-Game Compare
 

@@ -1,12 +1,14 @@
-import { Copy, Download, Plus, Trash2, Trophy, Upload } from 'lucide-react'
+import { Copy, Download, Link2, Plus, Trash2, Trophy, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { GameBadge, gameName } from '@/components/games/GameBadge'
 import { EmptyState, PageHeader } from '@/components/layout/AppShell'
 import { CreateTournamentDialog } from '@/components/tournament/CreateTournamentDialog'
 import { participantName, teamSizeLabel } from '@/components/tournament/labels'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Field'
+import { formatShareId, parseLink } from '@/services/tournamentSync'
 import { ConfirmDialog } from '@/components/ui/Dialog'
 import { exportTournament, importTournament, MAX_TOURNAMENT_IMPORT_BYTES, resolveTournament, type Tournament } from '@/core/tournament'
 import { useFormat } from '@/hooks/useFormat'
@@ -22,6 +24,16 @@ export default function TournamentsPage() {
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<Tournament | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate()
+  const [link, setLink] = useState('')
+
+  const openLink = () => {
+    const p = parseLink(link)
+    if (!p) return toast.error(t('share.openInvalid'))
+    setLink('')
+    const id = p.kind === 'edit' ? `${formatShareId(p.share)}.${p.keys.pub}.${p.keys.priv}` : formatShareId(p.share)
+    navigate(`/${p.kind}/${id}`)
+  }
 
   const onImport = async (file: File | undefined) => {
     if (!file) return
@@ -61,6 +73,22 @@ export default function TournamentsPage() {
           </>
         }
       />
+
+      <form
+        className="mb-5 flex max-w-xl items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+          openLink()
+        }}
+      >
+        <div className="relative min-w-0 flex-1">
+          <Link2 className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-subtle" />
+          <Input dir="ltr" value={link} onChange={(e) => setLink(e.target.value)} aria-label={t('share.open')} placeholder={t('share.openPlaceholder')} className="ps-9" />
+        </div>
+        <Button type="submit" disabled={!link.trim()}>
+          {t('share.openGo')}
+        </Button>
+      </form>
 
       {tournaments.length === 0 ? (
         <EmptyState
