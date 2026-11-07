@@ -140,7 +140,9 @@ export const CATALOG: GameDefinition[] = [
   game('krunker', 'Krunker', 'KRN', 'arena', 'none', 'Three.js'),
   game('splitgate', 'Splitgate (2019)', 'SG1', 'arena', 'none', 'Unreal Engine 4'),
   game('halo-mcc', 'Halo: The Master Chief Collection', 'MCC', 'arena', 'none', 'Blam!'),
-  game('titanfall2', 'Titanfall 2', 'T2', 'arena', 'sourceApprox', 'Source (modified)'),
+  // Verified (v2.2.1): published at the Source 0.022 yaw by several independent converter databases
+  // (mouse-sensitivity.com, csdb.gg, skin.club), which agree with each other.
+  game('titanfall2', 'Titanfall 2', 'T2', 'arena', 'source', 'Source (modified)', { noteKey: 'note.titanfall2' }),
   game('titanfall', 'Titanfall', 'TTF', 'arena', 'sourceApprox', 'Source (modified)', gone),
   game('doom2016', 'Doom (2016)', 'DM16', 'arena', 'idtechApprox', 'id Tech 6'),
   game('doometernal', 'Doom Eternal', 'DMET', 'arena', 'idtechApprox', 'id Tech 7'),

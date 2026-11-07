@@ -2,6 +2,39 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.2.1] - 2026-11-07
+
+### Added
+- **Real game icons for 104 of the 125 games**, bundled in `public/game-icons/` (160×160 WebP, about 800 KB), so they work offline in the desktop app and on the web. `scripts/fetch-game-icons.mjs` finds each game with the Steam Store Search API, takes the official client icon from Steam's CDN and falls back to Wikipedia / official favicons for non-Steam titles. Every icon was checked by eye; wrong or generic ones (a publisher logo shared by many games, a blank tile) were rejected. The other 21 games, mostly shut-down or off-Steam titles, keep the generated badge, which is also the automatic fallback if an image fails to load. Shown in the game picker, Games page, converter, compare, profiles, tournaments and the landing page.
+- **Alt Accounts** page (Library → Alt Accounts): a local vault for main and alt accounts.
+  - Fields: account name, game, username / email, password (masked, show/hide), in-game ID, rank, RR, region, status (ranked ready, cooldown, phone verified, warmup, banned, inactive), notes and an optional linked sensitivity profile that loads into the converter in one click.
+  - One-click **copy username / password / tag** with a toast that never echoes the secret; search, filters (game, region, status, favourites) and sorting (recent, highest rank, name, game).
+  - **AES-GCM (256-bit) encryption at rest** through the Web Crypto API, an optional **PIN / passphrase lock** (PBKDF2-SHA-256, 210,000 iterations, random salt; the key exists only while unlocked) with a Lock button, and **encrypted JSON export / import** protected by its own passphrase.
+- **Live rank tracker** on every account card:
+  - **Overwatch 2** through the keyless OverFast API (`#` is converted to `-` in BattleTags): avatar, namecard, title, endorsement level and the PC competitive rank of Tank, Damage, Support and Open Queue with the official rank icons. Private profiles show a clear notice.
+  - **Valorant** through the HenrikDev API: current rank with its official icon, RR progress bar with points to rank up, last-game RR change, peak rank and season, level and region auto-detected. Official tier icons and colours come from valorant-api.com and are bundled as an offline snapshot that refreshes itself.
+  - **Manual rank and RR** (with the official Valorant icons) for every game, for offline use or when rate-limited.
+  - Tracker deep links: Tracker.gg (Valorant, Overwatch 2, CS2, Apex, Siege, Warzone, Marvel Rivals, PUBG), Leetify (CS2), OP.GG (Valorant, PUBG), Blizzard and OverFast (Overwatch 2), Fortnite Tracker.
+  - Optional free HenrikDev API key field with an ⓘ explanation. Each card has a **Refresh rank** button and "Updated X min ago".
+- **Desktop: `fetch-live-rank` IPC.** Rank requests run in the Electron main process, so browser CORS never applies. It only accepts HTTPS GET requests to `overfast-api.tekrop.fr`, `api.henrikdev.xyz` and `valorant-api.com`, refuses redirects, and caps time and size.
+- 140 new strings in all five languages.
+- 56 new tests (173 in total): BattleTag and Riot ID parsing, tracker URL builders, AES-GCM round trips / wrong passphrase / tampering, rank parsers, the fetch flows, the vault store (ciphertext at rest, PIN lock, backup), and the games data.
+
+### Changed
+- **Accuracy audit:** Titanfall 2 is now **Verified** (Source 0.022° yaw, published consistently by independent sensitivity databases). The totals are 26 verified, 23 approximate and 76 unsupported. Other candidates were examined and deliberately **not** upgraded because sources conflict or none exists: Deadlock (0.022 vs 0.044), Halo Infinite (0.0225, 0.135 and 0.022), Marvel Rivals (0.022 is community-reported only), Krunker, Doom (2016), Call of Duty 4, Quake Champions (converters agree, but no developer source). Counter-Strike 1.6 / Source, Left 4 Dead 2, Portal 2, Day of Defeat and Black Mesa were already verified.
+- The privacy text now says the only network requests are rank lookups you start yourself (it used to say none).
+- "Clear all data" also wipes the Alt Accounts vault, and its confirmation says so.
+
+### Fixed
+- A late rank-refresh result can no longer write to a locked vault, which would otherwise have replaced it with an empty one (covered by a test).
+- Copying a password no longer shows it in the toast (the shared copy helper gained a secret mode).
+- Arabic full stops no longer jump to the wrong side after a Latin game name in the new strings.
+
+### Known limitations
+- HenrikDev now requires a free API key for every endpoint. Without one, Valorant live rank cannot load and the app says so; manual rank and RR still work. OverFast needs no key. The Valorant request path (v1 account, v2 MMR with a v3 fallback) was tested against mocked responses, not a real key.
+- Rank icons for Overwatch 2 are loaded from Blizzard's CDN, so they need a connection; the rank text works offline.
+- OP.GG profile URLs were built from their public URL patterns and were not opened one by one.
+
 ## [2.1.1] - 2026-11-07
 
 ### Added

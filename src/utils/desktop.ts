@@ -11,6 +11,11 @@ export interface ShortcutStatus {
   portable: boolean
 }
 
+export interface RankFetchResult {
+  status: number
+  body: string
+}
+
 export interface AimlessDesktop {
   platform: string
   window: {
@@ -23,6 +28,10 @@ export interface AimlessDesktop {
   shortcut: {
     status: () => Promise<ShortcutStatus>
     create: () => Promise<boolean>
+  }
+  /** Live rank requests made by the main process (no browser CORS). Only a fixed list of hosts is allowed. */
+  rank: {
+    fetch: (url: string, headers?: Record<string, string>) => Promise<RankFetchResult>
   }
 }
 

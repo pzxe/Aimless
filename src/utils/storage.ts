@@ -31,6 +31,11 @@ const safeStorage: StateStorage = {
   },
 }
 
+/** Raw access for modules that manage their own format (the encrypted vault). Never throws. */
+export const storageGet = (name: string) => safeStorage.getItem(name) as string | null
+export const storageSet = (name: string, value: string) => void safeStorage.setItem(name, value)
+export const storageRemove = (name: string) => void safeStorage.removeItem(name)
+
 export const persistStorage = createJSONStorage(() => safeStorage)
 
 export const STORAGE_KEYS = {
@@ -39,6 +44,9 @@ export const STORAGE_KEYS = {
   history: 'sc.history',
   converter: 'sc.converter',
   tournaments: 'sc.tournaments',
+  vault: 'sc.vault',
+  rankSettings: 'sc.rank',
+  valorantTiers: 'sc.valorantTiers',
 } as const
 
 export function clearAllStorage() {

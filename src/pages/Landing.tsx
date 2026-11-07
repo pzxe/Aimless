@@ -1,7 +1,7 @@
 import { ArrowLeftRight, ArrowRight, BarChart3, Crosshair, Download, Gauge, Globe, Package, RectangleHorizontal, ShieldCheck, Trophy } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { GameArt } from '@/components/games/GameArt'
+import { GameIcon } from '@/components/games/GameIcon'
 import { HeroCollage } from '@/components/landing/HeroCollage'
 import { HeroConverter, type DemoState } from '@/components/landing/HeroConverter'
 import { ThemeToggle } from '@/components/layout/AppShell'
@@ -298,7 +298,7 @@ function Games() {
               aria-label={`${g.name}: ${t(`accuracy.${g.accuracy}`)}`}
               className="group relative block w-full rounded-xl transition-transform duration-150 hover:-translate-y-0.5 focus-visible:-translate-y-0.5"
             >
-              <GameArt gameId={g.id} className="h-auto w-full" />
+              <GameIcon gameId={g.id} className="h-auto w-full" />
               <span
                 className={cn(
                   'absolute top-1 end-1 size-1.5 rounded-full',

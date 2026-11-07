@@ -43,6 +43,7 @@ import {
 } from '@/store/types'
 import { cn } from '@/utils/cn'
 import { playSound } from '@/utils/sound'
+import { useAccounts } from '@/store/accountsStore'
 import { clearAllStorage } from '@/utils/storage'
 import { isDesktopApp } from '@/utils/platform'
 import { clearPersistentTools } from '@/hooks/usePersistentState'
@@ -308,6 +309,7 @@ export default function SettingsPage() {
           useSettings.getState().reset()
           useConverter.getState().load(initialForm(DEFAULT_SETTINGS.defaultDpi))
           clearAllStorage()
+          useAccounts.getState().wipe()
           clearPersistentTools()
           toast.success(message)
         }}

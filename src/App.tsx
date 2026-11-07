@@ -15,6 +15,7 @@ import LandingPage from '@/pages/Landing'
 // The entry views ship in the main bundle; the rest load on demand.
 const ComparePage = lazy(() => import('@/pages/Compare'))
 const ProfilesPage = lazy(() => import('@/pages/Profiles'))
+const AccountsPage = lazy(() => import('@/pages/Accounts'))
 const HistoryPage = lazy(() => import('@/pages/History'))
 const ToolsPage = lazy(() => import('@/pages/Tools'))
 const GamesPage = lazy(() => import('@/pages/Games'))
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/tournaments/:id" element={<TournamentViewPage />} />
           <Route path="/mousepad" element={<MousepadPage />} />
           <Route path="/profiles" element={<ProfilesPage />} />
+          <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/tools" element={<ToolsPage />} />
           <Route path="/games" element={<GamesPage />} />

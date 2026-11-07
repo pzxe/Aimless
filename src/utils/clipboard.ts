@@ -2,7 +2,7 @@ import { toast } from 'sonner'
 import { playSound } from './sound'
 
 /** Copy text and show a toast. Falls back to execCommand for non-secure contexts. */
-export async function copyText(text: string, messages: { success: string; failure: string }): Promise<boolean> {
+export async function copyText(text: string, messages: { success: string; failure: string; /** Never echo the copied value in the toast (passwords). */ secret?: boolean }): Promise<boolean> {
   let ok = false
   try {
     if (navigator.clipboard && window.isSecureContext) {
@@ -28,7 +28,7 @@ export async function copyText(text: string, messages: { success: string; failur
     }
   }
   if (ok) playSound('success')
-  if (ok) toast.success(messages.success, { description: text.length <= 40 ? text : undefined })
+  if (ok) toast.success(messages.success, { description: !messages.secret && text.length <= 40 ? text : undefined })
   else toast.error(messages.failure)
   return ok
 }

@@ -5,7 +5,7 @@ import { pollStats, zoomSensitivityRatio } from '@/core/tools'
 import { useFormat } from '@/hooks/useFormat'
 import { useT } from '@/i18n'
 import { cn } from '@/utils/cn'
-import { GameArt } from '../games/GameArt'
+import { GameIcon } from '../games/GameIcon'
 import { AimStyleMeter } from '../tools/AimStyleMeter'
 
 /**
@@ -63,7 +63,7 @@ export function HeroCollage() {
         <Piece style={{ left: '4%', top: '6%', width: '62%' }}>
           <div className="eyebrow mb-3">{t('converter.title')}</div>
           <div className="flex items-center gap-3">
-            <GameArt gameId="cs2" className="h-8 w-10" />
+            <GameIcon gameId="cs2" className="h-8 w-10" />
             <div className="min-w-0 flex-1">
               <div className="truncate text-xs text-muted">{getGame('cs2')?.name}</div>
               <div className="ltr mono text-start text-lg font-semibold">1.00 · 800</div>
@@ -71,7 +71,7 @@ export function HeroCollage() {
           </div>
           <div className="my-3 h-px bg-border" />
           <div className="flex items-center gap-3">
-            <GameArt gameId="valorant" className="h-8 w-10" />
+            <GameIcon gameId="valorant" className="h-8 w-10" />
             <div className="min-w-0 flex-1">
               <div className="truncate text-xs text-muted">{getGame('valorant')?.name}</div>
               <div className="mono text-2xl font-semibold text-accent">{conv.ok ? f.sens(conv.target.sensitivity) : '—'}</div>

@@ -1,7 +1,7 @@
 // Electron entry point: wraps the static Vite build (dist/) as an offline desktop app.
 const fs = require('node:fs')
 const path = require('node:path')
-const { app, BrowserWindow, Menu, ipcMain, session, shell } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain, net, session, shell } = require('electron')
 
 const APP_ID = 'io.github.pzxe.aimless'
 const isMac = process.platform === 'darwin'
@@ -114,6 +114,28 @@ if (!app.requestSingleInstanceLock()) {
       description: 'Aimless: FPS sensitivity converter',
       appUserModelId: APP_ID,
     })
+  })
+
+  // Live rank lookups. The renderer asks, the main process fetches, so CORS never applies. Only GET
+  // requests to these three public APIs are allowed, with a fixed set of headers, a timeout and a size cap.
+  const RANK_HOSTS = new Set(['overfast-api.tekrop.fr', 'api.henrikdev.xyz', 'valorant-api.com'])
+  const RANK_MAX_BYTES = 2 * 1024 * 1024
+  ipcMain.handle('fetch-live-rank', async (event, req) => {
+    if (!fromOurWindow(event)) throw new Error('forbidden')
+    let url
+    try {
+      url = new URL(String(req && req.url))
+    } catch {
+      throw new Error('invalid url')
+    }
+    if (url.protocol !== 'https:' || !RANK_HOSTS.has(url.hostname)) throw new Error('host not allowed')
+    const headers = { Accept: 'application/json', 'User-Agent': `Aimless/${app.getVersion()}` }
+    const auth = req.headers && req.headers.Authorization
+    if (typeof auth === 'string' && auth.length <= 200 && url.hostname === 'api.henrikdev.xyz') headers.Authorization = auth
+    const res = await net.fetch(url.toString(), { method: 'GET', headers, redirect: 'error', signal: AbortSignal.timeout(15000) })
+    const body = await res.text()
+    if (body.length > RANK_MAX_BYTES) throw new Error('response too large')
+    return { status: res.status, body }
   })
 
   app.on('second-instance', () => {

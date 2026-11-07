@@ -20,4 +20,7 @@ contextBridge.exposeInMainWorld('aimlessDesktop', {
     status: () => ipcRenderer.invoke('shortcut:status'),
     create: () => ipcRenderer.invoke('shortcut:create'),
   },
+  rank: {
+    fetch: (url, headers) => ipcRenderer.invoke('fetch-live-rank', { url, headers }),
+  },
 })

@@ -61,7 +61,9 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | 🌐 **Five languages** | English, العربية (full RTL), Español, Русский and Português. |
 | ⓘ **Help everywhere** | Hover or focus the ⓘ next to any field, calculator, tournament control or setting for a plain explanation, in all five languages. |
 | 🎨 **Settings that matter** | cm or inches, pad size, five accent colours, comfortable or compact density, full / reduced / instant (0 ms) motion, startup view and optional sound feedback. |
-| 🔒 **Local-first** | No accounts, no telemetry, no network requests. Runs in the browser or as an offline Windows app. |
+| 👥 **Alt Accounts vault** | Keep main and alt accounts (login, password, in-game ID, rank, region, status, linked sensitivity profile) in an AES-GCM encrypted vault on your device, with optional PIN lock, one-click copy buttons, search, filters and encrypted backup/restore. |
+| 📈 **Live rank tracker** | Overwatch 2 ranks per role through the keyless OverFast API; Valorant rank, RR bar, last-game change and peak through HenrikDev (free key) with official tier icons from valorant-api.com; Tracker.gg, Leetify, OP.GG and Blizzard deep links. |
+| 🔒 **Local-first** | No accounts, no telemetry. Data stays on your device; the only network requests are the rank lookups you start yourself. Runs in the browser or as an offline Windows app. |
 
 ## 🎬 In action
 
@@ -86,11 +88,17 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | | |
 |---|---|
 | ![macOS-style title bar](docs/screenshots/titlebar-normal.png) | ![Arabic title bar and typography](docs/screenshots/titlebar-rtl-ar.png) |
+
+| ![Alt Accounts with live Valorant and Overwatch 2 rank](docs/screenshots/accounts-en.png) | ![Alt Accounts in Arabic, right-to-left](docs/screenshots/accounts-ar.png) |
+
+| | |
+|---|---|
+| ![PIN-locked vault](docs/screenshots/vault-locked.png) | ![Games page with real icons](docs/screenshots/games-icons.png) |
 | **Games.** Every constant is labelled, and any game can be calibrated. | |
 
 ## 🎮 Supported games
 
-**125 games:** 25 verified, 24 approximate and 76 unsupported. Each game has its own original emblem, bundled with the app (no official logos, no hotlinks).
+**125 games:** 26 verified, 23 approximate and 76 unsupported. 104 games show their real icon, bundled with the app (no hotlinks, works offline); the other 21 use a generated badge.
 
 <details>
 <summary><b>Show all 125 games and their constants</b></summary>
@@ -179,7 +187,7 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | Krunker | — | ⛔ Unsupported |
 | Splitgate (2019) | — | ⛔ Unsupported |
 | Halo: The Master Chief Collection | — | ⛔ Unsupported |
-| Titanfall 2 | 0.022 | 🟡 Approximate |
+| Titanfall 2 | 0.022 | 🟢 Verified |
 | Titanfall | 0.022 | 🟡 Approximate |
 | Doom (2016) | 0.022 | 🟡 Approximate |
 | Doom Eternal | 0.022 | 🟡 Approximate |
@@ -268,15 +276,15 @@ turns across pad                          = pad width / cm/360
 
 </details>
 
-## 🖥️ Windows desktop app (v2.1.1)
+## 🖥️ Windows desktop app (v2.2.1)
 
 Download from the [latest release](https://github.com/pzxe/Aimless/releases/latest):
 
 | File | What it is |
 |---|---|
-| `Aimless-v2.1.1-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
-| `Aimless-v2.1.1-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
-| `Aimless-v2.1.1-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
+| `Aimless-v2.2.1-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
+| `Aimless-v2.2.1-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
+| `Aimless-v2.2.1-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
 
 The app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
 
@@ -350,20 +358,22 @@ src/
     sensitivity/      conversion engine
     tools/            mousepad, ADS, polling, aim style
     tournament/       bracket generation, resolution, import/export
-  data/games/         game database
+  data/games/         game database and bundled icons list
+  core/accounts/      ID parsing, tracker links, rank parsers, AES-GCM vault crypto
   store/              Zustand stores persisted to localStorage
   i18n/               en, ar, es, ru, pt
   components/         UI, layout, landing, tools, tournament, games, converter, profiles
   pages/              Landing, Dashboard, Converter, Compare, Tournaments, Mousepad, Tools, …
 electron/             desktop wrapper (main process)
-scripts/              screenshot, GIF and icon generators
+scripts/              screenshot, GIF, icon and game-icon / rank-icon fetchers
 ```
 
 **Tech stack:** React 19, TypeScript, Vite, Tailwind CSS 4, Zustand, Lucide icons, Sonner toasts, Vitest and Electron. Fonts (Space Grotesk, IBM Plex Sans, IBM Plex Sans Arabic, JetBrains Mono) are bundled locally and work offline.
 
 ## 🔒 Privacy and security
 
-- All data is stored in `localStorage` on your device. Nothing is sent anywhere.
+- All data is stored in `localStorage` on your device. The only requests the app makes are the rank lookups you start with **Refresh rank** (the ID you entered goes to OverFast or HenrikDev, nothing else) and the one-off Valorant tier-icon list from valorant-api.com.
+- **Alt Accounts vault:** accounts are encrypted with AES-GCM (256-bit, Web Crypto) before being saved. Without a PIN the key is a non-extractable per-device key in IndexedDB, which only keeps the data from being readable as plain text. With a PIN or passphrase the key is derived with PBKDF2-SHA-256 (210,000 iterations, random salt) and exists only while the vault is unlocked. There is no recovery if you forget the PIN; export an encrypted backup. Passwords are masked and never shown in notifications when copied.
 - Imported profile and tournament files are parsed with `JSON.parse` only, size-limited and validated field by field. Unknown fields are dropped, and tournament structures are rebuilt rather than trusted. An imported file cannot execute code.
 - Exported bracket images escape all user text.
 
@@ -375,4 +385,4 @@ Contributions are welcome, especially **sourced** game data and translation fixe
 
 [MIT](LICENSE)
 
-Game names are trademarks of their respective owners. This project is not affiliated with or endorsed by any game publisher. It uses no game artwork: game badges are text-based placeholders, and all imagery is original.
+Game names are trademarks of their respective owners. This project is not affiliated with or endorsed by any game publisher. Game icons are fetched from public sources (Steam's CDN, Wikipedia, official sites) by `scripts/fetch-game-icons.mjs` and are the property of their owners. They are used only to identify each game in a sensitivity tool; the generated badge is the fallback.

@@ -8,6 +8,7 @@ import {
   Settings,
   Trophy,
   UserRound,
+  Users,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
@@ -28,6 +29,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/mousepad', label: 'nav.mousepad', icon: RectangleHorizontal, group: 'main' },
   { to: '/tools', label: 'nav.tools', icon: Wrench, group: 'main' },
   { to: '/profiles', label: 'nav.profiles', icon: UserRound, group: 'library' },
+  { to: '/accounts', label: 'nav.accounts', icon: Users, group: 'library' },
   { to: '/history', label: 'nav.history', icon: History, group: 'library' },
   { to: '/games', label: 'nav.games', icon: Gamepad2, group: 'library' },
   { to: '/settings', label: 'nav.settings', icon: Settings, group: 'library' },
