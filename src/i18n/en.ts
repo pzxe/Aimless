@@ -585,7 +585,7 @@ export const en = {
   'help.tournament.games': 'Enter each game’s map and score. The series winner is found automatically when one side reaches the wins needed.',
   'help.tournament.quickScore': 'Record only the series score, without a game-by-game breakdown.',
   'help.tournament.seriesAuto': 'Games after the decisive one are locked. Mark OT for games that went to overtime.',
-  'landing.hero.title': 'One aim. Every game.',
+  'landing.hero.title': 'One sens. Every game.',
   'landing.hero.lead': 'The FPS sensitivity converter that matches the real distance of a 360° turn across {games} games.',
   'landing.hero.under': 'Free and open source · no account · web and Windows',
   'landing.nav.games': 'Games',

@@ -69,7 +69,7 @@ function installCursor() {
 // ONLY=demo-landing.gif npm run gifs  records a single demo.
 const ONLY = process.env.ONLY
 
-async function record(browser, baseUrl, path, state, name, script, { captureLoad = false } = {}) {
+async function record(browser, baseUrl, path, state, name, script, { captureLoad = false, prepare, routes } = {}) {
   if (ONLY && ONLY !== name) return
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1, colorScheme: 'dark' })
   await context.addInitScript((entries) => {
@@ -79,6 +79,8 @@ async function record(browser, baseUrl, path, state, name, script, { captureLoad
     for (const [k, v] of Object.entries(entries)) localStorage.setItem(k, JSON.stringify(v))
   }, state)
   await context.addInitScript(installCursor)
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: new URL(baseUrl).origin }).catch(() => {})
+  if (routes) await context.route('**/*', routes)
   const page = await context.newPage()
   const frames = []
   const cdp = await context.newCDPSession(page)
@@ -100,6 +102,12 @@ async function record(browser, baseUrl, path, state, name, script, { captureLoad
     await page.goto(baseUrl + '#' + path)
     await page.waitForLoadState('networkidle')
     await page.evaluate(() => document.fonts.ready)
+    if (prepare) {
+      await prepare(page)
+      await page.reload()
+      await page.waitForLoadState('networkidle')
+      await page.evaluate(() => document.fonts.ready)
+    }
     await page.mouse.move(VIEWPORT.width * 0.55, VIEWPORT.height * 0.55)
     await page.waitForTimeout(300)
     await start()
@@ -254,6 +262,126 @@ async function tournamentDemo(page, ui) {
   await ui.wait(700)
 }
 
+
+// ---------------------------------------------------------------- README feature demos
+async function gifConverter(page, ui) {
+  await ui.click(page.getByLabel('In-game sensitivity'))
+  await ui.type('0.8')
+  await ui.wait(500)
+  await ui.click(page.getByLabel('Mouse DPI'))
+  await ui.press('Control+A')
+  await ui.type('800')
+  await ui.wait(700)
+  await ui.click(page.getByRole('button', { name: 'Copy sensitivity' }).first())
+  await ui.wait(1500)
+}
+
+async function gifTournaments(page, ui) {
+  await ui.click(page.getByRole('button', { name: 'New tournament' }).first())
+  await ui.wait(150)
+  await ui.type('LAN Finals')
+  await ui.click(page.getByRole('button', { name: 'Fill empty slots' }))
+  await ui.wait(350)
+  await ui.click(page.getByRole('button', { name: /Randomize/ }))
+  await ui.wait(500)
+  await ui.click(page.getByRole('button', { name: 'Generate bracket' }))
+  await page.waitForURL(/tournaments\//)
+  await page.locator('[data-status="ready"]').first().waitFor()
+  await ui.wait(300)
+  for (const score of ['2–0']) {
+    await ui.click(page.locator('[data-status="ready"]').first())
+    await ui.wait(200)
+    await ui.click(page.getByRole('button', { name: score, exact: true }))
+    await ui.wait(300)
+  }
+  await ui.wait(900)
+}
+
+const PIN = 'aimless-pin'
+async function accountsPrepare(page) {
+  const add = async (fn) => {
+    await page.getByRole('button', { name: 'Add account' }).first().click()
+    await page.locator('[role=dialog]').waitFor()
+    await fn()
+    await page.locator('[role=dialog] button.glow').click()
+    await page.locator('[role=dialog]').waitFor({ state: 'detached' })
+  }
+  await page.locator('#henrik-key').fill('HDEV-demo-key')
+  await page.locator('#henrik-key').blur()
+  await add(async () => {
+    await page.fill('#acc-label', 'Main Ranked')
+    await page.fill('#acc-id', 'TenZ#0505')
+    await page.selectOption('#acc-region', 'na')
+    await page.fill('#acc-user', 'tenz@example.com')
+    await page.fill('#acc-pw', 'S3cret-pass!')
+  })
+  await page.waitForTimeout(900)
+  await add(async () => {
+    await page.fill('#acc-label', 'OW Tank Alt')
+    await page.locator('[role=dialog] button[aria-haspopup=listbox]').click()
+    await page.keyboard.type('Overwatch 2')
+    await page.keyboard.press('Enter')
+    await page.fill('#acc-id', 'TeKrop#2217')
+    await page.selectOption('#acc-region', 'eu')
+    await page.fill('#acc-user', 'tekrop_alt')
+    await page.fill('#acc-pw', 'another-pass')
+  })
+  await page.waitForTimeout(900)
+  await page.getByRole('button', { name: 'Set PIN lock' }).click()
+  await page.fill('#pin-new', PIN)
+  await page.fill('#pin-again', PIN)
+  await page.locator('[role=dialog] button.glow').click()
+  await page.waitForTimeout(900)
+}
+let mmrCalls = 0
+const demoApis = async (route) => {
+  const url = route.request().url()
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' }
+  const json = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', headers: cors, body: JSON.stringify(body) })
+  if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
+  if (url.startsWith('https://overfast-api.tekrop.fr/')) {
+    return json({
+      username: 'TeKrop', title: 'Data Broker', endorsement: { level: 2 },
+      competitive: { pc: { season: 22, tank: { division: 'grandmaster', tier: 1 }, damage: { division: 'master', tier: 4 }, support: { division: 'silver', tier: 4 }, open: null }, console: null },
+    })
+  }
+  if (url.startsWith('https://api.henrikdev.xyz/')) {
+    if (url.includes('/account/')) return json({ status: 200, data: { name: 'TenZ', tag: '0505', region: 'na', account_level: 312 } })
+    mmrCalls++
+    const late = mmrCalls > 1
+    return json({ status: 200, data: { current_data: { currenttier: late ? 23 : 22, currenttierpatched: late ? 'Ascendant 3' : 'Ascendant 2', ranking_in_tier: late ? 12 : 74, mmr_change_to_last_game: late ? 24 : 21 }, highest_rank: { tier: 24, patched_tier: 'Immortal 1', season: 'e8a3' } } })
+  }
+  return route.continue()
+}
+async function gifAccounts(page, ui) {
+  await ui.wait(500)
+  await ui.click(page.locator('#vault-pin'))
+  await ui.type(PIN)
+  await ui.press('Enter')
+  await page.locator('main h3').first().waitFor()
+  await ui.wait(700)
+  await ui.click(page.getByRole('button', { name: 'Copy username' }).first())
+  await ui.wait(500)
+  await ui.click(page.getByRole('button', { name: 'Copy password' }).first())
+  await ui.wait(700)
+  await ui.click(page.getByRole('button', { name: 'Refresh rank' }).first())
+  await ui.wait(1700)
+}
+
+async function gifMousepad(page, ui) {
+  await ui.wait(400)
+  await ui.click(page.getByRole('radio', { name: /Small/ }))
+  await ui.wait(800)
+  await ui.click(page.getByRole('radio', { name: /XL/ }))
+  await ui.wait(800)
+  await ui.click(page.getByRole('link', { name: 'Compare' }).first())
+  await page.waitForURL(/compare/)
+  await ui.wait(500)
+  await ui.click(page.getByRole('button', { name: /first row/i }))
+  await ui.wait(1500)
+}
+
+
 // ---------------------------------------------------------------- main
 await mkdir(OUT, { recursive: true })
 const server = await preview({ preview: { port: 0, strictPort: false }, logLevel: 'silent' })
@@ -271,6 +399,11 @@ try {
     'demo-compare-rtl.gif',
     compareRtlDemo,
   )
+  // README feature GIFs
+  await record(browser, baseUrl, '/converter', seed({ sourceGameId: 'cs2', targetGameId: 'valorant' }), 'gif-converter.gif', gifConverter)
+  await record(browser, baseUrl, '/tournaments', seed({}), 'gif-tournaments.gif', gifTournaments)
+  await record(browser, baseUrl, '/accounts', seed({}), 'gif-accounts-rank.gif', gifAccounts, { prepare: accountsPrepare, routes: demoApis })
+  await record(browser, baseUrl, '/mousepad', seed({ sourceGameId: 'cs2', sourceSensitivity: '1.1', targetGameId: 'valorant' }), 'gif-tools-mousepad.gif', gifMousepad)
 } finally {
   await browser.close()
   await new Promise((resolve) => server.httpServer.close(resolve))

@@ -587,7 +587,7 @@ export const ru: Record<TranslationKey, string> = {
   'help.tournament.games': 'Введите карту и счёт каждой игры. Победитель серии определяется сам, когда сторона набирает нужное число побед.',
   'help.tournament.quickScore': 'Записать только счёт серии, без разбивки по играм.',
   'help.tournament.seriesAuto': 'Игры после решающей блокируются. Отметьте OT, если игра ушла в овертайм.',
-  'landing.hero.title': 'Один аим. Во всех играх.',
+  'landing.hero.title': 'Один сенс. Во всех играх.',
   'landing.hero.lead': 'Конвертер чувствительности для FPS, который сохраняет реальное расстояние поворота на 360° в {games} играх.',
   'landing.hero.under': 'Бесплатно, открытый код · без аккаунта · веб и Windows',
   'landing.nav.games': 'Игры',

@@ -587,7 +587,7 @@ export const es: Record<TranslationKey, string> = {
   'help.tournament.games': 'Introduce el mapa y el resultado de cada partida. El ganador de la serie se decide solo cuando un lado llega a las victorias necesarias.',
   'help.tournament.quickScore': 'Registra solo el resultado de la serie, sin desglose por partida.',
   'help.tournament.seriesAuto': 'Las partidas tras la decisiva se bloquean. Marca OT si una partida llegó a la prórroga.',
-  'landing.hero.title': 'Un solo aim. Todos los juegos.',
+  'landing.hero.title': 'Una sens. Todos los juegos.',
   'landing.hero.lead': 'El conversor de sensibilidad para FPS que iguala la distancia real de un giro de 360° en {games} juegos.',
   'landing.hero.under': 'Gratis y de código abierto · sin cuenta · web y Windows',
   'landing.nav.games': 'Juegos',

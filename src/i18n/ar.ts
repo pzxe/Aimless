@@ -587,7 +587,7 @@ export const ar: Record<TranslationKey, string> = {
   'help.tournament.games': 'أدخل خريطة ونتيجة كل مباراة. يُحدَّد الفائز بالسلسلة تلقائيًا عندما يصل أحد الطرفين إلى عدد الانتصارات المطلوب.',
   'help.tournament.quickScore': 'سجّل نتيجة السلسلة فقط دون تفصيل كل مباراة.',
   'help.tournament.seriesAuto': 'تُقفل المباريات بعد الحاسمة. ضع علامة OT للمباريات التي ذهبت إلى الوقت الإضافي.',
-  'landing.hero.title': 'تصويب واحد. لكل الألعاب.',
+  'landing.hero.title': 'سنس واحد. لكل الألعاب.',
   'landing.hero.lead': 'محوّل حساسية ألعاب التصويب الذي يطابق المسافة الحقيقية للدورة 360° في {games} لعبة.',
   'landing.hero.under': 'مجاني ومفتوح المصدر · بلا حساب · الويب وويندوز',
   'landing.nav.games': 'الألعاب',
