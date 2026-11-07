@@ -804,6 +804,21 @@ export const en = {
   'vault.importNoFile': 'Choose a backup file first.',
   'vault.chooseFile': 'Choose backup file…',
   'vault.backupPassphrase': 'Backup passphrase',
+  'quick.group': 'Quick links',
+  'quick.github': 'Developer GitHub (@pzxe)',
+  'quick.star': 'Star Aimless on GitHub',
+  'quick.twitch': 'Watch 1usl on Twitch',
+  'quick.releases': 'Releases & Updates',
+  'dev.title': 'Developer & Tech Stack',
+  'dev.intro': 'What Aimless is built with, and where to find the developer.',
+  'dev.builtWith': 'Built with',
+  'dev.connect': 'Connect with the developer',
+  'dev.twitchHint': 'Live streams',
+  'dev.xHint': 'News and updates',
+  'dev.githubHint': 'Source code and projects',
+  'dev.discordHint': 'Click to copy the username',
+  'dev.discordCopied': 'Discord username \'{name}\' copied!',
+  'dev.discordOpen': 'Open Discord',
 } as const
 
 export type TranslationKey = keyof typeof en

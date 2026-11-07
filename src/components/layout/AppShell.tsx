@@ -1,4 +1,5 @@
 import { Menu, Moon, ShieldCheck, Sun, X } from 'lucide-react'
+import { QuickLinks } from './QuickLinks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useAutoHideHeader } from '@/hooks/useAutoHideHeader'
@@ -124,6 +125,7 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
             <NavList />
           </div>
           <div className="hairline my-4" />
+          <QuickLinks className="mb-4" />
           <p className="flex items-center gap-1.5 px-3 text-[11px] text-subtle">
             <ShieldCheck className="size-3.5 text-success" />
             {t('nav.localOnly')}
@@ -177,6 +179,7 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
             <div className="scrollbar-thin flex-1 overflow-y-auto">
               <NavList onNavigate={() => setDrawer(false)} />
             </div>
+            <QuickLinks className="mt-4" />
             <p className="mt-4 flex items-center gap-1.5 px-2 text-[11px] text-subtle">
               <ShieldCheck className="size-3.5 text-success" />
               {t('nav.localOnly')}

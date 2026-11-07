@@ -58,6 +58,7 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | 🔭 **ADS / scope calculator** | Focal-length (0%) and monitor-distance matching from FOV, magnification or a custom multiplier. |
 | 📶 **Polling rate calculator** | Counts per report and the minimum hand speed at 1000, 2000, 4000 and 8000 Hz. |
 | 📊 **Compare, profiles, history** | Match several games to one reference, save and share profiles, and reuse past conversions. |
+| 🔗 **Quick links and developer card** | Four sidebar buttons (developer GitHub, star the repo, Twitch, releases) and a Settings card with the tech stack and clickable Twitch, X, Discord and GitHub links. External links open in your default browser, also in the desktop app. |
 | 🌐 **Five languages** | English, العربية (full RTL), Español, Русский and Português. |
 | ⓘ **Help everywhere** | Hover or focus the ⓘ next to any field, calculator, tournament control or setting for a plain explanation, in all five languages. |
 | 🎨 **Settings that matter** | cm or inches, pad size, five accent colours, comfortable or compact density, full / reduced / instant (0 ms) motion, startup view and optional sound feedback. |
@@ -276,15 +277,15 @@ turns across pad                          = pad width / cm/360
 
 </details>
 
-## 🖥️ Windows desktop app (v2.2.1)
+## 🖥️ Windows desktop app (v2.2.2)
 
 Download from the [latest release](https://github.com/pzxe/Aimless/releases/latest):
 
 | File | What it is |
 |---|---|
-| `Aimless-v2.2.1-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
-| `Aimless-v2.2.1-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
-| `Aimless-v2.2.1-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
+| `Aimless-v2.2.2-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
+| `Aimless-v2.2.2-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
+| `Aimless-v2.2.2-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
 
 The app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
 

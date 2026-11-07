@@ -43,6 +43,7 @@ import {
 } from '@/store/types'
 import { cn } from '@/utils/cn'
 import { playSound } from '@/utils/sound'
+import { DeveloperCard } from '@/components/settings/DeveloperCard'
 import { useAccounts } from '@/store/accountsStore'
 import { clearAllStorage } from '@/utils/storage'
 import { isDesktopApp } from '@/utils/platform'
@@ -272,6 +273,8 @@ export default function SettingsPage() {
             </Button>
           </CardBody>
         </Card>
+
+        <DeveloperCard />
 
         <Card>
           <CardHeader title={t('settings.about')} icon={<Info />} />

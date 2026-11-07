@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.2.2] - 2026-11-07
+
+### Added
+- **Quick action row** at the bottom of the sidebar (desktop sidebar and mobile menu), right above "All data stays on this device": four equal buttons with hover tooltips.
+  - GitHub icon opens the developer's profile (`github.com/pzxe`), tooltip "Developer GitHub (@pzxe)".
+  - Star icon with a gold glow opens the repository, tooltip "Star Aimless on GitHub".
+  - Twitch icon opens `twitch.tv/1usl`, tooltip "Watch 1usl on Twitch".
+  - Sparkles icon opens the releases page, tooltip "Releases & Updates".
+  - They are real links (`target="_blank"`, `rel="noopener noreferrer"`): a new tab on the web, and the default browser in the desktop app (the window's open handler sends https links to `shell.openExternal`, so they never load inside the app window).
+- **Developer & Tech Stack** card in Settings: clickable badges for TypeScript, React 19, Electron, Tailwind CSS 4, Vite, Zustand, Node.js and Vitest (each links to the project's site), and four clickable contact cards: Twitch (`1usl`), X / Twitter (`@87lx`), GitHub (`pzxe`) and Discord (`1usl`). The Discord card copies the username and shows "Discord username '1usl' copied!"; a button beside it opens Discord in the browser (Discord has no public profile URL for a username).
+- 15 new strings in all five languages (en, ar, es, ru, pt). 4 new tests (177 in total).
+
+### Fixed
+- Found while testing: the leftmost quick-action tooltip was cut off by the window edge. The outer tooltips now align to their button's edge.
+
 ## [2.2.1] - 2026-11-07
 
 ### Added
