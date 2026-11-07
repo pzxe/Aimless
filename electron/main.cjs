@@ -7,6 +7,10 @@ const APP_ID = 'io.github.pzxe.aimless'
 const isMac = process.platform === 'darwin'
 const isWindows = process.platform === 'win32'
 
+// Test hook for the updater's end-to-end tests: a separate profile folder, honoured only together with the loopback
+// update API variable, so a test copy never collides with (or touches the data of) a running Aimless.
+if (process.env.AIMLESS_UPDATE_TEST_API && process.env.AIMLESS_TEST_USER_DATA) app.setPath('userData', process.env.AIMLESS_TEST_USER_DATA)
+
 // One window per user; a second launch focuses the existing one.
 if (!app.requestSingleInstanceLock()) {
   app.quit()
@@ -138,6 +142,9 @@ if (!app.requestSingleInstanceLock()) {
     return { status: res.status, body }
   })
 
+  const updater = require('./updater.cjs')
+  updater.register({ ipcMain, window: () => win, fromOurWindow })
+
   app.on('second-instance', () => {
     if (!win) return
     if (win.isMinimized()) win.restore()
@@ -149,6 +156,7 @@ if (!app.requestSingleInstanceLock()) {
     // No camera, microphone, notifications, etc. The app needs none.
     session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
     createWindow()
+    updater.scheduleStartupCheck()
   })
 
   app.on('window-all-closed', () => app.quit())

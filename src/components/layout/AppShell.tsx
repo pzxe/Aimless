@@ -1,4 +1,5 @@
 import { Menu, Moon, ShieldCheck, Sun, X } from 'lucide-react'
+import { useUpdateBadge } from '@/store/updateStore'
 import { QuickLinks } from './QuickLinks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
@@ -14,6 +15,7 @@ import { NAV_ITEMS } from './nav'
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const t = useT()
+  const updateBadge = useUpdateBadge()
   const groups = [
     { key: 'main', label: t('nav.group.workspace') },
     { key: 'library', label: t('nav.group.library') },
@@ -48,6 +50,14 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                     )}
                     <Icon className={cn('size-[18px]', isActive && 'text-accent')} />
                     {t(label)}
+                    {to === '/settings' && updateBadge && (
+                      <span
+                        role="img"
+                        aria-label={t('updates.badge')}
+                        title={t('updates.badge')}
+                        className="ms-auto size-2 rounded-full bg-accent-fill shadow-[0_0_8px_1px_var(--c-accent-glow)]"
+                      />
+                    )}
                   </>
                 )}
               </NavLink>

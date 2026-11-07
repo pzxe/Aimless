@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppShell } from '@/components/layout/AppShell'
@@ -7,6 +7,7 @@ import { TitleBar } from '@/components/layout/TitleBar'
 import { useDocumentSettings } from '@/hooks/useDocumentSettings'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
+import { useUpdates } from '@/store/updateStore'
 import { isDesktopApp } from '@/utils/platform'
 import ConverterPage from '@/pages/Converter'
 import DashboardPage from '@/pages/Dashboard'
@@ -58,6 +59,7 @@ function Workspace({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
 
 export default function App() {
   const resolvedTheme = useDocumentSettings()
+  useEffect(() => useUpdates.getState().init(), [])
   const language = useSettings((s) => s.language)
   const rtl = language === 'ar'
   return (

@@ -20,6 +20,27 @@ contextBridge.exposeInMainWorld('aimlessDesktop', {
     status: () => ipcRenderer.invoke('shortcut:status'),
     create: () => ipcRenderer.invoke('shortcut:create'),
   },
+  update: {
+    getState: () => ipcRenderer.invoke('update:get-state'),
+    check: () => ipcRenderer.invoke('update:check'),
+    download: () => ipcRenderer.invoke('update:download'),
+    cancel: () => ipcRenderer.invoke('update:cancel'),
+    install: () => ipcRenderer.invoke('update:install'),
+    setPrefs: (prefs) => ipcRenderer.invoke('update:set-prefs', prefs),
+    openRelease: () => ipcRenderer.invoke('update:open-release'),
+    /** Full state changes (checking, available, downloading, ready, error...). Returns an unsubscribe function. */
+    onState: (callback) => {
+      const listener = (_event, state) => callback(state)
+      ipcRenderer.on('update:state', listener)
+      return () => ipcRenderer.removeListener('update:state', listener)
+    },
+    /** Download progress, about five times a second: { percent, transferredBytes, totalBytes, speed }. */
+    onProgress: (callback) => {
+      const listener = (_event, progress) => callback(progress)
+      ipcRenderer.on('update:progress', listener)
+      return () => ipcRenderer.removeListener('update:progress', listener)
+    },
+  },
   rank: {
     fetch: (url, headers) => ipcRenderer.invoke('fetch-live-rank', { url, headers }),
   },

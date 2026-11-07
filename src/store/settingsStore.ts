@@ -32,6 +32,10 @@ export interface SettingsState {
   accent: Accent
   startupView: StartupView
   sound: boolean
+  /** Desktop app: look for a newer GitHub release 3 seconds after launch. */
+  autoCheckUpdates: boolean
+  /** Desktop app: download a found update in the background (installing always needs a click). */
+  autoDownloadUpdates: boolean
   favoriteGames: string[]
   recentGames: string[]
   /** User-measured yaw values (degrees/count at sens 1). */
@@ -64,6 +68,8 @@ export const DEFAULT_SETTINGS: SettingsState = {
   // The desktop app opens straight into the workspace.
   startupView: isDesktopApp ? 'dashboard' : 'landing',
   sound: false,
+  autoCheckUpdates: true,
+  autoDownloadUpdates: false,
   favoriteGames: [],
   recentGames: [],
   calibrations: {},
@@ -72,6 +78,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
 export const PREFERENCE_KEYS = [
   'language', 'theme', 'precision', 'defaultDpi', 'fovDisplay', 'units', 'mousepad',
   'mousepadCustomCm', 'motion', 'density', 'accent', 'startupView', 'sound',
+  'autoCheckUpdates', 'autoDownloadUpdates',
 ] as const satisfies readonly (keyof Preferences)[]
 
 const RECENT_LIMIT = 5
@@ -129,6 +136,8 @@ export const useSettings = create<SettingsState & SettingsActions>()(
           accent: oneOf(p.accent, ACCENTS.map((a) => a.id), current.accent),
           startupView: oneOf(p.startupView, ['landing', 'dashboard', 'converter', 'tournaments'], current.startupView),
           sound: p.sound === true,
+          autoCheckUpdates: p.autoCheckUpdates !== false,
+          autoDownloadUpdates: p.autoDownloadUpdates === true,
           favoriteGames: ids(p.favoriteGames),
           recentGames: ids(p.recentGames).slice(0, RECENT_LIMIT),
           calibrations,

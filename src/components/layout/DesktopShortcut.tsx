@@ -28,7 +28,7 @@ export function useShortcutStatus() {
 }
 
 /** Settings control: create (or recreate) the desktop shortcut. */
-export function DesktopShortcutButton() {
+export function DesktopShortcutButton({ label }: { label?: string } = {}) {
   const t = useT()
   const { status, refresh } = useShortcutStatus()
   if (!status) return null
@@ -41,7 +41,7 @@ export function DesktopShortcutButton() {
         }}
       >
         <MonitorDown />
-        {status.exists ? t('settings.shortcutRecreate') : t('settings.shortcutCreate')}
+        {label ?? (status.exists ? t('settings.shortcutRecreate') : t('settings.shortcutCreate'))}
       </Button>
       {(status.exists || status.portable) && (
         <p className="max-w-xs text-xs text-subtle md:text-end">

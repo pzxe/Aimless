@@ -24,3 +24,8 @@ inspiration/
 # Design-skill inspection output
 .taste-skill/
 scripts/*.local.mjs
+
+# Secrets (X API keys for scripts/post-tweet.mjs)
+.env
+.env.*
+!.env.example

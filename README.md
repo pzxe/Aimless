@@ -58,13 +58,14 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | 🔭 **ADS / scope calculator** | Focal-length (0%) and monitor-distance matching from FOV, magnification or a custom multiplier. |
 | 📶 **Polling rate calculator** | Counts per report and the minimum hand speed at 1000, 2000, 4000 and 8000 Hz. |
 | 📊 **Compare, profiles, history** | Match several games to one reference, save and share profiles, and reuse past conversions. |
+| 🔄 **In-app updater** | Checks GitHub Releases on startup or on demand, downloads the new build with a live progress bar, verifies its SHA-256, then installs silently, repairs the shortcuts and restarts. Works for the Setup install, the portable .exe and the ZIP folder. |
 | 🔗 **Quick links and developer card** | Four sidebar buttons (developer GitHub, star the repo, Twitch, releases) and a Settings card with the tech stack and clickable Twitch, X, Discord and GitHub links. External links open in your default browser, also in the desktop app. |
 | 🌐 **Five languages** | English, العربية (full RTL), Español, Русский and Português. |
 | ⓘ **Help everywhere** | Hover or focus the ⓘ next to any field, calculator, tournament control or setting for a plain explanation, in all five languages. |
 | 🎨 **Settings that matter** | cm or inches, pad size, five accent colours, comfortable or compact density, full / reduced / instant (0 ms) motion, startup view and optional sound feedback. |
 | 👥 **Alt Accounts vault** | Keep main and alt accounts (login, password, in-game ID, rank, region, status, linked sensitivity profile) in an AES-GCM encrypted vault on your device, with optional PIN lock, one-click copy buttons, search, filters and encrypted backup/restore. |
 | 📈 **Live rank tracker** | Overwatch 2 ranks per role through the keyless OverFast API; Valorant rank, RR bar, last-game change and peak through HenrikDev (free key) with official tier icons from valorant-api.com; Tracker.gg, Leetify, OP.GG and Blizzard deep links. |
-| 🔒 **Local-first** | No accounts, no telemetry. Data stays on your device; the only network requests are the rank lookups you start yourself. Runs in the browser or as an offline Windows app. |
+| 🔒 **Local-first** | No accounts, no telemetry. Data stays on your device; the only network requests are rank lookups and update checks. Runs in the browser or as an offline Windows app. |
 
 ## 🎬 In action
 
@@ -95,6 +96,14 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | | |
 |---|---|
 | ![PIN-locked vault](docs/screenshots/vault-locked.png) | ![Games page with real icons](docs/screenshots/games-icons.png) |
+
+| ![Application Updates: downloading with live progress](docs/screenshots/update-downloading.png) | ![Application Updates: ready to install](docs/screenshots/update-ready.png) |
+
+| | |
+|---|---|
+| ![Application Updates: up to date](docs/screenshots/update-uptodate.png) | ![Application Updates: error with retry and manual download](docs/screenshots/update-error.png) |
+
+*The update screenshots use a local mock release (v9.9.9) that serves the real build, to exercise the updater end to end.*
 | **Games.** Every constant is labelled, and any game can be calibrated. | |
 
 ## 🎮 Supported games
@@ -277,15 +286,15 @@ turns across pad                          = pad width / cm/360
 
 </details>
 
-## 🖥️ Windows desktop app (v2.2.2)
+## 🖥️ Windows desktop app (v2.3.0)
 
 Download from the [latest release](https://github.com/pzxe/Aimless/releases/latest):
 
 | File | What it is |
 |---|---|
-| `Aimless-v2.2.2-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
-| `Aimless-v2.2.2-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
-| `Aimless-v2.2.2-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
+| `Aimless-v2.3.0-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
+| `Aimless-v2.3.0-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
+| `Aimless-v2.3.0-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
 
 The app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
 
@@ -302,6 +311,24 @@ The native Windows caption is replaced by a 38 px title bar with three traffic l
 - On macOS the native traffic lights are kept (inset into the bar) instead of drawing duplicates. The bar does not render on the web.
 
 **Known limitations:** the Windows 11 Snap Layouts flyout (hover over the maximize button) is only shown by Windows for the native maximize button, so it does not appear over the green light. Snapping itself works (drag to an edge or corner, Win+Arrow). The macOS path is implemented but not tested on a Mac.
+
+### In-app updates
+
+**Settings → Application Updates** checks GitHub Releases (`api.github.com/repos/pzxe/Aimless/releases/latest`) and updates the desktop app in place. It works for all three ways Aimless runs, without code signing:
+
+| You run | The updater downloads | Then |
+|---|---|---|
+| **Setup** install | `Aimless-vX-Setup.exe` | waits for the app to exit, runs it silently (`/S`, same install folder), repairs the Desktop and Start menu shortcuts, starts the new app |
+| **Portable** `.exe` | `Aimless-vX-Portable.exe` | puts the new file next to the old one, deletes the old one, repoints the shortcut, starts it |
+| **No-install ZIP** folder | `Aimless-vX-Windows-NoInstall.zip` | unpacks it over the folder and starts `Aimless.exe` |
+
+- **Checks:** automatically 3 seconds after launch (toggle "Automatically check for updates on startup", on by default) or on demand with **Check for Updates**. Versions are compared with strict semver (`2.10.0` is newer than `2.9.0`; a pre-release is older than its release).
+- **Download:** streamed into `%TEMP%` with a live progress bar (percent, MB, MB/s) and a Cancel button. "Auto-download updates in background" is off by default. **Installing always needs your click** on "Update & Restart Now".
+- **Safety:** downloads come only from GitHub's hosts (a redirect anywhere else is refused before it is contacted), only the assets of this repository's latest non-draft release are considered, and the file must match the SHA-256 that GitHub publishes for it. The hash is checked again right before it runs. A release without a published checksum is never installed automatically; the card offers a manual download instead. The builds are not code-signed, so Windows SmartScreen may still warn on a manual download.
+- **Refresh Desktop Shortcut** (same card) creates or repairs the Desktop shortcut so it points at the copy you are running.
+- **Web app:** the same card checks the latest release, tells you if a newer version or Windows app exists, clears stale cached copies and offers a one-click reload or the direct Windows installer link. The auto-update toggles and the shortcut button are desktop-only.
+- If anything fails (offline, rate limit, bad checksum), the card shows why, with a retry button and a link to download manually. A transcript of the last install is written to `%TEMP%imless-update.log`.
+- Limitation: v2.2.2 and older have no updater, so install v2.3.0 once by hand; later releases can update themselves.
 
 <details>
 <summary><b>🛡️ Windows SmartScreen notes</b></summary>
@@ -373,7 +400,7 @@ scripts/              screenshot, GIF, icon and game-icon / rank-icon fetchers
 
 ## 🔒 Privacy and security
 
-- All data is stored in `localStorage` on your device. The only requests the app makes are the rank lookups you start with **Refresh rank** (the ID you entered goes to OverFast or HenrikDev, nothing else) and the one-off Valorant tier-icon list from valorant-api.com.
+- All data is stored in `localStorage` on your device. The only requests the app makes are the rank lookups you start with **Refresh rank** (the ID you entered goes to OverFast or HenrikDev, nothing else), the one-off Valorant tier-icon list from valorant-api.com, and the update check against the public GitHub releases API (desktop: on startup unless you turn it off, or on demand; web: only when you click **Check for Updates**). The update check sends no data about you beyond what any HTTPS request carries.
 - **Alt Accounts vault:** accounts are encrypted with AES-GCM (256-bit, Web Crypto) before being saved. Without a PIN the key is a non-extractable per-device key in IndexedDB, which only keeps the data from being readable as plain text. With a PIN or passphrase the key is derived with PBKDF2-SHA-256 (210,000 iterations, random salt) and exists only while the vault is unlocked. There is no recovery if you forget the PIN; export an encrypted backup. Passwords are masked and never shown in notifications when copied.
 - Imported profile and tournament files are parsed with `JSON.parse` only, size-limited and validated field by field. Unknown fields are dropped, and tournament structures are rebuilt rather than trusted. An imported file cannot execute code.
 - Exported bracket images escape all user text.

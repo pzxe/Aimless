@@ -2,6 +2,38 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] - 2026-11-07
+
+### Added
+- **In-app auto-updater** (desktop), built on GitHub Releases with no code signing and no extra dependencies.
+  - **Check:** `GET /repos/pzxe/Aimless/releases/latest` (`User-Agent: Aimless-Updater`), compared with strict semver (`2.10.0` > `2.9.0`, a pre-release is older than its release). Runs by itself 3 seconds after launch (toggle, on by default) and on demand with **Check for Updates**.
+  - **Download:** streamed into `%TEMP%` with live `update:progress` events (percent, transferred bytes, total bytes, speed) shown as a progress bar with MB and MB/s, plus Cancel.
+  - **Install:** one click on **Update & Restart Now**. A short PowerShell script waits for the app to exit, installs, repairs the Desktop and Start menu shortcuts through `WScript.Shell`, starts the new version and deletes itself.
+    - *Setup install:* runs `Aimless-vX-Setup.exe /S` (silent, same install folder).
+    - *Portable .exe:* puts the new file next to the old one under its new name, deletes the old one and repoints the shortcut.
+    - *No-install ZIP folder:* unpacks the new ZIP over the folder.
+  - **Safety:** downloads only from GitHub's hosts; a redirect to any other host is refused before it is contacted; only the latest non-draft, non-pre-release of this repository is considered; the file must match the SHA-256 GitHub publishes for it, and the hash is checked again right before it runs; a release without a published checksum is never installed automatically (a manual download link is offered). Nothing installs without your click.
+  - `electron-builder` now has `publish: github (pzxe/Aimless)`, so `latest.yml` is generated and attached to releases.
+- **Application Updates** card at the top of Settings: version badge, last-checked time, live states (checking with spinner, up to date, update available with title, size and collapsible release notes, downloading with progress, ready to install, installing, error with Try again and a manual download link), **Check for Updates**, "Automatically check for updates on startup" (on), "Auto-download updates in background" (off) and **Refresh Desktop Shortcut**. The toggles are saved in the settings store and pushed to the main process.
+- A dot on **Settings** in the sidebar while an update is available, downloading or ready.
+- **Web app:** the same card checks the latest release, shows whether a newer version or Windows app exists, clears stale cached copies, and offers a one-click "Clear cache & reload" or the direct Windows installer download. It never contacts GitHub until you click.
+- 51 new strings in all five languages. 26 new tests (203 in total), including a check that the generated PowerShell is accepted by the real PowerShell parser even with hostile quotes in the paths.
+
+### Changed
+- "Refresh Desktop Shortcut" moved from the Defaults card into the Application Updates card.
+- The privacy text now says the only network requests are rank lookups and update checks.
+
+### Fixed
+Found by running the real packaged apps through a full update against a mock GitHub (ZIP, Portable and Setup; 46 checks) before release:
+- Every update would have been refused as coming from an untrusted host: Electron's `net.fetch` leaves the response URL empty, so the origin could not be checked. A redirect to a foreign host was also contacted before being refused. Downloads now use `net.request` with manual redirects and vet the URL and every hop before any request is made.
+- The updater script never started: it was launched `detached`, which gives PowerShell no console, so it exited silently. It is now started through `Start-Process`, and the app quits only after the launcher has finished.
+- Shortcut repair rewrote **any** `Aimless.lnk` it found. With an installed copy and a portable copy side by side, updating one would have repointed the other's shortcut. It now only repairs shortcuts that point at the app being updated.
+
+### Known limitations
+- v2.2.2 and older have no updater: install v2.3.0 by hand once; later releases can update themselves.
+- The builds are not code-signed, so Windows SmartScreen may warn on a manual download.
+- The portable build is renamed to the new version's file name when it updates (for example `Aimless-v2.3.0-Portable.exe` becomes `Aimless-v2.4.0-Portable.exe`).
+
 ## [2.2.2] - 2026-11-07
 
 ### Added

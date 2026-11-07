@@ -1,7 +1,7 @@
 {
   "name": "aimless",
   "private": true,
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Aimless: local-first FPS sensitivity toolkit. cm/360 converter, tournament brackets, mousepad visualizer, ADS and polling tools. 5 languages.",
   "license": "MIT",
   "type": "module",
@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:tweet": "node --test scripts/tweet-length.test.mjs",
     "typecheck": "tsc -b --noEmit",
     "screenshots": "node scripts/screenshots.mjs",
     "electron:start": "npm run build && electron .",
@@ -65,6 +66,8 @@
       "dist/**/*",
       "electron/main.cjs",
       "electron/preload.cjs",
+      "electron/updater.cjs",
+      "electron/update-core.mjs",
       "package.json"
     ],
     "extraFiles": [
@@ -74,6 +77,13 @@
       }
     ],
     "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "pzxe",
+        "repo": "Aimless"
+      }
+    ],
     "win": {
       "icon": "build/icon.ico",
       "requestedExecutionLevel": "asInvoker",
