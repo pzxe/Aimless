@@ -649,6 +649,21 @@ export const en = {
   'tournament.error.invalid_game': 'Enter a whole-number score for both sides of each game.',
   'tournament.error.game_after_decided': 'The series was already decided before this game.',
   'tournament.error.series_incomplete': 'The series is not decided yet: add the remaining games.',
+  'window.controls': 'Window controls',
+  'window.close': 'Close',
+  'window.minimize': 'Minimize',
+  'window.maximize': 'Maximize',
+  'window.restore': 'Restore',
+  'settings.shortcut': 'Desktop shortcut',
+  'settings.shortcutHint': 'Put an Aimless icon on your Windows desktop.',
+  'settings.shortcutCreate': 'Create desktop shortcut',
+  'settings.shortcutRecreate': 'Recreate shortcut',
+  'settings.shortcutDone': 'Shortcut created on your desktop',
+  'settings.shortcutExists': 'A shortcut is already on your desktop.',
+  'settings.shortcutFailed': 'Could not create the shortcut',
+  'settings.shortcutPortableNote': 'It points to this portable .exe, so keep the file where it is.',
+  'settings.shortcutPrompt': 'Add Aimless to your desktop?',
+  'help.settings.shortcut': 'Creates Aimless.lnk on your desktop with the app icon. The Setup installer does this automatically; use this for the portable .exe or the no-install ZIP.',
 } as const
 
 export type TranslationKey = keyof typeof en

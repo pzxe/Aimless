@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react'
 import { HashRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppShell } from '@/components/layout/AppShell'
+import { DesktopShortcutPrompt } from '@/components/layout/DesktopShortcut'
+import { TitleBar } from '@/components/layout/TitleBar'
 import { useDocumentSettings } from '@/hooks/useDocumentSettings'
 import { useT } from '@/i18n'
 import { useSettings } from '@/store/settingsStore'
@@ -59,6 +61,8 @@ export default function App() {
   const rtl = language === 'ar'
   return (
     <HashRouter>
+      <TitleBar />
+      <DesktopShortcutPrompt />
       <Routes>
         <Route path="/" element={<StartupRedirect />} />
         <Route path="/welcome" element={<LandingPage resolvedTheme={resolvedTheme} />} />

@@ -193,12 +193,12 @@ export default function ProfilesPage() {
                   </p>
                 )}
                 {p.notes && <p className="mt-3 line-clamp-2 text-xs whitespace-pre-line text-muted">{p.notes}</p>}
-                <div className="mt-auto flex items-center justify-between gap-2 pt-4">
-                  <div className="flex items-center gap-2">
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 pt-4">
+                  <div className="flex min-w-0 items-center gap-2">
                     <AccuracyBadge accuracy={accuracyOf(p.gameId)} />
                     <span className="hidden truncate text-[11px] whitespace-nowrap text-subtle sm:inline">{t('profiles.updatedAt', { date: f.relativeTime(p.updatedAt) })}</span>
                   </div>
-                  <div className="flex items-center">
+                  <div className="-me-1.5 ms-auto flex items-center">
                     <Button variant="ghost" size="icon-sm" title={t('profiles.useInConverter')} aria-label={t('profiles.useInConverter')} onClick={() => fromProfile(p)}>
                       <ArrowLeftRight />
                     </Button>

@@ -113,9 +113,9 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
   }, [drawer])
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[264px_1fr]">
+    <div className="min-h-[calc(100dvh-var(--tb))] lg:grid lg:grid-cols-[264px_1fr]">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh flex-col p-3 lg:flex">
+      <aside className="sticky top-(--tb) hidden h-[calc(100dvh-var(--tb))] flex-col p-3 lg:flex">
         <div className="card flex h-full flex-col rounded-[24px] px-3 py-5">
           <div className="px-3 pb-7">
             <Brand />
@@ -135,7 +135,7 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
         {/* Top bar */}
         <header
           className={cn(
-            'sticky top-0 z-30 border-b transition-[transform,background-color,border-color,backdrop-filter] duration-300 ease-out',
+            'sticky top-(--tb) z-30 border-b transition-[transform,background-color,border-color,backdrop-filter] duration-300 ease-out',
             hidden && !drawer ? '-translate-y-full' : 'translate-y-0',
             atTop ? 'border-transparent bg-transparent' : 'border-border/40 bg-bg/40 backdrop-blur-md',
           )}
@@ -165,7 +165,7 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
       </div>
 
       {drawer && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-x-0 top-(--tb) bottom-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60 animate-[fade-in_150ms_ease-out]" onClick={() => setDrawer(false)} />
           <div className="absolute inset-y-0 end-0 flex w-72 max-w-[85vw] flex-col border-s border-border bg-surface p-4 shadow-pop">
             <div className="flex items-center justify-between px-2 pb-6">

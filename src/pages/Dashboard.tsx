@@ -186,7 +186,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="mt-3 grid items-start gap-3 lg:grid-cols-3">
+      <div className="mt-3 grid gap-3 lg:grid-cols-3">
         <QuickConvert />
         <Card>
           <CardHeader title={t('dashboard.tools')} icon={<Calculator />} />

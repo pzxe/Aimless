@@ -113,10 +113,27 @@
   --color-info-soft: var(--c-info-soft);
   --color-ring: var(--c-ring);
   --shadow-pop: var(--shadow-pop);
-  --font-sans: "Geist Variable", "Noto Sans Arabic Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-  --font-arabic: "Noto Sans Arabic Variable", "Geist Variable", "Segoe UI", Tahoma, sans-serif;
-  --font-display: "Geist Variable", "Noto Sans Arabic Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono Variable", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  /* Latin: Space Grotesk. Cyrillic: IBM Plex Sans. Arabic: IBM Plex Sans Arabic. Numbers: JetBrains Mono.
+     All bundled locally (fontsource), so the desktop app renders identically offline. */
+  --font-sans: "Space Grotesk Variable", "IBM Plex Sans Variable", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-cyrillic: "IBM Plex Sans Variable", "Space Grotesk Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-arabic: "IBM Plex Sans Arabic", "Space Grotesk Variable", "Segoe UI", Tahoma, sans-serif;
+  --font-display: "Space Grotesk Variable", "IBM Plex Sans Variable", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+/* Desktop app: height of the custom title bar (0 on the web). */
+:root {
+  --tb: 0px;
+}
+html[data-titlebar] {
+  --tb: 38px;
+}
+html[data-titlebar] body {
+  padding-top: var(--tb);
+}
+html[data-titlebar] [id] {
+  scroll-margin-top: calc(var(--tb) + 4.5rem);
 }
 
 /* Density: Tailwind's spacing scale is calc(var(--spacing) * n). */
@@ -131,6 +148,14 @@ html[data-density="compact"] {
   }
   html[lang="ar"] body {
     font-family: var(--font-arabic);
+    line-height: 1.6;
+  }
+  html[lang="ru"] body {
+    font-family: var(--font-cyrillic);
+  }
+  /* Arabic letters join; any tracking breaks them. */
+  html[lang="ar"] body * {
+    letter-spacing: 0 !important;
   }
   body {
     @apply text-text font-sans antialiased;
@@ -140,7 +165,6 @@ html[data-density="compact"] {
       radial-gradient(900px 520px at 100% -5%, rgb(255 255 255 / 0.035), transparent 60%);
     background-attachment: fixed;
     background-repeat: no-repeat;
-    font-feature-settings: "cv11", "ss01";
   }
   ::selection {
     background: var(--c-accent-soft);
@@ -197,18 +221,24 @@ html[data-density="compact"] {
   /* Display headings: sentence case, medium weight, tight tracking. */
   .display {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.04;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
     text-wrap: balance;
   }
   html[lang="ar"] .display {
-    line-height: 1.3;
-    letter-spacing: 0;
+    font-family: var(--font-arabic);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  html[lang="ru"] .display {
+    font-family: var(--font-cyrillic);
+    letter-spacing: -0.025em;
   }
   .mono {
     font-family: var(--font-mono);
-    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
   .hairline {
     background: linear-gradient(90deg, transparent, var(--c-border-strong), transparent);
@@ -238,8 +268,9 @@ html[data-density="compact"] {
     }
   }
   .num {
+    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum", "cv11";
+    letter-spacing: -0.01em;
   }
   /* Numbers and Latin identifiers stay left-to-right inside RTL text. */
   .ltr {

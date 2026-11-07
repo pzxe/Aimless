@@ -93,7 +93,7 @@ export default function ConverterPage() {
       <div className="grid items-stretch gap-3 lg:grid-cols-[1fr_auto_1fr]">
         {/* SOURCE */}
         <Card className="p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex h-6 items-center justify-between">
             <span className="text-xs font-semibold tracking-wider text-subtle uppercase">{t('converter.source')}</span>
           </div>
           <div className="space-y-4">
@@ -150,7 +150,7 @@ export default function ConverterPage() {
         {/* TARGET */}
         <Card className={cn('relative overflow-hidden p-5', ok && 'border-accent/40')}>
           {ok && <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent" />}
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex h-6 items-center justify-between">
             <span className="text-xs font-semibold tracking-wider text-subtle uppercase">{t('converter.target')}</span>
             {ok && <AccuracyBadge accuracy={ok.accuracy} />}
           </div>
@@ -232,7 +232,7 @@ export default function ConverterPage() {
       {ok && (
         <div className="mt-3 grid gap-3 lg:grid-cols-[1.3fr_1fr]">
           <Card className="p-5">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="mb-3 flex min-h-8 flex-wrap items-center justify-between gap-2">
               <h2 className="flex items-center gap-1.5 text-sm font-semibold">
                 {t('converter.summary')}
                 <InfoTip>{t('help.converter.summary')}</InfoTip>
@@ -273,7 +273,7 @@ export default function ConverterPage() {
             {sameGame && <p className="mt-3 text-xs text-subtle">{t('converter.sameGame')}</p>}
           </Card>
           <Card className="p-5">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <h2 className="mb-3 flex min-h-8 items-center gap-2 text-sm font-semibold">
               <Info className="size-4 text-muted" />
               {t('common.accuracy')}
               <AccuracyBadge accuracy={ok.accuracy} className="ms-auto" />

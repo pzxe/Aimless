@@ -46,6 +46,7 @@ import { playSound } from '@/utils/sound'
 import { clearAllStorage } from '@/utils/storage'
 import { isDesktopApp } from '@/utils/platform'
 import { clearPersistentTools } from '@/hooks/usePersistentState'
+import { DesktopShortcutButton, useShortcutStatus } from '@/components/layout/DesktopShortcut'
 
 function Row({ label, hint, help, children }: { label: ReactNode; hint?: ReactNode; help?: ReactNode; children: ReactNode }) {
   return (
@@ -63,6 +64,7 @@ function Row({ label, hint, help, children }: { label: ReactNode; hint?: ReactNo
 }
 
 export default function SettingsPage() {
+  const shortcut = useShortcutStatus()
   const t = useT()
   const s = useSettings()
   const [dpiText, setDpiText] = useState(String(s.defaultDpi))
@@ -248,6 +250,11 @@ export default function SettingsPage() {
                 )}
               </div>
             </Row>
+            {shortcut.status && (
+              <Row label={t('settings.shortcut')} hint={t('settings.shortcutHint')} help={t('help.settings.shortcut')}>
+                <DesktopShortcutButton />
+              </Row>
+            )}
           </CardBody>
         </Card>
 

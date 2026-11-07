@@ -32,7 +32,7 @@ export function HeroConverter({ demo, setDemo }: { demo: DemoState; setDemo: (d:
   const text = result.ok ? f.sens(result.target.sensitivity) : ''
 
   return (
-    <div data-ui="aimless-converter" className="card glass relative overflow-hidden rounded-[24px] shadow-pop">
+    <div data-ui="aimless-converter" className="card glass relative flex w-full flex-col overflow-hidden rounded-[24px] shadow-pop">
       <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
         <span className="size-2.5 rounded-full bg-[#ff5f57]" />
         <span className="size-2.5 rounded-full bg-[#febc2e]" />
@@ -40,7 +40,7 @@ export function HeroConverter({ demo, setDemo }: { demo: DemoState; setDemo: (d:
         <span className="ms-3 text-[11px] font-medium tracking-[0.14em] text-muted uppercase">{t('landing.widget.title')}</span>
         {result.ok && <AccuracyBadge accuracy={result.accuracy} className="ms-auto" />}
       </div>
-      <div className="space-y-4 p-5">
+      <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
           <GameSelector value={demo.source} onChange={(source) => setDemo({ ...demo, source })} label={t('converter.sourceGame')} />
           <button
@@ -73,7 +73,7 @@ export function HeroConverter({ demo, setDemo }: { demo: DemoState; setDemo: (d:
           </div>
         </div>
         {!result.ok && result.unsupported.length > 0 && <p className="text-xs text-danger">{t('note.unsupportedGeneric')}</p>}
-        <div className="flex items-center justify-between gap-2">
+        <div className="mt-auto flex items-center justify-between gap-2">
           <CopyButton text={text} label={t('converter.copySens')} showLabel size="sm" />
           <button
             type="button"

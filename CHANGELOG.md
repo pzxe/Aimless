@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.1.1] - 2026-11-07
+
+### Added
+- **Setup installer** `Aimless-v2.1.1-Setup.exe`: per-user (no administrator rights), creates an Aimless icon on the Desktop and in the Start menu. The Portable `.exe` and the NoInstall ZIP stay available.
+- **Create desktop shortcut** for the portable build: a one-time prompt on first run and a button in Settings (Windows).
+- **macOS-style title bar** in the desktop app: a frameless window with red / yellow / green traffic lights on the top-left (close, minimize, maximize/restore), a 38 px themed bar with the app name, native drag, double-click maximize, edge resizing, Aero Snap and Alt+F4. macOS keeps its native controls.
+- New text-free app icon and logo (rotation ring, three crosshair ticks and a core diamond): `public/favicon.svg`, the in-app logo, `build/icon.png` and a multi-size `build/icon.ico`.
+
+### Changed
+- **Typography:** Space Grotesk (display / UI), IBM Plex Sans (Cyrillic), IBM Plex Sans Arabic (Arabic) and JetBrains Mono with tabular numerals for cm/360°, eDPI and sensitivity values. All fonts are bundled locally and work offline. Line height, weight and letter spacing were tuned; Arabic has no letter spacing.
+- Cards and boxes in grid rows now share equal heights and aligned action buttons across all pages in LTR and RTL, desktop and mobile.
+
+### Fixed
+- Arabic: the window controls were drawn on the right; they now stay top-left.
+
 ## [2.1.0] - 2026-11-06
 
 ### Added

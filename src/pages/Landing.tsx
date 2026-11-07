@@ -103,7 +103,7 @@ function LandingNav({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
   return (
     <header
       className={cn(
-        'nav fixed inset-x-0 top-0 z-40 border-b transition-[transform,background-color,border-color] duration-300 ease-out',
+        'nav fixed inset-x-0 top-(--tb) z-40 border-b transition-[transform,background-color,border-color] duration-300 ease-out',
         hidden ? '-translate-y-full' : 'translate-y-0',
         atTop ? 'border-transparent bg-transparent' : 'border-border/40 bg-bg/40 backdrop-blur-md',
       )}
@@ -211,8 +211,8 @@ function Why({ demo, setDemo }: { demo: DemoState; setDemo: (d: DemoState) => vo
   const max = cs.cm360
   return (
     <Section id="why" eyebrow={t('landing.why.eyebrow')} title={t('landing.why.title')} lead={t('landing.why.lead')}>
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-        <div className="lg:col-span-6">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <div className="flex lg:col-span-6">
           <HeroConverter demo={demo} setDemo={setDemo} />
         </div>
         <div className="grid gap-5 lg:col-span-6">

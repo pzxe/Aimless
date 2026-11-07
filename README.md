@@ -81,7 +81,11 @@ The local-first FPS toolkit: a mouse sensitivity converter that matches the real
 | **Tournaments.** Double elimination with scores, connectors and highlighted ready matches. | **Mousepad.** One full turn to scale on a 45 cm pad, and the aim style it suits. |
 | ![Compare view with cm/360° chart](docs/screenshots/compare-dark.png) | ![Arabic right-to-left interface](docs/screenshots/converter-rtl-ar.png) |
 | **Compare.** Four games matched to the same cm/360°. | **Arabic (RTL).** The whole interface mirrors for right-to-left reading. |
-| ![Games database with accuracy badges](docs/screenshots/games-calibration.png) | |
+| ![Games database with accuracy badges](docs/screenshots/games-calibration.png) | ![macOS-style title bar, maximized](docs/screenshots/titlebar-maximized.png) |
+
+| | |
+|---|---|
+| ![macOS-style title bar](docs/screenshots/titlebar-normal.png) | ![Arabic title bar and typography](docs/screenshots/titlebar-rtl-ar.png) |
 | **Games.** Every constant is labelled, and any game can be calibrated. | |
 
 ## 🎮 Supported games
@@ -264,11 +268,31 @@ turns across pad                          = pad width / cm/360
 
 </details>
 
-## 🖥️ Windows desktop app
+## 🖥️ Windows desktop app (v2.1.1)
 
-Download `Aimless-v2.1.0-Portable.exe` (a single file) or `Aimless-v2.1.0-Windows-NoInstall.zip` (extract it and run `Run-Aimless.bat` or `Aimless.exe`) from the [latest release](https://github.com/pzxe/Aimless/releases/latest).
+Download from the [latest release](https://github.com/pzxe/Aimless/releases/latest):
 
-Nothing is installed and the app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
+| File | What it is |
+|---|---|
+| `Aimless-v2.1.1-Setup.exe` | **Recommended.** Per-user installer, no administrator rights. Puts an **Aimless** icon on your Desktop and in the Start menu, and can be uninstalled from Windows Settings. |
+| `Aimless-v2.1.1-Portable.exe` | One file, nothing installed. On first run it offers to create a Desktop shortcut; Settings has a "Create desktop shortcut" button at any time. |
+| `Aimless-v2.1.1-Windows-NoInstall.zip` | Extract and run `Run-Aimless.bat` or `Aimless.exe`. |
+
+The app never asks for administrator rights (`requestedExecutionLevel: asInvoker`). It opens straight into the workspace; the presentation page is one click away in the top bar. The window can't navigate away from the bundled files, and all permission requests are denied.
+
+### macOS-style title bar
+
+The native Windows caption is replaced by a 38 px title bar with three traffic lights on the top-left (red `#FF5F57` closes, yellow `#FEBC2E` minimizes, green `#28C840` maximizes or restores; × / − / expand glyphs appear on hover, lights turn grey when the window is unfocused). The app name sits in the centre. The bar follows the dark/light theme and stays left-to-right in Arabic so the lights are always top-left.
+
+**How it works (Electron):**
+
+- `electron/main.cjs` creates the window with `titleBarStyle: 'hidden'` (`'hiddenInset'` on macOS). This removes the caption and its buttons but keeps the real resizable frame, shadow, Aero Snap and `Alt+F4`. It is not a visual hack over a native bar.
+- `src/components/layout/TitleBar.tsx` draws the bar. The empty area uses `-webkit-app-region: drag`, so Windows treats it as the caption: drag to move, double-click to maximize/restore, drag to the top edge to maximize, drag a maximized window to restore, Win+Arrow snapping. Buttons use `no-drag`, so clicking them never starts a drag.
+- `electron/preload.cjs` exposes a small fixed bridge (`aimlessDesktop.window.minimize / toggleMaximize / close / getState / onState`) with `contextBridge`; the main process handles them through `ipcMain.handle` and only accepts calls from its own window. The page gets no Node access (`contextIsolation`, `sandbox`).
+- `win.on('maximize' | 'unmaximize' | 'focus' | 'blur' ...)` events are pushed to the renderer so the green button's glyph and the grey unfocused look stay in sync.
+- On macOS the native traffic lights are kept (inset into the bar) instead of drawing duplicates. The bar does not render on the web.
+
+**Known limitations:** the Windows 11 Snap Layouts flyout (hover over the maximize button) is only shown by Windows for the native maximize button, so it does not appear over the green light. Snapping itself works (drag to an edge or corner, Win+Arrow). The macOS path is implemented but not tested on a Mac.
 
 <details>
 <summary><b>🛡️ Windows SmartScreen notes</b></summary>
@@ -335,7 +359,7 @@ electron/             desktop wrapper (main process)
 scripts/              screenshot, GIF and icon generators
 ```
 
-**Tech stack:** React 19, TypeScript, Vite, Tailwind CSS 4, Zustand, Lucide icons, Sonner toasts, Vitest and Electron. Fonts (Inter, Oswald, Noto Sans Arabic) are bundled locally.
+**Tech stack:** React 19, TypeScript, Vite, Tailwind CSS 4, Zustand, Lucide icons, Sonner toasts, Vitest and Electron. Fonts (Space Grotesk, IBM Plex Sans, IBM Plex Sans Arabic, JetBrains Mono) are bundled locally and work offline.
 
 ## 🔒 Privacy and security
 

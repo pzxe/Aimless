@@ -30,9 +30,9 @@ import { useSettings } from '@/store/settingsStore'
 
 function ToolCard({ id, icon, title, desc, children, action, help }: { id: string; icon: ReactNode; title: string; desc: string; children: ReactNode; action?: ReactNode; help?: ReactNode }) {
   return (
-    <Card id={id} className="scroll-mt-20">
+    <Card id={id} className="flex scroll-mt-20 flex-col">
       <CardHeader title={title} description={desc} icon={icon} action={action} help={help} />
-      <CardBody className="space-y-4">{children}</CardBody>
+      <CardBody className="flex-1 space-y-4">{children}</CardBody>
     </Card>
   )
 }
