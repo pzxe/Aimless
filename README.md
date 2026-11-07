@@ -50,21 +50,6 @@ Keep your main and alt accounts in an encrypted vault on your own PC (AES-GCM, o
 
 <p align="center"><img src="docs/gifs/rank-climb-immortal.gif" width="820" alt="A Valorant alt account climbing from Iron 3 to Immortal 1 in the vault" /></p>
 
-## 📸 A closer look
-
-<table>
-  <tr>
-    <td width="33%"><img src="docs/screenshots/converter-dark.png" alt="The sensitivity converter, Valorant to Overwatch 2" /><br /><sub><b>Converter</b>: exact cm/360° match</sub></td>
-    <td width="33%"><img src="docs/screenshots/tournament-bracket.png" alt="A double elimination tournament bracket" /><br /><sub><b>Tournaments</b>: live brackets</sub></td>
-    <td width="33%"><img src="docs/screenshots/live-obs-overlay.png" alt="The bracket as a clean OBS stream overlay" /><br /><sub><b>OBS overlay</b>: paste it, you're on stream</sub></td>
-  </tr>
-  <tr>
-    <td width="33%"><img src="docs/screenshots/mousepad-visualizer.png" alt="The mousepad visualizer showing the 360° turn on a pad" /><br /><sub><b>Mousepad</b>: your turn on your pad</sub></td>
-    <td width="33%"><img src="docs/screenshots/alt-accounts-immortal.png" alt="The alt accounts vault with a Valorant account at Immortal 1" /><br /><sub><b>Alt Accounts</b>: live rank and RR</sub></td>
-    <td width="33%"><img src="docs/screenshots/live-viewer-phone.png" alt="The live tournament guest view on a phone" /><br /><sub><b>Guest link</b>: fans watch on any phone</sub></td>
-  </tr>
-</table>
-
 <br />
 
 ## ⬇️ Install
