@@ -1035,6 +1035,17 @@ export const en = {
   'ra.hist.unpin': 'Unpin',
   'ra.hist.rename': 'Rename',
   'ra.hist.clear': 'Clear unpinned',
+  'ra.profile.title': 'Curve profile',
+  'ra.profile.slow': 'Slow / Control',
+  'ra.profile.slow.desc': 'Micro-aim priority',
+  'ra.profile.natural': 'Natural / Balanced',
+  'ra.profile.natural.desc': 'Recommended sweet spot',
+  'ra.profile.fast': 'Fast / Aggressive',
+  'ra.profile.fast.desc': 'Snappy flicks and entry',
+  'ra.profile.custom': 'Edited by hand: none of the three profiles is selected.',
+  'ra.stale': 'Your setup changed. Press Generate curve to refresh the three profiles.',
+  'ra.flat.badge': 'Flat baseline · 1:1, no acceleration',
+  'ra.flat.advice': 'This is the flat 1:1 baseline: no acceleration, so Base and Peak eDPI both equal your raw eDPI. Press Generate curve to build a curve tailored to your setup.',
 } as const
 
 export type TranslationKey = keyof typeof en

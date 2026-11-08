@@ -3,10 +3,14 @@ import { persist } from 'zustand/middleware'
 import {
   DEFAULT_PARAMS,
   HISTORY_LIMIT,
+  PROFILE_IDS,
+  REFERENCE_PARAMS,
+  paramsEqual,
   sanitizeParams,
   type HandStyle,
   type HistoryItem,
   type PresetId,
+  type ProfileId,
   type RawAccelParams,
 } from '@/services/rawAccelEngine'
 import type { ReplicaTheme } from '@/services/rawAccelRender'
@@ -26,6 +30,11 @@ export interface RawAccelForm {
   notes: string
   name: string
   theme: ReplicaTheme
+  /** The three curves from the last Generate, and which one is loaded (null = edited by hand). */
+  profiles: Record<ProfileId, RawAccelParams> | null
+  profile: ProfileId | null
+  /** Signature of the setup the profiles were generated for. */
+  genSig: string
   /** True once the game and sensitivity were seeded from the Converter (first visit only). */
   seeded: boolean
 }
@@ -51,6 +60,9 @@ export const initialForm: RawAccelForm = {
   notes: '',
   name: '',
   theme: 'dark',
+  profiles: null,
+  profile: null,
+  genSig: '',
   seeded: false,
 }
 
@@ -69,7 +81,7 @@ export const useRawAccel = create<RawAccelState>()(
     {
       name: STORAGE_KEYS.rawAccel,
       storage: persistStorage,
-      version: 1,
+      version: 2,
       partialize: (s) => {
         const { patch: _a, setHistory: _b, toggleCompare: _c, compare: _d, ...rest } = s
         return rest
@@ -97,7 +109,11 @@ export const useRawAccel = create<RawAccelState>()(
           preset: p.preset === 'tracking' || p.preset === 'hybrid' ? p.preset : 'tactical',
           hand: p.hand === 'wrist' || p.hand === 'arm' ? p.hand : 'hybrid',
           pad: p.pad === 'small' || p.pad === 'medium' || p.pad === 'xl' ? p.pad : 'large',
-          params: sanitizeParams(p.params),
+          // v2.5.0 stored its worked example as the default; that untouched state is now the flat baseline
+          params: p.params && paramsEqual(sanitizeParams(p.params), REFERENCE_PARAMS) ? { ...DEFAULT_PARAMS } : sanitizeParams(p.params),
+          profiles: p.profiles && PROFILE_IDS.every((id) => p.profiles?.[id]) ? (Object.fromEntries(PROFILE_IDS.map((id) => [id, sanitizeParams(p.profiles?.[id])])) as Record<ProfileId, RawAccelParams>) : null,
+          profile: p.profile === 'slow' || p.profile === 'natural' || p.profile === 'fast' ? p.profile : null,
+          genSig: typeof p.genSig === 'string' ? p.genSig.slice(0, 200) : '',
           notes: typeof p.notes === 'string' ? p.notes.slice(0, 500) : '',
           name: typeof p.name === 'string' ? p.name.slice(0, 80) : '',
           theme: p.theme === 'classic' ? 'classic' : 'dark',

@@ -1,9 +1,40 @@
 import { ChevronDown } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CopyButton } from '@/components/ui/CopyButton'
 import { useT } from '@/i18n'
 import { curveDefaults, sanitizeParams, type CurveType, type RawAccelParams } from '@/services/rawAccelEngine'
 import { PALETTES, RA_LABELS, fieldsFor, fmt, graphSvg, type Ghost, type ReplicaTheme } from '@/services/rawAccelRender'
+
+const TWEEN_KEYS = ['sensMultiplier', 'acceleration', 'capOutput', 'capInput', 'inputOffset', 'limit', 'exponent'] as const
+
+/** Graph-only tween: when the parameters jump (Generate, a profile, Reset) the curve glides to its new shape. */
+function useTweened(target: RawAccelParams): RawAccelParams {
+  const [shown, setShown] = useState(target)
+  const current = useRef(target)
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motionPref === 'instant') {
+      current.current = target
+      setShown(target)
+      return
+    }
+    const from = current.current
+    if (from === target) return
+    const start = performance.now()
+    let raf = 0
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - start) / 450)
+      const e = 1 - Math.pow(1 - k, 3)
+      const next: RawAccelParams = { ...target }
+      for (const key of TWEEN_KEYS) next[key] = from[key] + (target[key] - from[key]) * e
+      current.current = k >= 1 ? target : next
+      setShown(current.current)
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target])
+  return shown
+}
 
 function RaNum({ value, onCommit, pal, label }: { value: number; onCommit: (n: number) => void; pal: (typeof PALETTES)['dark']; label: string }) {
   const [draft, setDraft] = useState(fmt(value))
@@ -54,7 +85,8 @@ export function ReplicaPanel({
   const [aniso, setAniso] = useState(false)
   const fields = useMemo(() => fieldsFor(params), [params])
   const set = (patch: Partial<RawAccelParams>) => onChange(sanitizeParams({ ...params, ...patch }))
-  const svg = useMemo(() => graphSvg({ params, ghosts, theme, w: 560, h: 430 }), [params, ghosts, theme])
+  const drawn = useTweened(params)
+  const svg = useMemo(() => graphSvg({ params: drawn, ghosts, theme, w: 560, h: 430 }), [drawn, ghosts, theme])
 
   return (
     <div dir="ltr" lang="en" className="overflow-hidden rounded-xl border text-left" style={{ background: pal.window, color: pal.text, borderColor: pal.border, fontFamily: 'Segoe UI, Roboto, Arial, sans-serif' }}>

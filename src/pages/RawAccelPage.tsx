@@ -36,8 +36,10 @@ import {
   diagnose,
   encodeShareCode,
   parseAny,
+  PROFILE_IDS,
+  generateProfiles,
+  isFlatBaseline,
   pushHistory,
-  recommend,
   telemetry,
   toConfigFile,
   toNativeSettings,
@@ -46,6 +48,7 @@ import {
   type HandStyle,
   type HistoryItem,
   type PresetId,
+  type ProfileId,
   type RawAccelParams,
 } from '@/services/rawAccelEngine'
 import {
@@ -75,6 +78,7 @@ const PRESETS: { id: PresetId; icon: string }[] = [
   { id: 'hybrid', icon: '🔥' },
 ]
 const MAX_IMPORT_BYTES = 200_000
+const PROFILE_ICON: Record<ProfileId, string> = { slow: '🐢', natural: '⚖️', fast: '⚡' }
 
 export default function RawAccelPage() {
   const t = useT()
@@ -128,6 +132,7 @@ export default function RawAccelPage() {
 
   const record = useCallback(
     (name?: string) => {
+      if (isFlatBaseline(params)) return
       const c = config()
       const item: HistoryItem = {
         id: createId(),
@@ -140,7 +145,7 @@ export default function RawAccelPage() {
       }
       useRawAccel.getState().setHistory(pushHistory(useRawAccel.getState().history, item))
     },
-    [config, tel],
+    [config, tel, params],
   )
 
   // Every tweak is saved automatically (after a short pause); identical configs are merged.
@@ -167,12 +172,26 @@ export default function RawAccelPage() {
     if (!opts?.keepDpi) setCustomDpi(!(DPIS as readonly number[]).includes(c.dpi))
   }
 
+  const setupSig = JSON.stringify([st.dpi, st.pollingRate, st.gameId, st.gameSens, st.preset, st.hand, st.pad, curveChoice])
+  const [flash, setFlash] = useState(0)
+  const flat = isFlatBaseline(params)
+
   const generate = () => {
-    const p = recommend({ preset: st.preset, hand: st.hand, padCm, rawCm360, curve: curveChoice === 'auto' ? undefined : curveChoice }, DEFAULT_PARAMS)
-    st.patch({ params: { ...p, rotation: 0, yxRatio: 1, lockXY: true } })
+    const profiles = generateProfiles({ dpi: st.dpi, pollingRate: st.pollingRate, rawCm360, rawEdpi: st.dpi * (sens > 0 ? sens : 0), preset: st.preset, hand: st.hand, padCm, curve: curveChoice })
+    st.patch({ profiles, profile: 'natural', params: profiles.natural, genSig: setupSig })
     setFriend(null)
+    setFlash((n) => n + 1)
     toast.success(t('ra.generated'))
   }
+  const pickProfile = (id: ProfileId) => {
+    if (!st.profiles) return
+    st.patch({ profile: id, params: st.profiles[id] })
+    setFlash((n) => n + 1)
+  }
+  const profileStats = useMemo(
+    () => (st.profiles ? (Object.fromEntries(PROFILE_IDS.map((id) => { const tl = telemetry(st.dpi, sens > 0 ? sens : 0, rawCm360, st.profiles![id]); return [id, { base: Math.round(tl.baseEdpi), peak: Math.round(tl.peakEdpi) }] })) as Record<ProfileId, { base: number; peak: number }>) : null),
+    [st.profiles, st.dpi, sens, rawCm360],
+  )
 
   // ---- sharing
   const exportFriend = async () => {
@@ -405,17 +424,46 @@ export default function RawAccelPage() {
           }
         />
         <CardBody className="space-y-3">
+          {st.profiles && profileStats && (
+            <div>
+              <Label>{t('ra.profile.title')}</Label>
+              <div className="grid gap-2 md:grid-cols-3" role="radiogroup" aria-label={t('ra.profile.title')}>
+                {PROFILE_IDS.map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="radio"
+                    aria-checked={st.profile === id}
+                    onClick={() => pickProfile(id)}
+                    className={cn('rounded-xl border p-3 text-start transition-colors', st.profile === id ? 'border-accent bg-accent-soft' : 'border-border bg-surface-2/50 hover:border-border-strong')}
+                  >
+                    <div className="text-sm font-semibold">{PROFILE_ICON[id]} {t(`ra.profile.${id}`)}</div>
+                    <div className="mt-0.5 text-xs text-muted">{t(`ra.profile.${id}.desc`)}</div>
+                    <div className="num mt-1 text-xs text-subtle" dir="ltr">{profileStats[id].base} → {profileStats[id].peak} eDPI</div>
+                  </button>
+                ))}
+              </div>
+              {st.profile === null && <p className="mt-1.5 text-xs text-muted">{t('ra.profile.custom')}</p>}
+              {st.genSig !== setupSig && <p className="mt-1.5 text-xs text-danger">{t('ra.stale')}</p>}
+            </div>
+          )}
+          {flat && <p className="inline-flex items-center rounded-full border border-border-strong bg-surface-2/70 px-3 py-1 text-xs font-medium text-muted">{t('ra.flat.badge')}</p>}
+          <div key={flash} className={flash > 0 ? 'ra-flash rounded-xl' : undefined}>
           <ReplicaPanel
             params={params}
-            onChange={(p) => st.patch({ params: p })}
+            onChange={(p) => st.patch({ params: p, profile: null })}
             theme={st.theme}
             ghosts={ghostList}
             onApply={() => {
               record()
               toast.success(t('ra.replica.applied'))
             }}
-            onReset={() => st.patch({ params: { ...DEFAULT_PARAMS } })}
+            onReset={() => {
+              st.patch({ params: { ...DEFAULT_PARAMS }, profile: null })
+              setFlash((n) => n + 1)
+            }}
           />
+          </div>
           {ghostList.length > 0 && (
             <p className="flex flex-wrap items-center gap-2 text-xs text-muted">
               <span className="inline-block h-0.5 w-6 bg-[#5aa9ff]" /> {t('ra.graph.current')}
@@ -462,8 +510,8 @@ export default function RawAccelPage() {
               <div className="rounded-xl border border-border bg-surface-2/50 p-3"><div className="text-xs text-muted">{t('ra.diag.flick')}</div><div className="mt-0.5 font-semibold">{t(`ra.flick.${diag.flick}`)}</div></div>
               <div className="rounded-xl border border-border bg-surface-2/50 p-3"><div className="text-xs text-muted">{t('ra.diag.smooth')}</div><div className="mt-0.5 font-semibold">{t(`ra.smooth.${diag.smoothness}`)} <span className="num text-xs font-normal text-subtle">{diag.smoothScore}/100</span></div></div>
             </div>
-            <p className="text-sm leading-relaxed">{advice.main}</p>
-            {advice.hints.length > 0 && (
+            <p className="text-sm leading-relaxed">{flat ? t('ra.flat.advice') : advice.main}</p>
+            {!flat && advice.hints.length > 0 && (
               <ul className="list-disc space-y-1 ps-5 text-xs text-muted">
                 {advice.hints.map((h) => (<li key={h}>{h}</li>))}
               </ul>

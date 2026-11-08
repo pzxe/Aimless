@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_PARAMS } from '../rawAccelEngine'
+import { REFERENCE_PARAMS as DEFAULT_PARAMS } from '../rawAccelEngine'
 import { classicWindowSvg, fieldsFor, graphSvg, showcaseCardSvg, valuesText, type CardLabels } from '../rawAccelRender'
 
 const labels: CardLabels = {

@@ -42,20 +42,30 @@ export interface RawAccelParams {
   lockXY: boolean
 }
 
+/** The unaccelerated 1:1 baseline: a flat line at 1.0 across the whole graph. */
 export const DEFAULT_PARAMS: RawAccelParams = {
   curve: 'Linear',
   gain: true,
-  sensMultiplier: 0.5,
+  sensMultiplier: 1,
   yxRatio: 1,
   rotation: 0,
-  acceleration: 0.75,
+  acceleration: 0,
   capType: 'Output',
-  capOutput: 3,
+  capOutput: 1,
   capInput: 0,
-  inputOffset: 9,
+  inputOffset: 0,
   limit: 1.5,
   exponent: 2,
   lockXY: true,
+}
+
+/** A worked example (Linear + Gain, Offset 9, Sens Multiplier 0.5, Acceleration 0.75, Cap: Output 3). Used by tests and docs. */
+export const REFERENCE_PARAMS: RawAccelParams = {
+  ...DEFAULT_PARAMS,
+  sensMultiplier: 0.5,
+  acceleration: 0.75,
+  capOutput: 3,
+  inputOffset: 9,
 }
 
 /** Default parameters when switching curve type. */
@@ -455,31 +465,104 @@ export function toNativeSettings(c: AccelConfig): Record<string, unknown> {
   }
 }
 
-// ------------------------------------------------------------- presets/advisor
+// ------------------------------------------------------------- profile generator
 
 export type PresetId = 'tactical' | 'tracking' | 'hybrid'
 export type HandStyle = 'wrist' | 'arm' | 'hybrid'
+export type ProfileId = 'slow' | 'natural' | 'fast'
+export const PROFILE_IDS: readonly ProfileId[] = ['slow', 'natural', 'fast']
 
-export const PRESET_PARAMS: Record<PresetId, Partial<RawAccelParams>> = {
-  tactical: { curve: 'Linear', gain: true, sensMultiplier: 0.5, acceleration: 0.75, capType: 'Output', capOutput: 3, inputOffset: 9 },
-  tracking: { curve: 'Natural', gain: true, sensMultiplier: 0.85, acceleration: 0.12, limit: 1.6, capType: 'Output', capOutput: 0, inputOffset: 4 },
-  hybrid: { curve: 'Linear', gain: true, sensMultiplier: 0.4, acceleration: 1, capType: 'Output', capOutput: 3.5, inputOffset: 12 },
+/** True when the curve is the plain 1:1 line (no acceleration, no multiplier) over the whole graph. */
+export function isFlatBaseline(p: RawAccelParams): boolean {
+  for (let x = 0; x <= SPEED_MAX; x += 4) if (Math.abs(ratioAt(p, Math.max(x, 1e-6)) - 1) > 1e-9) return false
+  return true
 }
 
-/** Build a recommended curve from the playstyle choices. `curve` forces a specific curve type. */
-export function recommend(opts: { preset: PresetId; hand: HandStyle; padCm: number; rawCm360: number | null; curve?: CurveType }, base: RawAccelParams = DEFAULT_PARAMS): RawAccelParams {
-  let p: RawAccelParams = { ...base, ...PRESET_PARAMS[opts.preset] }
-  if (opts.curve && opts.curve !== p.curve) p = { ...p, ...curveDefaults(opts.curve), curve: opts.curve, sensMultiplier: p.sensMultiplier, gain: p.gain }
-  // Wrist aimers move slower (smaller offset); arm aimers move faster.
-  const handFactor = opts.hand === 'wrist' ? 0.8 : opts.hand === 'arm' ? 1.25 : 1
-  p.inputOffset = Math.round(p.inputOffset * handFactor * 10) / 10
-  // Keep the fastest flick inside one pad swipe by raising the output cap when needed.
-  if (opts.rawCm360 !== null && opts.padCm > 0 && p.capOutput > 0) {
-    let cap = p.capOutput
-    while (cap < 6 && opts.rawCm360 / (p.sensMultiplier * cap) > opts.padCm * 0.9) cap = Math.round((cap + 0.25) * 100) / 100
-    p.capOutput = cap
+interface PresetModel { curve: CurveType; multBias: number; capBase: number }
+const PRESET_MODEL: Record<PresetId, PresetModel> = {
+  tactical: { curve: 'Linear', multBias: 1, capBase: 3 }, // micro-control + fast 180s
+  tracking: { curve: 'Natural', multBias: 1.22, capBase: 1.8 }, // smooth tracking, little anchor
+  hybrid: { curve: 'Linear', multBias: 0.82, capBase: 3.4 }, // low-sens anchor, high-sens entry
+}
+/** Offset (counts/ms) and slope per counts/ms at 800 DPI for each curve shape. */
+const CURVE_MODEL: Record<CurveType, { offset: number; accel: number }> = {
+  Linear: { offset: 9, accel: 0.75 },
+  Classic: { offset: 9, accel: 0.75 },
+  Natural: { offset: 5, accel: 0.12 },
+  Power: { offset: 6, accel: 0.35 },
+  Jump: { offset: 16, accel: 0 },
+}
+const PRESET_OFFSET: Record<PresetId, number> = { tactical: 1, tracking: 0.7, hybrid: 1.3 }
+const STYLE: Record<ProfileId, { mult: number; off: number; acc: number; cap: number }> = {
+  slow: { mult: 0.82, off: 1.35, acc: 0.6, cap: 0.78 },
+  natural: { mult: 1, off: 1, acc: 1, cap: 1 },
+  fast: { mult: 1.12, off: 0.7, acc: 1.5, cap: 1.3 },
+}
+const HAND_FACTOR: Record<HandStyle, number> = { wrist: 0.8, arm: 1.25, hybrid: 1 }
+
+export interface GenInput {
+  dpi: number
+  pollingRate: number
+  /** cm/360 at the raw (unaccelerated) sensitivity, null when the game has no formula. */
+  rawCm360: number | null
+  /** DPI x in-game sensitivity. */
+  rawEdpi: number
+  preset: PresetId
+  hand: HandStyle
+  padCm: number
+  /** Force a curve type; 'auto' picks it from the aiming goal. */
+  curve?: CurveType | 'auto'
+}
+
+const round = (v: number, d: number) => Number(v.toFixed(d))
+
+/**
+ * Three tailored curves (slow / natural / fast) from every input of the setup wizard.
+ *  - DPI: input speed is counts/ms, so the same hand speed gives DPI/800 times the counts.
+ *    Input Offset (a speed) scales WITH DPI and Acceleration (per counts/ms) scales against it.
+ *  - cm/360: a slow raw sensitivity gets a higher Sens Multiplier and a stronger Cap: Output so 180 turns are
+ *    reachable; a fast one gets a lower multiplier to steady micro-aim. Without a formula, eDPI stands in.
+ *  - Goal, hand style, mousepad and curve type change the shape, offset anchor, slope and cap.
+ *  - Polling rate does not change counts/ms; it only nudges the offset a few percent (a faster poll has less jitter at low speeds).
+ * Peak eDPI always rises slow < natural < fast (higher multiplier AND higher cap).
+ */
+export function generateProfiles(i: GenInput): Record<ProfileId, RawAccelParams> {
+  const preset = PRESET_MODEL[i.preset]
+  const curve: CurveType = !i.curve || i.curve === 'auto' ? preset.curve : i.curve
+  const model = CURVE_MODEL[curve]
+  const k = Math.max(i.dpi, 50) / 800
+  const sigma = clamp(i.rawCm360 && i.rawCm360 > 0 ? Math.log2(i.rawCm360 / 35) : -Math.log2(Math.max(i.rawEdpi, 1) / 300), -1.5, 1.5)
+  const multN = clamp((0.62 + 0.17 * sigma) * preset.multBias, 0.45, 0.92)
+  const padF = i.padCm <= 25 ? 0.88 : i.padCm <= 35 ? 0.95 : i.padCm <= 45 ? 1 : 1.1
+  const pollF = 1 + 0.03 * Math.log2(1000 / clamp(i.pollingRate, 125, 8000))
+  const offN = model.offset * PRESET_OFFSET[i.preset] * k * HAND_FACTOR[i.hand] * padF * pollF
+  // the fastest flick should still fit in one swipe of the pad
+  const needCap = i.rawCm360 && i.padCm > 0 ? i.rawCm360 / (multN * 0.85 * i.padCm) : 0
+  const capN = clamp(Math.max(preset.capBase * (1 + 0.12 * sigma), needCap), 1.25, 6.5)
+
+  const out = {} as Record<ProfileId, RawAccelParams>
+  for (const id of PROFILE_IDS) {
+    const st = STYLE[id]
+    const mult = round(clamp(multN * st.mult, 0.3, 1.2), 3)
+    const cap = round(clamp(capN * st.cap, 1.15, 7), 2)
+    const offset = Math.max(0.5, round(offN * st.off, 1))
+    let accel = (curve === 'Jump' ? cap : (model.accel * st.acc) / k)
+    if (curve === 'Linear' || curve === 'Classic') accel = Math.max(accel, (cap - 1) / Math.max(15, 65 * k - offset))
+    out[id] = {
+      ...DEFAULT_PARAMS,
+      curve,
+      gain: true,
+      sensMultiplier: mult,
+      acceleration: round(accel, 3),
+      capType: 'Output',
+      capOutput: cap,
+      capInput: 0,
+      inputOffset: offset,
+      limit: curve === 'Natural' ? cap : DEFAULT_PARAMS.limit,
+      exponent: curve === 'Power' ? 0.6 : 2,
+    }
   }
-  return p
+  return out
 }
 
 // -------------------------------------------------------------------- history

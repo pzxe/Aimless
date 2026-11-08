@@ -359,3 +359,11 @@ html.obs-mode { scrollbar-width: none; }
 html.obs-mode h1, html.obs-mode h2, html.obs-mode .eyebrow, html.obs-mode [class*='uppercase'] { text-shadow: 0 1px 10px rgb(0 0 0 / 0.9), 0 0 2px rgb(0 0 0 / 0.8); }
 html.obs-mode .text-subtle, html.obs-mode .text-muted { color: #d4d7e0; }
 html.obs-mode svg path { stroke: rgb(255 255 255 / 0.4); }
+
+/* Raw Accel: brief ring when a curve is generated, a profile is picked or the replica is reset. */
+@keyframes ra-flash {
+  0% { box-shadow: 0 0 0 0 var(--c-accent-glow), inset 0 0 0 2px var(--c-accent); }
+  100% { box-shadow: 0 0 0 18px transparent, inset 0 0 0 2px transparent; }
+}
+.ra-flash { animation: ra-flash 800ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .ra-flash { animation: none; } }

@@ -1,28 +1,34 @@
 import { describe, expect, it } from 'vitest'
 import {
+  CURVES,
   DEFAULT_PARAMS,
+  PROFILE_IDS,
+  REFERENCE_PARAMS,
   adaptParamsToDpi,
   decodeShareCode,
   diagnose,
   encodeShareCode,
+  generateProfiles,
+  isFlatBaseline,
   parseAny,
   parseConfigJson,
   pushHistory,
   ratioAt,
-  recommend,
   sampleCurve,
+  sanitizeParams,
   slopeAt,
   telemetry,
   toConfigFile,
   toNativeSettings,
   yAxisBounds,
   type AccelConfig,
+  type GenInput,
   type HistoryItem,
   type RawAccelParams,
 } from '../rawAccelEngine'
 
 // The reference setup: Linear + Gain, Offset 9, Sens Multiplier 0.5, Acceleration 0.75, Cap: Output 3.
-const REF: RawAccelParams = { ...DEFAULT_PARAMS }
+const REF: RawAccelParams = { ...REFERENCE_PARAMS }
 
 /** Independent brute-force integration of the slope, to cross-check the closed form. */
 function numericGainRatio(p: RawAccelParams, x: number) {
@@ -217,24 +223,6 @@ describe('Config import / export', () => {
 })
 
 describe('Advisor and history', () => {
-  it('recommends the reference setup for the tactical preset', () => {
-    const p = recommend({ preset: 'tactical', hand: 'hybrid', padCm: 45, rawCm360: 30 })
-    expect(p.inputOffset).toBe(9)
-    expect(p.sensMultiplier).toBe(0.5)
-    expect(p.curve).toBe('Linear')
-  })
-  it('wrist aimers get a smaller offset; arm aimers a larger one', () => {
-    expect(recommend({ preset: 'tactical', hand: 'wrist', padCm: 45, rawCm360: 30 }).inputOffset).toBeLessThan(9)
-    expect(recommend({ preset: 'tactical', hand: 'arm', padCm: 45, rawCm360: 30 }).inputOffset).toBeGreaterThan(9)
-  })
-  it('raises the output cap when the fastest flick would not fit the pad', () => {
-    const p = recommend({ preset: 'tactical', hand: 'hybrid', padCm: 20, rawCm360: 40 })
-    expect(p.capOutput).toBeGreaterThan(3)
-  })
-  it('honours a forced curve type', () => {
-    expect(recommend({ preset: 'tactical', hand: 'hybrid', padCm: 45, rawCm360: null, curve: 'Natural' }).curve).toBe('Natural')
-  })
-
   const base: AccelConfig = { params: REF, dpi: 800, pollingRate: 1000, gameId: 'valorant', gameSens: 0.6, notes: '', name: '' }
   const item = (id: string, over: Partial<HistoryItem> = {}): HistoryItem => ({ id, at: 1, name: id, pinned: false, baseEdpi: 1, peakEdpi: 2, config: base, ...over })
 
@@ -252,5 +240,126 @@ describe('Advisor and history', () => {
     for (let i = 0; i < 100; i++) list = pushHistory(list, item('n' + i, { config: { ...base, dpi: 100 + i } }))
     expect(list.length).toBeLessThanOrEqual(61)
     expect(list.some((h) => h.id === 'pin')).toBe(true)
+  })
+})
+
+describe('Flat baseline (default state)', () => {
+  it('is a flat horizontal line at 1.0 across 0..80 counts/ms', () => {
+    for (let x = 0; x <= 80; x += 0.5) expect(ratioAt(DEFAULT_PARAMS, Math.max(x, 1e-6))).toBeCloseTo(1, 12)
+    for (const pt of sampleCurve(DEFAULT_PARAMS)) expect(pt.y).toBeCloseTo(1, 12)
+    expect(isFlatBaseline(DEFAULT_PARAMS)).toBe(true)
+  })
+  it('uses the documented neutral values', () => {
+    expect(DEFAULT_PARAMS).toMatchObject({ sensMultiplier: 1, yxRatio: 1, rotation: 0, curve: 'Linear', gain: true, acceleration: 0, capType: 'Output', capOutput: 1, inputOffset: 0, lockXY: true })
+  })
+  it('Raw, Base and Peak eDPI all equal the raw eDPI', () => {
+    const t = telemetry(800, 0.4, 80, DEFAULT_PARAMS)
+    expect(t.rawEdpi).toBe(320)
+    expect(t.baseEdpi).toBe(320)
+    expect(t.peakEdpi).toBe(320)
+    expect(t.baseCm360).toBeCloseTo(80, 8)
+    expect(t.peakCm360).toBeCloseTo(80, 8)
+  })
+  it('only the flat curve is flat', () => {
+    expect(isFlatBaseline(REF)).toBe(false)
+    expect(isFlatBaseline({ ...DEFAULT_PARAMS, sensMultiplier: 0.9 })).toBe(false)
+  })
+  it('hostile or missing stored params fall back to the flat baseline', () => {
+    expect(isFlatBaseline(sanitizeParams(undefined))).toBe(true)
+    expect(isFlatBaseline(sanitizeParams({ curve: 'nope' }))).toBe(true)
+  })
+})
+
+describe('generateProfiles (Generate curve)', () => {
+  const base: GenInput = { dpi: 800, pollingRate: 1000, rawCm360: 62.8, rawEdpi: 320, preset: 'tactical', hand: 'hybrid', padCm: 45 }
+  const peak = (g: GenInput, p: RawAccelParams) => telemetry(g.dpi, g.rawEdpi / g.dpi, g.rawCm360, p).peakEdpi
+  const natural = (g: GenInput) => generateProfiles(g).natural
+
+  it('returns three distinct curves ordered slow < natural < fast by peak eDPI', () => {
+    const g = generateProfiles(base)
+    expect(PROFILE_IDS).toEqual(['slow', 'natural', 'fast'])
+    expect(new Set(PROFILE_IDS.map((id) => JSON.stringify(g[id]))).size).toBe(3)
+    expect(peak(base, g.slow)).toBeLessThan(peak(base, g.natural))
+    expect(peak(base, g.natural)).toBeLessThan(peak(base, g.fast))
+  })
+  it('slow has the lowest multiplier and widest offset, fast the highest multiplier and shortest offset', () => {
+    const g = generateProfiles(base)
+    expect(g.slow.sensMultiplier).toBeLessThan(g.natural.sensMultiplier)
+    expect(g.natural.sensMultiplier).toBeLessThan(g.fast.sensMultiplier)
+    expect(g.slow.inputOffset).toBeGreaterThan(g.natural.inputOffset)
+    expect(g.natural.inputOffset).toBeGreaterThan(g.fast.inputOffset)
+    expect(g.slow.acceleration).toBeLessThan(g.fast.acceleration)
+  })
+  it('never returns a flat curve and always stays within the accepted parameter ranges', () => {
+    for (const id of PROFILE_IDS) {
+      const p = generateProfiles(base)[id]
+      expect(isFlatBaseline(p)).toBe(false)
+      expect(sanitizeParams(p)).toEqual(p)
+    }
+  })
+  it('keeps the ordering across DPI, sensitivity, goal, hand, pad, polling and curve type', () => {
+    for (const dpi of [400, 800, 1600, 3200])
+      for (const rawCm360 of [8, 20, 35, 62.8, 150, null])
+        for (const preset of ['tactical', 'tracking', 'hybrid'] as const)
+          for (const pad of [20, 30, 45, 90])
+            for (const curve of ['auto', ...CURVES] as const) {
+              const g: GenInput = { dpi, pollingRate: dpi > 1000 ? 4000 : 1000, rawCm360, rawEdpi: dpi * 0.4, preset, hand: 'arm', padCm: pad, curve }
+              const r = generateProfiles(g)
+              const pk = PROFILE_IDS.map((id) => peak(g, r[id]))
+              expect(pk[0], JSON.stringify(g)).toBeLessThan(pk[1]!)
+              expect(pk[1], JSON.stringify(g)).toBeLessThan(pk[2]!)
+            }
+  })
+  it('DPI scales Input Offset up and Acceleration down for the same hand speed', () => {
+    const a = natural(base)
+    const b = natural({ ...base, dpi: 1600 })
+    expect(b.inputOffset / a.inputOffset).toBeCloseTo(2, 1)
+    expect(b.acceleration).toBeLessThan(a.acceleration)
+    expect(b.acceleration / a.acceleration).toBeCloseTo(0.5, 1)
+  })
+  it('a slow raw sensitivity gets a higher multiplier and stronger cap than a fast one', () => {
+    const slowRaw = natural({ ...base, rawCm360: 62.8 })
+    const fastRaw = natural({ ...base, rawCm360: 18 })
+    expect(slowRaw.sensMultiplier).toBeGreaterThanOrEqual(0.75)
+    expect(slowRaw.sensMultiplier).toBeLessThanOrEqual(0.9)
+    expect(fastRaw.sensMultiplier).toBeLessThanOrEqual(0.65)
+    expect(fastRaw.sensMultiplier).toBeGreaterThanOrEqual(0.45)
+    expect(slowRaw.capOutput).toBeGreaterThan(fastRaw.capOutput)
+  })
+  it('falls back to the eDPI when the game has no cm/360 formula', () => {
+    const lowEdpi = natural({ ...base, rawCm360: null, rawEdpi: 120 })
+    const highEdpi = natural({ ...base, rawCm360: null, rawEdpi: 1200 })
+    expect(lowEdpi.sensMultiplier).toBeGreaterThan(highEdpi.sensMultiplier)
+  })
+  it('aiming goal, hand, pad, polling rate and curve type each change the result', () => {
+    const ref = JSON.stringify(natural(base))
+    expect(JSON.stringify(natural({ ...base, preset: 'tracking' }))).not.toBe(ref)
+    expect(JSON.stringify(natural({ ...base, preset: 'hybrid' }))).not.toBe(ref)
+    expect(JSON.stringify(natural({ ...base, padCm: 25 }))).not.toBe(ref)
+    expect(JSON.stringify(natural({ ...base, pollingRate: 8000 }))).not.toBe(ref)
+    for (const c of ['Natural', 'Classic', 'Power', 'Jump'] as const) {
+      const p = natural({ ...base, curve: c })
+      expect(p.curve).toBe(c)
+      expect(JSON.stringify(p)).not.toBe(ref)
+    }
+    expect(natural({ ...base, curve: 'auto' }).curve).toBe('Linear')
+    expect(natural({ ...base, preset: 'tracking', curve: 'auto' }).curve).toBe('Natural')
+  })
+  it('wrist aimers get a shorter anchor and arm aimers a longer one', () => {
+    const wrist = natural({ ...base, hand: 'wrist' }).inputOffset
+    const hybrid = natural({ ...base, hand: 'hybrid' }).inputOffset
+    const arm = natural({ ...base, hand: 'arm' }).inputOffset
+    expect(wrist).toBeLessThan(hybrid)
+    expect(hybrid).toBeLessThan(arm)
+  })
+  it('a small pad raises the cap so the fastest flick still fits one swipe', () => {
+    const big = natural({ ...base, rawCm360: 60, padCm: 90 })
+    const small = natural({ ...base, rawCm360: 60, padCm: 25 })
+    expect(small.capOutput).toBeGreaterThan(big.capOutput)
+  })
+  it('Generate produces visibly different curves than the flat baseline', () => {
+    const p = natural(base)
+    expect(ratioAt(p, 80)).toBeGreaterThan(ratioAt(p, 1) * 1.3)
+    expect(ratioAt(p, 1)).toBeCloseTo(p.sensMultiplier, 9)
   })
 })

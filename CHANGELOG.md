@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.5.1] - 2026-11-08
+
+### Fixed
+- **Raw Accel: Generate curve now reacts to your setup.** It used to start from the same hardcoded numbers as the panel (Sens Multiplier 0.5, Acceleration 0.75, Cap: Output 3, Input Offset 9), so with the default setup pressing the button changed nothing you could see. The curve is now computed from every input of **Your setup**:
+  - **Mouse DPI:** Input Offset scales with DPI and Acceleration scales against it, because the same hand speed produces more counts/ms at a higher DPI (1600 DPI doubles the offset and halves the acceleration of 800 DPI).
+  - **Game and in-game sensitivity (raw cm/360° and eDPI):** a slow raw sensitivity gets a higher Sens Multiplier (about 0.75 to 0.90) and a stronger Cap: Output so 180° turns are reachable; a fast one gets a lower multiplier (about 0.45 to 0.65) for steadier micro-aim. When a game has no cm/360° formula, the raw eDPI is used instead.
+  - **Aiming goal, hand style, mousepad size and curve type** change the curve shape, the Input Offset anchor, the Acceleration slope and Cap: Output. A small pad raises the cap so the fastest flick still fits in one swipe.
+  - **Polling rate** does not change counts/ms; it only nudges the Input Offset by a few percent (a faster poll is steadier at low speeds).
+- **Flat baseline by default.** Before you generate a curve, and whenever you press **Reset** in the replica, the panel is now a flat 1:1 line: Sens Multiplier 1, Y/X Ratio 1, Rotation 0, Linear with Gain, Acceleration 0, Cap Type Output, Cap: Output 1, Input Offset 0. The graph is a flat line at 1.0 from 0 to 80 counts/ms, and Raw, Base and Peak eDPI all equal your raw eDPI. A "Flat baseline" badge shows while this is the active curve, and the flat baseline is never saved to History. If you opened v2.5.0 and never changed the curve, your stored default is moved to the flat baseline too.
+
+### Added
+- **Three curve profiles per Generate:** **Slow / Control** (lower multiplier, wider flat zone, gentler slope, controlled cap), **Natural / Balanced** (the recommended curve, selected by default) and **Fast / Aggressive** (higher multiplier, shorter flat zone, steeper slope, higher cap). A selector above the replica shows each profile's Base to Peak eDPI, and the peak eDPI always rises from Slow to Natural to Fast. Switching profile, or editing any box by hand, updates the replica fields, the Sensitivity graph and the three eDPI cards at once. Editing by hand deselects the profile.
+- **Visible feedback:** a brief ring flashes around the replica when you press Generate curve, pick a profile or press Reset, and the graph glides to the new curve. Both respect the app's reduced-motion setting.
+- A notice appears when your setup changed after the last Generate ("Press Generate curve to refresh the three profiles").
+- 11 new strings in all five languages.
+
+### Changed
+- `recommend()` is replaced by `generateProfiles()` in `src/services/rawAccelEngine.ts`. `DEFAULT_PARAMS` is now the flat baseline; the old worked example lives on as `REFERENCE_PARAMS`.
+- 12 new tests (268 in total): the flat default, the three profiles and their ordering across a matrix of DPIs, sensitivities, goals, pads and curve types, and each input's effect.
+
 ## [2.5.0] - 2026-11-08
 
 ### Added
