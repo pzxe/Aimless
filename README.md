@@ -72,7 +72,6 @@ Keep your main and alt accounts in an encrypted vault on your own PC (AES-GCM, o
 
 <div align="center">
 
-**[GitHub @pzxe](https://github.com/pzxe)** • **[Twitch 1usl](https://twitch.tv/1usl)** • **[X @87lx](https://x.com/87lx)** • **Discord 1usl**
 
 [MIT License](LICENSE) · Contributions welcome, see [CONTRIBUTING](CONTRIBUTING.md)
 
