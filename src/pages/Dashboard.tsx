@@ -5,6 +5,7 @@ import { gameName } from '@/components/games/GameBadge'
 import { GameSelector } from '@/components/games/GameSelector'
 import { FeedbackCard } from '@/components/dashboard/FeedbackCard'
 import { NewsFeed } from '@/components/dashboard/NewsFeed'
+import { PerspectiveTeaser } from '@/components/dashboard/PerspectiveTeaser'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { CopyButton } from '@/components/ui/CopyButton'
@@ -126,6 +127,8 @@ export default function DashboardPage() {
       </div>
 
       <QuickConvert />
+
+      <PerspectiveTeaser />
 
       <NewsFeed />
 

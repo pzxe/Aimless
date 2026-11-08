@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.5.4] - 2026-11-08
+
+### Added
+- **TPP ⇄ FPP Lab** (sidebar: *TPP ⇄ FPP Lab*, page `/perspective`). Match your sensitivity between a game's third-person and first-person camera, in both directions, so your aim feels the same in each.
+  - **How it works.** A camera with a wider field of view makes the same turn look faster, and a narrower one makes it look slower. Aimless brings both FOVs onto the same axis (horizontal, at your screen shape) and scales the sensitivity by the ratio of how far the two views turn for the same screen distance:
+    - *Screen centre*: `ratio = tan(FOV_to / 2) ÷ tan(FOV_from / 2)`. Best for small aim corrections near the crosshair, and the default.
+    - *Half screen* and *Screen edge*: `ratio = atan(p · tan(FOV_to / 2)) ÷ atan(p · tan(FOV_from / 2))` with `p` = 0.5 or 1 (at the edge this is simply the ratio of the two angles).
+    - *Same 360°*: `ratio = 1`, so both cameras turn the same distance.
+    - The new sensitivity is `old × ratio`, and the new cm/360° is `old cm/360° ÷ ratio`. A TPP → FPP → TPP round trip returns the number you started with.
+  - **Every game with a rotation constant.** Pick any of the 72 supported games (or a game you calibrated yourself); its rotation constant, FOV type (horizontal, vertical or the 4:3 axis), allowed FOV range, fixed-FOV flag and smallest sensitivity step come from the game database. The result shows the nearest value the game accepts and how far off it is. Games with no known constant say so and link to the converter's calibration.
+  - **Live telemetry:** effective cm/360° (source → target), the FOV multiplier (how much bigger things look), the rotation scale, a to-scale comparison of what each camera shows, and the step-by-step working.
+  - **Motion:** the top-down camera glides between the shoulder and the eyes while its field-of-view wedge morphs; readouts pulse when a number changes; the input panel and the result have a slow glowing border. All of it follows the Reduced motion setting.
+  - **Dashboard teaser** card, and an entry in the news feed with a screenshot.
+  - 5 languages (English, Arabic, Spanish, Russian, Portuguese).
+- 14 new tests (the maths, the reversibility, the FOV axes, input checks and a pass over every supported game).
+
+### Known limitations
+- **The database does not hold per-camera FOVs.** Which FOV a game uses in third person versus first person is not published consistently, so Aimless asks for both numbers (they start at the game's default FOV) instead of guessing. If both are equal the sensitivity does not change, and the page says so.
+- **Camera distance is not part of the maths.** An orbiting third-person camera turns by the same angle whatever its distance, so distance changes how far away things look, not how fast you turn. Games that apply their own hidden scale per camera should be checked in the game.
+- The conversion is the same maths as the ADS/zoom tool and is unit-tested, but it has not been compared against any specific game's own TPP/FPP behaviour.
+
 ## [2.5.3] - 2026-11-08
 
 ### Added

@@ -14,6 +14,7 @@ export interface NewsItem {
 }
 
 export const NEWS: readonly NewsItem[] = [
+  { id: 'tppfpp', version: '2.5.4', image: 'tpp-fpp-lab.webp', to: '/perspective' },
   { id: 'padlab', version: '2.5.3', image: 'mousepad-lab.webp', to: '/mousepad' },
   { id: 'accounts', version: '2.5.3', image: 'alt-accounts.webp', to: '/accounts' },
   { id: 'games', version: '2.5.3', image: 'games.webp', to: '/games' },

@@ -52,6 +52,12 @@ Every curve you tweak is saved automatically: turn on **Compare** to lay an old 
 
 <p align="center"><img src="docs/gifs/raw-accel-lab.gif" width="860" alt="The Raw Accel Lab in the Aimless desktop app: eDPI telemetry, the Raw Accel replica, a ghost curve comparison and the PNG export" /></p>
 
+## 🎥 TPP ⇄ FPP Lab <sub>NEW in v2.5.4</sub>
+
+Switch between third-person and first-person without losing your aim. Pick a game, enter your sensitivity in one camera and the FOV of both, and Aimless gives you the matching sensitivity for the other one, with the effective cm/360° and a live look at what each camera sees.
+
+<p align="center"><img src="docs/gifs/tpp-fpp-lab.gif" width="820" alt="The TPP to FPP Lab: switching the source camera, narrowing the first-person FOV and changing the match, with the sensitivity updating live" /></p>
+
 ## 🔐 Alt Accounts Vault & Live Rank Tracker
 
 Keep your main and alt accounts in an encrypted vault on your own PC (AES-GCM, optional PIN lock), with one-click username and password copy. See your live Valorant and Overwatch 2 ranks and RR right inside the app.

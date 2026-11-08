@@ -411,3 +411,32 @@ html.obs-mode svg path { stroke: rgb(255 255 255 / 0.4); }
     linear-gradient(var(--b), var(--b)) bottom right / 14px 1.5px no-repeat,
     linear-gradient(var(--b), var(--b)) bottom right / 1.5px 14px no-repeat;
 }
+
+/* TPP ⇄ FPP lab: a light that circles the input panel and the result, a pulse when a number changes, a camera that glides. */
+@property --tpp-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes tpp-spin { to { --tpp-a: 360deg; } }
+@keyframes tpp-pulse {
+  0% { opacity: 0.35; transform: translateY(4px) scale(0.97); text-shadow: 0 0 0 transparent; }
+  45% { opacity: 1; text-shadow: 0 0 22px var(--c-accent-glow); }
+  100% { opacity: 1; transform: none; text-shadow: 0 0 0 transparent; }
+}
+.tpp-pulse { animation: tpp-pulse 650ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tpp-glow { position: relative; }
+.tpp-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(from var(--tpp-a), transparent 0 58%, var(--c-accent) 82%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0.75;
+  animation: tpp-spin 7s linear infinite;
+}
+.tpp-cam { transition: transform 750ms cubic-bezier(0.22, 1, 0.36, 1); }
+.tpp-wedge { transition: d 750ms cubic-bezier(0.22, 1, 0.36, 1); }
+.tpp-frame { transition: width 650ms cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .tpp-glow::before { animation: none; } .tpp-pulse { animation: none; } }

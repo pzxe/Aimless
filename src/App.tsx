@@ -24,6 +24,7 @@ const GamesPage = lazy(() => import('@/pages/Games'))
 const SettingsPage = lazy(() => import('@/pages/Settings'))
 const MousepadPage = lazy(() => import('@/pages/Mousepad'))
 const RawAccelPage = lazy(() => import('@/pages/RawAccelPage'))
+const TppFppPage = lazy(() => import('@/pages/TppFppPage'))
 const TournamentsPage = lazy(() => import('@/pages/Tournaments'))
 const TournamentViewPage = lazy(() => import('@/pages/TournamentView'))
 const LiveViewPage = lazy(() => import('@/pages/LiveView'))
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="/tournaments/:id" element={<TournamentViewPage />} />
           <Route path="/mousepad" element={<MousepadPage />} />
           <Route path="/rawaccel" element={<RawAccelPage />} />
+          <Route path="/perspective" element={<TppFppPage />} />
           <Route path="/profiles" element={<ProfilesPage />} />
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/history" element={<HistoryPage />} />

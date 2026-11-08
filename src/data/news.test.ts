@@ -39,7 +39,7 @@ describe('dashboard news feed', () => {
   })
 
   it('only links to pages that exist in the app', () => {
-    const routes = ['/mousepad', '/accounts', '/games', '/tools', '/rawaccel', '/tournaments', '/converter']
+    const routes = ['/mousepad', '/accounts', '/games', '/tools', '/rawaccel', '/perspective', '/tournaments', '/converter']
     for (const n of NEWS) if (n.to) expect(routes, n.id).toContain(n.to)
   })
 })
