@@ -44,6 +44,14 @@ See exactly how much desk space a full 360° turn takes on your mousepad. Change
 
 <p align="center"><img src="docs/gifs/mousepad-sensitivity.gif" width="820" alt="Changing sensitivity from 1.6 to 1.2 and watching the cm/360° gauge and the red 360° line update" /></p>
 
+## 📈 Raw Accel Lab, eDPI Analyzer & 1:1 Blueprint Generator <sub>NEW in v2.5.0</sub>
+
+Stop guessing your Raw Accel numbers. Tell Aimless your DPI, game and playstyle and it builds a curve for you, with a live read-out of your **Base eDPI** for calm micro-aim and your **Peak eDPI** for fast 180° flicks. Every setting shows up in a 1:1 copy of the Raw Accel window (exact field names, dark or classic white), so you can type it in within seconds.
+
+Every curve you tweak is saved automatically: turn on **Compare** to lay an old one over the graph as a dashed **ghost curve**. Send a curve to a friend as a file or a code, and one click adapts it from their DPI to yours so it feels the same on your mouse. Then export a **PNG blueprint** or a showcase card and paste it straight into Discord.
+
+<p align="center"><img src="docs/gifs/raw-accel-lab.gif" width="860" alt="The Raw Accel Lab in the Aimless desktop app: eDPI telemetry, the Raw Accel replica, a ghost curve comparison and the PNG export" /></p>
+
 ## 🔐 Alt Accounts Vault & Live Rank Tracker
 
 Keep your main and alt accounts in an encrypted vault on your own PC (AES-GCM, optional PIN lock), with one-click username and password copy. See your live Valorant and Overwatch 2 ranks and RR right inside the app.

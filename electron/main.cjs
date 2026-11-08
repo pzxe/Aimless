@@ -153,8 +153,10 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null)
-    // No camera, microphone, notifications, etc. The app needs none.
-    session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
+    // No camera, microphone, notifications, etc. The app needs none. The one exception is writing to the
+    // clipboard (the Raw Accel "Copy image" button); reading the clipboard stays blocked.
+    session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => callback(permission === 'clipboard-sanitized-write'))
+    session.defaultSession.setPermissionCheckHandler((_wc, permission) => permission === 'clipboard-sanitized-write')
     createWindow()
     updater.scheduleStartupCheck()
   })

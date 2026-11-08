@@ -48,6 +48,7 @@ export const STORAGE_KEYS = {
   vault: 'sc.vault',
   rankSettings: 'sc.rank',
   valorantTiers: 'sc.valorantTiers',
+  rawAccel: 'sc.rawaccel',
 } as const
 
 export function clearAllStorage() {

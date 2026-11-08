@@ -2,6 +2,28 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] - 2026-11-08
+
+### Added
+- **Raw Accel Advisor** (new **Raw Accel** page in the sidebar). Build, check and share a Raw Accel curve for your setup. Aimless does not touch your mouse driver; you copy the numbers into Raw Accel yourself.
+  - **Setup wizard:** mouse DPI (400, 800, 1600, 3200 or custom), polling rate, game and in-game sensitivity (taken from the Converter, with a Sync button), three aiming goals (tactical micro-control, smooth tracking, low-sens anchor with high-sens entry), hand style, mousepad size and curve type (Linear with Gain, Natural, Classic, Power, Jump).
+  - **Base to Peak eDPI telemetry:** raw eDPI, the slow-aim Base eDPI (raw eDPI x Sens Multiplier) and the Peak eDPI for fast flicks (raw eDPI x Sens Multiplier x Cap: Output), each with its cm/360°.
+  - **Curve diagnostic report:** micro-adjustment stability score, 180° flick speed rating, smoothness rating and plain-language advice.
+  - **1:1 Raw Accel replica:** the Raw Accel fields in the same order with the exact English names (`Sens Multiplier`, `Y/X Ratio`, `Rotation`, `Gain`, `Acceleration`, `Cap Type`, `Cap: Output`, `Input Offset`), the Sensitivity graph (0 to 80 counts/ms, Ratio of Output to Input), one-click copy buttons, and an Aimless Dark or Raw Accel Classic white look.
+  - **Automatic curve history:** every curve you generate, tweak or import is saved on your device. Restore, pin, rename or delete entries, and turn on **Compare** to draw a saved curve as a dashed ghost line over the current one.
+  - **Friend sharing:** export a `.aimless-accel.json` file (and a copied `AIMLESS-RA:` share code), import a friend's file by drag and drop or by pasting a code, and press **Adapt friend's curve to my DPI** to keep the same hand speed and cm/360° on a different mouse DPI. A native `settings.json` download is included as a best effort.
+  - **PNG export:** save or copy a classic Raw Accel window image or a 16:9 showcase card with the graph, parameters, Base to Peak eDPI, cm/360° range and the diagnostic verdict.
+- The engine lives in `src/services/rawAccelEngine.ts` (Gain is the running average of the curve's slope, so Linear with Gain stays flat until the Input Offset and then bends smoothly) and the image renderer in `src/services/rawAccelRender.ts`.
+- About 110 new strings in all five languages (the Raw Accel field names and axis titles stay in English everywhere).
+- 37 new tests (256 in total): curve math, eDPI, diagnostics, DPI adaptation, import and export, and the SVG output.
+
+### Fixed
+- Copying an image to the clipboard is now allowed in the Windows app. It was blocked before because the app denied every permission request; clipboard reading is still blocked.
+
+### Known limitations
+- Linear and Classic curves follow Raw Accel's definition of Gain; Natural, Power and Jump are close approximations rather than a bit-exact copy of the driver.
+- The native `settings.json` export is best effort because the file layout differs between Raw Accel versions. If Raw Accel rejects it, type the values from the replica panel.
+
 ## [2.4.0] - 2026-11-07
 
 ### Added
