@@ -49,6 +49,7 @@ export const STORAGE_KEYS = {
   rankSettings: 'sc.rank',
   valorantTiers: 'sc.valorantTiers',
   rawAccel: 'sc.rawaccel',
+  padCalibration: 'sc.padcal',
 } as const
 
 export function clearAllStorage() {

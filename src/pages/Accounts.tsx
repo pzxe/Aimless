@@ -19,10 +19,12 @@ import { useProfiles } from '@/store/profilesStore'
 import { useRankSettings } from '@/store/rankSettingsStore'
 import { cn } from '@/utils/cn'
 
-type SortKey = 'recent' | 'rank' | 'name' | 'game'
+type SortKey = 'custom' | 'recent' | 'rank' | 'name' | 'game'
 
 function sortAccounts(list: Account[], key: SortKey): Account[] {
   const out = [...list]
+  // the vault's own array order IS the user's arrangement (new accounts are added on top)
+  if (key === 'custom') return out
   const fav = (a: Account, b: Account) => Number(b.favorite) - Number(a.favorite)
   if (key === 'rank') out.sort((a, b) => fav(a, b) || rankScore(b.live, b.rankTier, b.rr) - rankScore(a.live, a.rankTier, a.rr) || a.label.localeCompare(b.label))
   else if (key === 'name') out.sort((a, b) => fav(a, b) || a.label.localeCompare(b.label))
@@ -36,7 +38,7 @@ export default function AccountsPage() {
   const status = useAccounts((s) => s.status)
   const accounts = useAccounts((s) => s.accounts)
   const pinEnabled = useAccounts((s) => s.pinEnabled)
-  const { init, lock, remove, toggleFavorite, removePin, wipe } = useAccounts()
+  const { init, lock, remove, toggleFavorite, reorder, removePin, wipe } = useAccounts()
   const profiles = useProfiles((s) => s.profiles)
   const { fromProfile } = useLoadIntoConverter()
   const { refresh, busy } = useRankRefresh()
@@ -48,7 +50,10 @@ export default function AccountsPage() {
   const [region, setRegion] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [favOnly, setFavOnly] = useState(false)
-  const [sort, setSort] = useState<SortKey>('recent')
+  const [sort, setSort] = useState<SortKey>('custom')
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [overId, setOverId] = useState<string | null>(null)
+  const [armedId, setArmedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<Account | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState<Account | null>(null)
@@ -76,6 +81,32 @@ export default function AccountsPage() {
     })
     return sortAccounts(list, sort)
   }, [accounts, query, game, region, statusFilter, favOnly, sort])
+
+  // Dragging only makes sense on the full list in "My order": a filtered or re-sorted view would drop cards into the wrong place.
+  const filtersOn = query.trim() !== '' || game !== '' || region !== '' || statusFilter !== '' || favOnly
+  const canReorder = sort === 'custom' && !filtersOn && accounts.length > 1
+  const moveBy = (id: string, delta: -1 | 1) => {
+    const ids = accounts.map((a) => a.id)
+    const from = ids.indexOf(id)
+    const to = from + delta
+    if (from < 0 || to < 0 || to >= ids.length) return
+    ids.splice(to, 0, ids.splice(from, 1)[0]!)
+    reorder(ids)
+  }
+  const dropOn = (targetId: string) => {
+    if (!dragId || dragId === targetId) return
+    const ids = accounts.map((a) => a.id)
+    const from = ids.indexOf(dragId)
+    const to = ids.indexOf(targetId)
+    if (from < 0 || to < 0) return
+    ids.splice(to, 0, ids.splice(from, 1)[0]!)
+    reorder(ids)
+  }
+  const endDrag = () => {
+    setDragId(null)
+    setOverId(null)
+    setArmedId(null)
+  }
 
   const openAdd = () => {
     setEditing(null)
@@ -145,6 +176,7 @@ export default function AccountsPage() {
                 ))}
               </Select>
               <Select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} aria-label={t('accounts.sort.label')}>
+                <option value="custom">{t('accounts.sort.custom')}</option>
                 <option value="recent">{t('accounts.sort.recent')}</option>
                 <option value="rank">{t('accounts.sort.rank')}</option>
                 <option value="name">{t('accounts.sort.name')}</option>
@@ -172,26 +204,59 @@ export default function AccountsPage() {
           ) : filtered.length === 0 ? (
             <EmptyState icon={<Search />} title={t('accounts.noMatch')} />
           ) : (
-            <div className="grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((a) => (
-                <AccountCard
-                  key={a.id}
-                  account={a}
-                  busy={busy.has(a.id)}
-                  onRefresh={() => void refresh(a)}
-                  onEdit={() => {
-                    setEditing(a)
-                    setDialogOpen(true)
-                  }}
-                  onDelete={() => setDeleting(a)}
-                  onToggleFavorite={() => toggleFavorite(a.id)}
-                  onLoadProfile={(id) => {
-                    const p = profiles.find((x) => x.id === id)
-                    if (p) fromProfile(p)
-                  }}
-                />
-              ))}
-            </div>
+            <>
+              {accounts.length > 1 && (
+                <p className="mb-2 text-xs text-subtle">{sort !== 'custom' ? t('accounts.reorder.pickCustom') : filtersOn ? t('accounts.reorder.locked') : t('accounts.reorder.hint')}</p>
+              )}
+              <div className="grid items-stretch gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {filtered.map((a, i) => (
+                  <div
+                    key={a.id}
+                    draggable={canReorder && armedId === a.id}
+                    onDragStart={(e) => {
+                      if (!canReorder) return
+                      e.dataTransfer.effectAllowed = 'move'
+                      e.dataTransfer.setData('text/plain', a.id) // Firefox only starts a drag when data is set
+                      setDragId(a.id)
+                    }}
+                    onDragOver={(e) => {
+                      if (!dragId) return
+                      e.preventDefault()
+                      e.dataTransfer.dropEffect = 'move'
+                      if (overId !== a.id) setOverId(a.id)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      dropOn(a.id)
+                      endDrag()
+                    }}
+                    onDragEnd={endDrag}
+                    className={cn(
+                      'rounded-2xl transition-[opacity,transform,box-shadow] duration-150',
+                      dragId === a.id && 'scale-[0.98] opacity-50',
+                      dragId && overId === a.id && dragId !== a.id && 'ring-2 ring-accent ring-offset-2 ring-offset-bg',
+                    )}
+                  >
+                    <AccountCard
+                      account={a}
+                      busy={busy.has(a.id)}
+                      onRefresh={() => void refresh(a)}
+                      onEdit={() => {
+                        setEditing(a)
+                        setDialogOpen(true)
+                      }}
+                      onDelete={() => setDeleting(a)}
+                      onToggleFavorite={() => toggleFavorite(a.id)}
+                      onLoadProfile={(id) => {
+                        const p = profiles.find((x) => x.id === id)
+                        if (p) fromProfile(p)
+                      }}
+                      reorder={canReorder ? { first: i === 0, last: i === filtered.length - 1, onArm: () => setArmedId(a.id), onMove: (d) => moveBy(a.id, d) } : undefined}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
           <div className="mt-6 grid items-stretch gap-3 lg:grid-cols-2">

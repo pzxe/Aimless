@@ -33,6 +33,9 @@ const STEAM_APP = {
   titanfall: null,
   cod4: 7940, 'mw2-2009': 10180, bo1: 42700, ut99: 13240, ut2004: 13230, ut3: 13210, jka: 6020,
   coldwar: 1985810, reflex: 328070, bf6: 2807960, bo6: 1938090, bo7: 1938090,
+  l4d: 500, portal: 400, hl2dm: 320, cscz: 80, dod: 30, alienswarm: 630, hlopfor: 50, hlbshift: 130,
+  nmrih: 224260, fof: 265630, contagion: 238430, doi: 447820, zps: 17500, synergy: 17520, dystopia: 17580,
+  bloodlines: 2600, darkmessiah: 2100, svencoop: 225840, 'alienswarm-rd': 563560, cod1: 2620, jk2: 6030,
   hunt: 594650, verdun: 242860, realmroyale: 813820, quake2: 2320, quake3: 2200, rtcw: 9010, toxikk: 324810, payday2: 218620,
 }
 
@@ -95,6 +98,8 @@ const OFFSITE = {
   paladins: { wiki: 'Paladins (video game)', domain: 'paladins.com' },
   hunt: { wiki: 'Hunt: Showdown', domain: 'huntshowdown.com' },
   payday2: { wiki: 'Payday 2', domain: 'payday2.com' },
+  openarena: { wiki: 'OpenArena', domain: 'openarena.ws' },
+  nexuiz: { wiki: 'Nexuiz', domain: 'alientrap.org' },
 }
 
 /** Publisher-wide favicons that would put the same logo on many different games: never used. */

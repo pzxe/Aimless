@@ -45,6 +45,8 @@ interface AccountsState {
   update: (id: string, patch: Partial<AccountDraft>) => void
   remove: (id: string) => void
   toggleFavorite: (id: string) => void
+  /** Put the accounts in this id order (ids not listed keep their relative order at the end). The order is saved with the vault. */
+  reorder: (ids: string[]) => void
   setLive: (id: string, live: LiveRank) => void
   importMany: (accounts: Account[]) => number
   exportBackup: (passphrase: string) => Promise<string>
@@ -236,6 +238,23 @@ export const useAccounts = create<AccountsState>()((set, get) => {
       commit(get().accounts.map((a) => (a.id === id ? { ...a, ...patch, updatedAt: Date.now() } : a))),
     remove: (id) => commit(get().accounts.filter((a) => a.id !== id)),
     toggleFavorite: (id) => commit(get().accounts.map((a) => (a.id === id ? { ...a, favorite: !a.favorite } : a))),
+    reorder: (ids) => {
+      const current = get().accounts
+      const byId = new Map(current.map((a) => [a.id, a]))
+      const seen = new Set<string>()
+      const next: Account[] = []
+      for (const id of ids) {
+        const a = byId.get(id)
+        if (a && !seen.has(id)) {
+          seen.add(id)
+          next.push(a)
+        }
+      }
+      for (const a of current) if (!seen.has(a.id)) next.push(a)
+      // nothing moved: do not rewrite the encrypted vault
+      if (next.every((a, i) => a === current[i])) return
+      commit(next)
+    },
     // Live rank refreshes don't change `updatedAt`: they are not edits.
     setLive: (id, live) =>
       commit(get().accounts.map((a) => (a.id === id ? { ...a, live, liveAt: Date.now() } : a))),

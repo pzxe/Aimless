@@ -276,7 +276,6 @@ export function UpdateNotificationBell() {
                     <Check className="size-3.5" /> {t('bell.status.latest')}
                   </p>
                 )}
-                {info.intro && <p className="text-sm leading-relaxed text-muted">{info.intro}</p>}
                 {info.highlights.length > 0 ? (
                   <div>
                     <div className="mb-1.5 text-[11px] font-semibold tracking-wider text-subtle uppercase">{t('bell.highlights')}</div>
@@ -286,9 +285,9 @@ export function UpdateNotificationBell() {
                       ))}
                     </ul>
                   </div>
-                ) : !info.intro ? (
+                ) : (
                   <p className="text-sm text-muted">{t('bell.empty')}</p>
-                ) : null}
+                )}
               </>
             ) : loading ? (
               <p className="flex items-center gap-2 py-6 text-sm text-muted"><RefreshCw className="size-4 motion-safe:animate-spin" /> {t('bell.status.checking')}</p>

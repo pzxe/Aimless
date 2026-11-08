@@ -1,7 +1,7 @@
-import { Calculator, Crosshair, MousePointer2, Ruler, ScanEye } from 'lucide-react'
+import { Archive, ArrowRight, Calculator, Cloud, Cpu, Crosshair, KeyRound, Link2, MousePointer2, RectangleHorizontal, Ruler, ScanEye, ShieldCheck, Trophy, type LucideIcon } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { usePersistentState } from '@/hooks/usePersistentState'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { GameSelector } from '@/components/games/GameSelector'
 import { PageHeader } from '@/components/layout/AppShell'
@@ -30,7 +30,7 @@ import { useSettings } from '@/store/settingsStore'
 
 function ToolCard({ id, icon, title, desc, children, action, help }: { id: string; icon: ReactNode; title: string; desc: string; children: ReactNode; action?: ReactNode; help?: ReactNode }) {
   return (
-    <Card id={id} className="flex scroll-mt-20 flex-col">
+    <Card id={id} className="flex scroll-mt-24 flex-col transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-pop">
       <CardHeader title={title} description={desc} icon={icon} action={action} help={help} />
       <CardBody className="flex-1 space-y-4">{children}</CardBody>
     </Card>
@@ -266,6 +266,50 @@ function FovTool() {
   )
 }
 
+/** A card that opens another part of the app (the calibrator, the vault, live sharing...). */
+function ToolLink({ to, icon: Icon, title, desc }: { to: string; icon: LucideIcon; title: string; desc: string }) {
+  const t = useT()
+  return (
+    <Link
+      to={to}
+      className="group card flex items-center gap-3.5 p-4 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-accent-line hover:shadow-pop focus-visible:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]"
+    >
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent transition-transform duration-200 group-hover:scale-105 [&_svg]:size-5">
+        <Icon />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold">{title}</span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-muted">{desc}</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-subtle transition-colors group-hover:text-accent">
+        {t('tools.open')}
+        <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" />
+      </span>
+    </Link>
+  )
+}
+
+/** One labelled group of tools: an icon tile, a title and a one-line purpose, then its cards. */
+function Group({ id, icon: Icon, title, desc, children }: { id: string; icon: LucideIcon; title: string; desc: string; children: ReactNode }) {
+  return (
+    <section id={id} aria-labelledby={`${id}-h`} className="scroll-mt-24">
+      <div className="mb-3.5 flex items-center gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-accent-line bg-accent-soft text-accent shadow-[0_0_24px_-8px_var(--c-accent-glow)] [&_svg]:size-[18px]">
+          <Icon />
+        </span>
+        <div className="min-w-0">
+          <h2 id={`${id}-h`} className="display text-lg leading-tight">
+            {title}
+          </h2>
+          <p className="text-xs text-muted">{desc}</p>
+        </div>
+        <span aria-hidden="true" className="ms-2 hidden h-px flex-1 bg-gradient-to-r from-border-strong to-transparent rtl:bg-gradient-to-l sm:block" />
+      </div>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">{children}</div>
+    </section>
+  )
+}
+
 export default function ToolsPage() {
   const t = useT()
   const { hash } = useLocation()
@@ -274,19 +318,55 @@ export default function ToolsPage() {
     const el = document.getElementById(hash.slice(1))
     if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   }, [hash])
+  const groups = [
+    { id: 'group-sensitivity', icon: Calculator, label: t('tools.group.sens.title') },
+    { id: 'group-hardware', icon: Cpu, label: t('tools.group.hardware.title') },
+    { id: 'group-cloud', icon: Cloud, label: t('tools.group.cloud.title') },
+    { id: 'group-backup', icon: ShieldCheck, label: t('tools.group.backup.title') },
+  ]
   return (
     <>
       <PageHeader eyebrow={t('tools.eyebrow')} title={t('tools.title')} description={t('tools.subtitle')} />
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <Cm360Tool />
-        <TargetTool />
-        <DpiTool />
-        <EdpiTool />
-        <FovTool />
-        <AdsTool />
-        <div className="lg:col-span-2">
-          <PollingTool />
-        </div>
+      <nav aria-label={t('tools.jump')} className="-mt-2 mb-7 flex flex-wrap gap-2">
+        {groups.map((g) => (
+          <a
+            key={g.id}
+            href={`#${g.id}`}
+            onClick={(e) => {
+              e.preventDefault()
+              document.getElementById(g.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-surface-2/60 px-3 text-xs font-medium text-muted transition-[color,border-color,transform] duration-150 hover:-translate-y-px hover:border-accent-line hover:text-text active:translate-y-0 [&_svg]:size-3.5"
+          >
+            <g.icon />
+            {g.label}
+          </a>
+        ))}
+      </nav>
+      <div className="space-y-10">
+        <Group id="group-sensitivity" icon={Calculator} title={t('tools.group.sens.title')} desc={t('tools.group.sens.desc')}>
+          <Cm360Tool />
+          <TargetTool />
+          <DpiTool />
+          <EdpiTool />
+          <AdsTool />
+          <FovTool />
+        </Group>
+        <Group id="group-hardware" icon={Cpu} title={t('tools.group.hardware.title')} desc={t('tools.group.hardware.desc')}>
+          <div className="lg:col-span-2">
+            <PollingTool />
+          </div>
+          <ToolLink to="/mousepad" icon={RectangleHorizontal} title={t('tools.link.mousepad.title')} desc={t('tools.link.mousepad.desc')} />
+          <ToolLink to="/rawaccel" icon={MousePointer2} title={t('tools.link.rawaccel.title')} desc={t('tools.link.rawaccel.desc')} />
+        </Group>
+        <Group id="group-cloud" icon={Cloud} title={t('tools.group.cloud.title')} desc={t('tools.group.cloud.desc')}>
+          <ToolLink to="/tournaments" icon={Trophy} title={t('tools.link.live.title')} desc={t('tools.link.live.desc')} />
+          <ToolLink to="/tournaments" icon={Link2} title={t('tools.link.shared.title')} desc={t('tools.link.shared.desc')} />
+        </Group>
+        <Group id="group-backup" icon={ShieldCheck} title={t('tools.group.backup.title')} desc={t('tools.group.backup.desc')}>
+          <ToolLink to="/accounts" icon={KeyRound} title={t('tools.link.vault.title')} desc={t('tools.link.vault.desc')} />
+          <ToolLink to="/profiles" icon={Archive} title={t('tools.link.profiles.title')} desc={t('tools.link.profiles.desc')} />
+        </Group>
       </div>
     </>
   )

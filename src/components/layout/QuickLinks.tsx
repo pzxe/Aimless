@@ -4,17 +4,17 @@ import { useT, type TranslationKey } from '@/i18n'
 import { cn } from '@/utils/cn'
 import { LINKS } from '@/utils/links'
 import { GitHubMark } from './GitHubLink'
-import { TwitchMark } from './BrandMarks'
+import { XMark } from './BrandMarks'
 
 const ITEMS: { key: string; href: string; label: TranslationKey; icon: ReactNode; hover: string }[] = [
   { key: 'github', href: LINKS.github, label: 'quick.github', icon: <GitHubMark className="size-[18px]" />, hover: 'hover:text-text' },
   { key: 'star', href: LINKS.repo, label: 'quick.star', icon: <Star className="size-[18px]" />, hover: 'hover:border-warning/50 hover:text-warning hover:shadow-[0_0_16px_-2px_var(--color-warning)] [&:hover_svg]:fill-current' },
-  { key: 'twitch', href: LINKS.twitch, label: 'quick.twitch', icon: <TwitchMark className="size-[18px]" />, hover: 'hover:border-[#9146ff]/60 hover:text-[#9146ff]' },
+  { key: 'x', href: LINKS.xLab, label: 'quick.x', icon: <XMark className="size-[17px]" />, hover: 'hover:border-text/50 hover:text-text hover:shadow-[0_0_16px_-4px_var(--color-text)]' },
   { key: 'releases', href: LINKS.releases, label: 'quick.releases', icon: <Sparkles className="size-[18px]" />, hover: 'hover:border-accent/60 hover:text-accent hover:shadow-[0_0_16px_-2px_var(--color-accent)]' },
 ]
 
 /**
- * Four external quick links. They are plain `target="_blank"` anchors: the browser opens a new tab, and in
+ * Four external quick links (developer GitHub, star the repo, the project's X account, releases). They are plain `target="_blank"` anchors: the browser opens a new tab, and in
  * the desktop app the window's open handler passes https URLs to shell.openExternal (default browser).
  */
 export function QuickLinks({ className }: { className?: string }) {

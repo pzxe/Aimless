@@ -191,4 +191,33 @@ export const CATALOG: GameDefinition[] = [
   game('serioussam4', 'Serious Sam 4', 'SS4', 'singleplayer', 'none', 'Serious Engine 4'),
   game('ultrakill', 'Ultrakill', 'UK', 'singleplayer', 'none', 'Unity'),
   game('prey2017', 'Prey (2017)', 'PRY', 'singleplayer', 'none', 'CryEngine'),
+  // Added in v2.5.3. Same rules as above: only an engine constant that is documented (Valve's m_yaw for GoldSrc and
+  // Source, the id Tech / ioquake3 / DarkPlaces m_yaw cvar) and never a guess. Valve's own titles are verified;
+  // third-party titles built on the same engine are approximate, like their siblings above.
+  // Valve, GoldSrc and Source
+  game('l4d', 'Left 4 Dead', 'L4D', 'coop', 'source', 'Source'),
+  game('portal', 'Portal', 'P1', 'singleplayer', 'source', 'Source'),
+  game('hl2dm', 'Half-Life 2: Deathmatch', 'HL2DM', 'arena', 'source', 'Source'),
+  game('cscz', 'Counter-Strike: Condition Zero', 'CZ', 'tactical', 'source', 'GoldSrc'),
+  game('dod', 'Day of Defeat', 'DOD', 'tactical', 'source', 'GoldSrc'),
+  game('alienswarm', 'Alien Swarm', 'AS', 'coop', 'source', 'Source'),
+  game('hlopfor', 'Half-Life: Opposing Force', 'HLOF', 'singleplayer', 'source', 'GoldSrc'),
+  game('hlbshift', 'Half-Life: Blue Shift', 'HLBS', 'singleplayer', 'source', 'GoldSrc'),
+  // Third-party Source and GoldSrc games
+  game('nmrih', 'No More Room in Hell', 'NMRIH', 'coop', 'sourceApprox', 'Source'),
+  game('fof', 'Fistful of Frags', 'FOF', 'arena', 'sourceApprox', 'Source'),
+  game('contagion', 'Contagion', 'CTG', 'coop', 'sourceApprox', 'Source'),
+  game('doi', 'Day of Infamy', 'DOI', 'military', 'sourceApprox', 'Source'),
+  game('zps', 'Zombie Panic! Source', 'ZPS', 'coop', 'sourceApprox', 'Source'),
+  game('synergy', 'Synergy', 'SYN', 'coop', 'sourceApprox', 'Source'),
+  game('dystopia', 'Dystopia', 'DYS', 'tactical', 'sourceApprox', 'Source'),
+  game('bloodlines', 'Vampire: The Masquerade - Bloodlines', 'VTMB', 'singleplayer', 'sourceApprox', 'Source (modified)'),
+  game('darkmessiah', 'Dark Messiah of Might and Magic', 'DMM', 'singleplayer', 'sourceApprox', 'Source'),
+  game('svencoop', 'Sven Co-op', 'SVEN', 'coop', 'sourceApprox', 'GoldSrc'),
+  game('alienswarm-rd', 'Alien Swarm: Reactive Drop', 'ASRD', 'coop', 'sourceApprox', 'Source'),
+  // id Tech 3 family
+  game('cod1', 'Call of Duty (2003)', 'COD1', 'classic', 'idtechApprox', 'id Tech 3'),
+  game('jk2', 'Star Wars Jedi Knight II: Jedi Outcast', 'JK2', 'classic', 'idtechApprox', 'id Tech 3'),
+  game('openarena', 'OpenArena', 'OA', 'arena', 'idtechApprox', 'ioquake3'),
+  game('nexuiz', 'Nexuiz', 'NXZ', 'arena', 'idtechApprox', 'DarkPlaces'),
 ]

@@ -27,6 +27,8 @@ export interface SettingsState {
   units: Units
   mousepad: MousepadPreset
   mousepadCustomCm: number
+  /** Depth (front to back) of a custom or calibrated pad. */
+  mousepadCustomHeightCm: number
   motion: MotionPref
   density: Density
   accent: Accent
@@ -62,6 +64,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
   units: 'cm',
   mousepad: 'large',
   mousepadCustomCm: 60,
+  mousepadCustomHeightCm: 40,
   motion: 'full',
   density: 'comfortable',
   accent: 'crimson',
@@ -77,7 +80,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
 
 export const PREFERENCE_KEYS = [
   'language', 'theme', 'precision', 'defaultDpi', 'fovDisplay', 'units', 'mousepad',
-  'mousepadCustomCm', 'motion', 'density', 'accent', 'startupView', 'sound',
+  'mousepadCustomCm', 'mousepadCustomHeightCm', 'motion', 'density', 'accent', 'startupView', 'sound',
   'autoCheckUpdates', 'autoDownloadUpdates',
 ] as const satisfies readonly (keyof Preferences)[]
 
@@ -129,8 +132,9 @@ export const useSettings = create<SettingsState & SettingsActions>()(
           defaultDpi: num(p.defaultDpi, 1, 64000, current.defaultDpi),
           fovDisplay: oneOf(p.fovDisplay, ['horizontal', 'vertical'], 'horizontal'),
           units: oneOf(p.units, ['cm', 'in'], 'cm'),
-          mousepad: oneOf(p.mousepad, ['small', 'medium', 'large', 'xl', 'custom'], current.mousepad),
+          mousepad: oneOf(p.mousepad, ['small', 'medium', 'large', 'xl', 'deskmat', 'custom'], current.mousepad),
           mousepadCustomCm: num(p.mousepadCustomCm, 5, 300, current.mousepadCustomCm),
+          mousepadCustomHeightCm: num(p.mousepadCustomHeightCm, 5, 200, current.mousepadCustomHeightCm),
           motion: oneOf(p.motion, ['full', 'reduced', 'instant'], 'full'),
           density: oneOf(p.density, ['comfortable', 'compact'], 'comfortable'),
           accent: oneOf(p.accent, ACCENTS.map((a) => a.id), current.accent),

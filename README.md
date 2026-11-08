@@ -7,7 +7,7 @@
 ### One sens. Every game.
 **سنس واحد. لكل الألعاب.**
 
-Keep your exact muscle memory across 125+ shooter games, track your ranks, manage your alt accounts, and run live tournament brackets — free and offline.
+Keep your exact muscle memory across 145+ shooter games, track your ranks, manage your alt accounts, and run live tournament brackets — free and offline.
 
 [![Latest release](https://img.shields.io/github/v/release/pzxe/Aimless?label=release&color=ff2e4d)](https://github.com/pzxe/Aimless/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/pzxe/Aimless/total?label=downloads&color=3fcf8e)](https://github.com/pzxe/Aimless/releases)
@@ -28,7 +28,7 @@ Keep your exact muscle memory across 125+ shooter games, track your ranks, manag
 
 ## 🎯 Instant Sensitivity Converter
 
-Pick your main game, enter your sens and DPI, and get the exact matching sensitivity for 125+ FPS games, so your 360° turn feels identical everywhere. Every game is labelled *Verified* or *Approximate*, so you always know how much to trust the number.
+Pick your main game, enter your sens and DPI, and get the exact matching sensitivity for 145+ FPS games, so your 360° turn feels identical everywhere. Every game is labelled *Verified* or *Approximate*, so you always know how much to trust the number.
 
 <p align="center"><img src="docs/gifs/converter.gif" width="820" alt="Converting sensitivity between Counter-Strike 2 and Valorant, with the matching cm/360°" /></p>
 

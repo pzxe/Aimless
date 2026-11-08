@@ -96,6 +96,78 @@ describe('alt accounts vault', () => {
   })
 })
 
+describe('alt accounts custom order', () => {
+  beforeEach(async () => {
+    useAccounts.getState().wipe()
+    useAccounts.setState({ status: 'ready' })
+  })
+  const labels = () => useAccounts.getState().accounts.map((a) => a.label)
+  const addThree = () => {
+    const s = useAccounts.getState()
+    s.add({ ...draft(), label: 'C' })
+    s.add({ ...draft(), label: 'B' })
+    s.add({ ...draft(), label: 'A' })
+    return useAccounts.getState().accounts.map((a) => a.id) // newest first: A B C
+  }
+
+  it('puts the accounts in the requested order', () => {
+    const ids = addThree()
+    expect(labels()).toEqual(['A', 'B', 'C'])
+    useAccounts.getState().reorder([ids[2]!, ids[0]!, ids[1]!])
+    expect(labels()).toEqual(['C', 'A', 'B'])
+  })
+
+  it('keeps accounts that are missing from the list, ignores unknown and duplicate ids', () => {
+    const ids = addThree()
+    useAccounts.getState().reorder(['nope', ids[2]!, ids[2]!])
+    expect(labels()).toEqual(['C', 'A', 'B'])
+    expect(useAccounts.getState().accounts).toHaveLength(3)
+  })
+
+  it('does not rewrite the vault when nothing moved', async () => {
+    const ids = addThree()
+    await flush()
+    const before = storageGet(STORAGE_KEYS.vault)
+    useAccounts.getState().reorder(ids)
+    await flush()
+    expect(storageGet(STORAGE_KEYS.vault)).toBe(before)
+  })
+
+  it('survives an app restart: the order is stored (encrypted) with the vault', async () => {
+    const ids = addThree()
+    useAccounts.getState().reorder([ids[1]!, ids[2]!, ids[0]!])
+    await flush()
+    expect(storageGet(STORAGE_KEYS.vault)).not.toContain('Main Ranked')
+    useAccounts.setState({ status: 'loading', accounts: [] }) // what a fresh launch starts from
+    await useAccounts.getState().init()
+    expect(useAccounts.getState().status).toBe('ready')
+    expect(labels()).toEqual(['B', 'C', 'A'])
+  })
+
+  it('keeps the custom order across a PIN lock and unlock', async () => {
+    const ids = addThree()
+    useAccounts.getState().reorder([ids[2]!, ids[1]!, ids[0]!])
+    await useAccounts.getState().setPin('1234')
+    await flush()
+    useAccounts.getState().lock()
+    await flush()
+    expect(await useAccounts.getState().unlock('1234')).toBe(true)
+    expect(labels()).toEqual(['C', 'B', 'A'])
+  })
+
+  it('a locked vault cannot be reordered', async () => {
+    const ids = addThree()
+    await useAccounts.getState().setPin('1234')
+    await flush()
+    useAccounts.getState().lock()
+    await flush()
+    const before = storageGet(STORAGE_KEYS.vault)
+    useAccounts.getState().reorder([...ids].reverse())
+    await flush()
+    expect(storageGet(STORAGE_KEYS.vault)).toBe(before)
+  })
+})
+
 describe('sanitizeAccount', () => {
   it('rejects unknown games and missing ids, clamps values', () => {
     expect(sanitizeAccount({ id: 'x', gameId: 'nope' })).toBeNull()

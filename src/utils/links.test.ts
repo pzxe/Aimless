@@ -21,7 +21,8 @@ describe('quick-link tooltips and developer card strings', () => {
   it('uses the requested English tooltips', () => {
     expect(en['quick.github']).toBe('Developer GitHub (@pzxe)')
     expect(en['quick.star']).toBe('Star Aimless on GitHub')
-    expect(en['quick.twitch']).toBe('Watch 1usl on Twitch')
+    expect(en['quick.x']).toBe('Follow AimlessLab on X')
+    expect(LINKS.xLab).toBe('https://x.com/AimlessLab')
     expect(en['quick.releases']).toBe('Releases & Updates')
     expect(en['dev.title']).toBe('Developer & Tech Stack')
   })

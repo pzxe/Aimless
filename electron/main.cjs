@@ -153,10 +153,12 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null)
-    // No camera, microphone, notifications, etc. The app needs none. The one exception is writing to the
-    // clipboard (the Raw Accel "Copy image" button); reading the clipboard stays blocked.
-    session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => callback(permission === 'clipboard-sanitized-write'))
-    session.defaultSession.setPermissionCheckHandler((_wc, permission) => permission === 'clipboard-sanitized-write')
+    // No camera, microphone, notifications, etc. The app needs none. Only two are allowed: writing to the clipboard (the
+    // Raw Accel "Copy image" button; reading the clipboard stays blocked) and pointer lock, which the Mousepad
+    // calibrator needs to read raw mouse movement.
+    const ALLOWED_PERMISSIONS = new Set(['clipboard-sanitized-write', 'pointerLock'])
+    session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => callback(ALLOWED_PERMISSIONS.has(permission)))
+    session.defaultSession.setPermissionCheckHandler((_wc, permission) => ALLOWED_PERMISSIONS.has(permission))
     createWindow()
     updater.scheduleStartupCheck()
   })

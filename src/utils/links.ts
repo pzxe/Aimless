@@ -5,6 +5,8 @@ export const LINKS = {
   releases: 'https://github.com/pzxe/Aimless/releases',
   twitch: 'https://www.twitch.tv/1usl',
   x: 'https://x.com/87lx',
+  /** The project's own X account (footer quick link). `x` above is the developer's personal account. */
+  xLab: 'https://x.com/AimlessLab',
   discordApp: 'https://discord.com/app',
   discordUser: '1usl',
 } as const

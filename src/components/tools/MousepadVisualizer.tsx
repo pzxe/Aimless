@@ -18,7 +18,7 @@ export function PadPicker() {
   const set = useSettings((s) => s.set)
   const [text, setText] = useState(() => f.num(f.units === 'in' ? custom / 2.54 : custom, 1))
   useEffect(() => setText(f.num(f.units === 'in' ? custom / 2.54 : custom, 1)), [custom, f])
-  const presets: MousepadPreset[] = ['small', 'medium', 'large', 'xl', 'custom']
+  const presets: MousepadPreset[] = ['small', 'medium', 'large', 'xl', 'deskmat', 'custom']
   return (
     <div className="flex min-w-0 flex-wrap items-end gap-3">
       <div className="scrollbar-thin max-w-full min-w-0 overflow-x-auto">

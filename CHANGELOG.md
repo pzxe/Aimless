@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.5.3] - 2026-11-08
+
+### Added
+- **Mousepad lab with a Live Sensor Calibrator.** The Mousepad page is rebuilt as a telemetry screen.
+  - **Start calibration** opens an overlay: press Start, slide the mouse from the far left to the far right of your pad, then from the near edge to the far edge. Aimless locks the pointer and reads the **raw mouse counts** (the browser's `unadjustedMovement`, which skips OS pointer acceleration), then converts counts at your DPI into centimeters (`counts / DPI × 2.54`). Going back and forth does not inflate the width; sweeps under 3 cm are rejected; you see the measured centimeters, the counts and a live heat trace while you move. Click, Space or Enter stops a sweep.
+  - The measured width and depth are shown as a pad you can keep (saved as your custom pad, with a "Raw input" or "Approximate" badge). You can also type the size by hand, or correct the measured numbers after checking with a ruler.
+  - **Desk advice** from your cm/360° and the pad: turns across the pad, spare width, how much of the pad one 360° uses, the travel of a 180° flick, whether the pad is deep enough for a full look up and down, counts per 360° and per degree, and a plain-language verdict (overflow, tight, good, roomy) with how much faster your sensitivity would have to be to fit a full turn comfortably.
+  - A to-scale top-down **pad heatmap** (comfort zone, reach limit, your recorded sweeps, the 360° and look up/down markers), a **Deskmat** preset (120 × 60 cm) next to Small, Medium, Large and XL, and pad depth for every preset.
+- **Drag-and-drop alt accounts.** Alt Accounts has a new default sort, **My order**: drag any card by its grip into place, or use the Move earlier and Move later buttons (keyboard and touch friendly). The order is saved with the encrypted vault, so it survives restarts and PIN locks. Dragging switches itself off, and says why, while a search, a filter or another sort is active.
+- **Latest updates & news on the dashboard.** The newest release from GitHub (title, category badge and highlights) above a gallery of recent features with bundled screenshots that also work offline.
+- **Send feedback from the dashboard.** Pick bug report, feature request or other, write a short title and details, and optionally include the app version and system. A 30-second cooldown and length limits protect the issue tracker.
+  - **Direct sending** posts to a small proxy that holds the GitHub token on the server (a token inside an app would be public), and creates the issue on `pzxe/Aimless` without opening a browser. The proxy's source and deploy steps are in `docs/feedback-worker`; the app talks to it when built with `VITE_FEEDBACK_ENDPOINT`.
+  - **Without that proxy (this release's builds)**, Submit copies your text and opens a pre-filled GitHub "New issue" page instead.
+- **23 more supported games** (72 of 148 now have a conversion formula, up from 49 of 125): Left 4 Dead, Portal, Half-Life 2: Deathmatch, Counter-Strike: Condition Zero, Day of Defeat, Alien Swarm, Half-Life: Opposing Force and Blue Shift (verified at Valve's documented 0.022 yaw), plus No More Room in Hell, Fistful of Frags, Contagion, Day of Infamy, Zombie Panic! Source, Synergy, Dystopia, Vampire: The Masquerade - Bloodlines, Dark Messiah of Might and Magic, Sven Co-op, Alien Swarm: Reactive Drop, Call of Duty (2003), Jedi Knight II, OpenArena and Nexuiz (approximate, as engine relatives). Every new game has its real icon, bundled locally. A game is only added when its rotation constant is documented, never guessed.
+- **Follow AimlessLab on X** replaces the Twitch icon in the sidebar footer.
+- 50 new tests (353 in total): the pad math and the sweep tracker, the desk report and the heat trace, the account order (including a restart and a PIN lock), the feedback service and the proxy, the new games and their icons, and the news feed.
+
+### Changed
+- **The Tools page is organised in groups:** Sensitivity tools, Hardware lab (polling rate, plus links to the Mousepad calibrator and the Raw Accel Lab), Cloud sync (live tournaments) and Backup & vault (the Alt Accounts vault and profile export), with a jump bar, hover feedback and a calmer layout.
+- **The dashboard is minimal:** three stat cards, the quick converter, the news feed and the feedback form. The tools list, favourite games, profiles, tournaments and recent-conversions widgets are gone (they live one click away in the sidebar).
+- **The update card is compact.** The notification bell's card no longer repeats the release summary paragraph; it keeps the version, title, category badge, status and the key highlights and fixes.
+- The privacy line now also mentions feedback you choose to send.
+- The desktop app now allows pointer lock, which the calibrator needs to read raw mouse movement (checked in the real app). Every other permission request, including reading the clipboard, stays blocked; only clipboard writes and pointer lock are allowed.
+- The game database tests now audit the new split: 148 games, 34 verified, 38 approximate, 76 unsupported.
+
+### Known limitations
+- **Physical calibration depends on raw input.** Chrome, Edge and the desktop app support it; a browser that cannot provide raw movement shows an "Approximate" badge and a hint to turn off "Enhance pointer precision" (or to check the result with a ruler), and a browser that cannot lock the pointer offers manual entry only. The sweep measurement was verified with simulated and real browser pointer-lock events, not yet against a ruler on physical hardware.
+- **Direct feedback needs the proxy to be deployed** (see `docs/feedback-worker`). Until then Submit opens a pre-filled GitHub issue, and posting it needs a GitHub account.
+- Popular modern titles whose sensitivity constant is not published consistently (for example Fortnite, Marvel Rivals, Deadlock) stay unsupported; you can still calibrate them yourself.
+
 ## [2.5.2] - 2026-11-08
 
 ### Added

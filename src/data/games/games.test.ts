@@ -5,18 +5,22 @@ import { getAllGames, getGame } from '@/core/sensitivity'
 import { GAME_ICON_IDS } from './gameIcons'
 
 const games = getAllGames()
+
+/** The 23 titles added in v2.5.3 (documented engine rotation only; each has a real, visually checked icon). */
+const NEW_IN_253 = ['l4d', 'portal', 'hl2dm', 'cscz', 'dod', 'alienswarm', 'hlopfor', 'hlbshift', 'nmrih', 'fof', 'contagion', 'doi', 'zps', 'synergy', 'dystopia', 'bloodlines', 'darkmessiah', 'svencoop', 'alienswarm-rd', 'cod1', 'jk2', 'openarena', 'nexuiz']
 const count = (a: string) => games.filter((g) => g.accuracy === a).length
 
 describe('game database', () => {
-  it('has 125 games with unique ids', () => {
-    expect(games).toHaveLength(125)
-    expect(new Set(games.map((g) => g.id)).size).toBe(125)
+  it('has 148 games with unique ids', () => {
+    expect(games).toHaveLength(148)
+    expect(new Set(games.map((g) => g.id)).size).toBe(148)
   })
 
-  it('has the audited accuracy split: 26 verified, 23 approximate, 76 unsupported', () => {
-    expect(count('verified')).toBe(26)
-    expect(count('approximate')).toBe(23)
+  it('has the audited accuracy split: 34 verified, 38 approximate, 76 unsupported (72 supported)', () => {
+    expect(count('verified')).toBe(34)
+    expect(count('approximate')).toBe(38)
     expect(count('unsupported')).toBe(76)
+    expect(games.filter((g) => g.formula !== null)).toHaveLength(72)
   })
 
   it('upgraded Titanfall 2 to verified at the Source 0.022 yaw, with its own note', () => {
@@ -29,6 +33,17 @@ describe('game database', () => {
   it('keeps games with conflicting or missing sources out of "verified"', () => {
     for (const id of ['deadlock', 'marvelrivals', 'haloinfinite', 'krunker', 'doom2016', 'cod4']) {
       expect(getGame(id)!.accuracy, id).not.toBe('verified')
+    }
+  })
+
+  it('v2.5.3 additions: Valve titles verified at the documented 0.022 yaw, third-party engine relatives approximate', () => {
+    for (const id of ['l4d', 'portal', 'hl2dm', 'cscz', 'dod', 'alienswarm', 'hlopfor', 'hlbshift']) {
+      expect(getGame(id)!.accuracy, id).toBe('verified')
+      expect(getGame(id)!.formula, id).toEqual({ kind: 'linear', yaw: 0.022 })
+    }
+    for (const id of NEW_IN_253.filter((x) => !['l4d', 'portal', 'hl2dm', 'cscz', 'dod', 'alienswarm', 'hlopfor', 'hlbshift'].includes(x))) {
+      expect(getGame(id)!.accuracy, id).toBe('approximate')
+      expect(getGame(id)!.formula, id).toEqual({ kind: 'linear', yaw: 0.022 })
     }
   })
 
@@ -46,6 +61,9 @@ describe('bundled game icons', () => {
   })
   it('covers at least 100 games', () => {
     expect(GAME_ICON_IDS.size).toBeGreaterThanOrEqual(100)
+  })
+  it('gives every game added in v2.5.3 an authentic bundled icon', () => {
+    for (const id of NEW_IN_253) expect(GAME_ICON_IDS.has(id), id).toBe(true)
   })
 })
 

@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Copy, ExternalLink, Eye, EyeOff, KeyRound, Pencil, RefreshCw, Star, Trash2, UserRound } from 'lucide-react'
+import { ArrowLeftRight, ChevronDown, ChevronUp, Copy, ExternalLink, Eye, EyeOff, GripVertical, KeyRound, Pencil, RefreshCw, Star, Trash2, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { trackerLinks } from '@/core/accounts/ids'
 import type { Account } from '@/core/accounts/types'
@@ -30,6 +30,7 @@ export function AccountCard({
   onDelete,
   onToggleFavorite,
   onLoadProfile,
+  reorder,
 }: {
   account: Account
   busy: boolean
@@ -38,6 +39,8 @@ export function AccountCard({
   onDelete: () => void
   onToggleFavorite: () => void
   onLoadProfile: (profileId: string) => void
+  /** Manual ordering: a grip to drag by and move-earlier / move-later buttons (the only way on touch screens). */
+  reorder?: { first: boolean; last: boolean; onArm: () => void; onMove: (delta: -1 | 1) => void }
 }) {
   const t = useT()
   const f = useFormat()
@@ -53,6 +56,25 @@ export function AccountCard({
   return (
     <Card className="flex h-full flex-col p-4">
       <div className="flex items-start gap-3">
+        {reorder && (
+          <div className="-ms-1 flex shrink-0 flex-col items-center">
+            <Button variant="ghost" size="icon-sm" aria-label={t('accounts.reorder.up')} title={t('accounts.reorder.up')} disabled={reorder.first} onClick={() => reorder.onMove(-1)} className="h-5 w-6">
+              <ChevronUp />
+            </Button>
+            <span
+              role="img"
+              aria-label={t('accounts.reorder.grip')}
+              title={t('accounts.reorder.grip')}
+              onPointerDown={reorder.onArm}
+              className="flex h-6 w-6 cursor-grab touch-none items-center justify-center rounded-md text-subtle select-none hover:bg-surface-2 hover:text-text active:cursor-grabbing"
+            >
+              <GripVertical className="size-4" />
+            </span>
+            <Button variant="ghost" size="icon-sm" aria-label={t('accounts.reorder.down')} title={t('accounts.reorder.down')} disabled={reorder.last} onClick={() => reorder.onMove(1)} className="h-5 w-6">
+              <ChevronDown />
+            </Button>
+          </div>
+        )}
         <GameBadge gameId={account.gameId} size="lg" />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold" title={account.label}>
