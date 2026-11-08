@@ -277,7 +277,7 @@ export default function ToolsPage() {
   return (
     <>
       <PageHeader eyebrow={t('tools.eyebrow')} title={t('tools.title')} description={t('tools.subtitle')} />
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Cm360Tool />
         <TargetTool />
         <DpiTool />

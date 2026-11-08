@@ -22,7 +22,7 @@ export function Segmented<T extends string>({
   className?: string
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className={cn('inline-flex rounded-xl border border-border bg-surface-2/70 p-0.5', className)}>
+    <div role="radiogroup" aria-label={label} className={cn('inline-flex max-w-full overflow-x-auto rounded-xl border border-border bg-surface-2/70 p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', className)}>
       {options.map((o) => {
         const active = o.value === value
         return (

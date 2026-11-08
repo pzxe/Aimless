@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   fetchOverwatchRank,
   fetchValorantRank,
@@ -9,6 +9,9 @@ import {
   RankError,
   bundledTiers,
   type Transport,
+  RANK_TIMEOUT_MS,
+  defaultTransport,
+  isTimeout,
 } from './rankFetcher'
 
 const ok = (body: unknown) => ({ status: 200, body: JSON.stringify(body) })
@@ -121,5 +124,42 @@ describe('Valorant tiers (valorant-api.com)', () => {
     expect(tiers?.[0]).toEqual({ tier: 3, name: 'Tier 3', color: '#aabbcc', icon: 'https://icon/3.png' })
     expect(parseTiers({ data: [] })).toBeNull()
     expect(parseTiers({ data: [{ tiers: [mk(3)] }] })).toBeNull()
+  })
+})
+
+describe('rank request timeouts', () => {
+  it('a hung rank service becomes a "timeout" error instead of an endless spinner', async () => {
+    vi.useFakeTimers()
+    const realFetch = globalThis.fetch
+    globalThis.fetch = ((_u: string, init: RequestInit) =>
+      new Promise((_, reject) => init.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))))) as unknown as typeof fetch
+    try {
+      const pending = defaultTransport({ url: 'https://api.henrikdev.xyz/x' }).catch((e) => e)
+      await vi.advanceTimersByTimeAsync(RANK_TIMEOUT_MS + 10)
+      const err = await pending
+      expect(err).toBeInstanceOf(RankError)
+      expect(err.kind).toBe('timeout')
+    } finally {
+      globalThis.fetch = realFetch
+      vi.useRealTimers()
+    }
+  })
+  it('an ordinary connection failure stays a "network" error', async () => {
+    const realFetch = globalThis.fetch
+    globalThis.fetch = (async () => {
+      throw new TypeError('Failed to fetch')
+    }) as unknown as typeof fetch
+    try {
+      await expect(defaultTransport({ url: 'https://api.henrikdev.xyz/x' })).rejects.toMatchObject({ kind: 'network' })
+    } finally {
+      globalThis.fetch = realFetch
+    }
+  })
+  it('recognises the timeout errors fetch and the desktop IPC bridge produce', () => {
+    expect(isTimeout(new DOMException('The operation was aborted due to timeout', 'TimeoutError'))).toBe(true)
+    expect(isTimeout(new DOMException('aborted', 'AbortError'))).toBe(true)
+    expect(isTimeout(new Error("Error invoking remote method 'fetch-live-rank': TimeoutError: The operation was aborted due to timeout"))).toBe(true)
+    expect(isTimeout(new TypeError('Failed to fetch'))).toBe(false)
+    expect(isTimeout(undefined)).toBe(false)
   })
 })

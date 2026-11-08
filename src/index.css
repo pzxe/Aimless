@@ -142,6 +142,9 @@ html[data-density="compact"] {
 }
 
 @layer base {
+  /* A grid with no explicit columns gets one shrinkable column, so wide content (a segmented control, a number row)
+     can no longer stretch the page past a phone's width. Any grid-cols-* utility still overrides this. */
+  .grid { grid-template-columns: minmax(0, 1fr); }
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
@@ -367,3 +370,9 @@ html.obs-mode svg path { stroke: rgb(255 255 255 / 0.4); }
 }
 .ra-flash { animation: ra-flash 800ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .ra-flash { animation: none; } }
+
+/* Update bell: the 5-second notice slides in next to the bell, then folds into it. */
+.bell-toast { transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.55, 0, 0.2, 1); }
+.bell-toast[data-phase="enter"] { opacity: 0; transform: translateX(var(--bt-from)) scale(0.8); }
+.bell-toast[data-phase="show"] { opacity: 1; transform: none; }
+.bell-toast[data-phase="collapse"] { opacity: 0; transform: translateX(var(--bt-to)) scale(0.12); }

@@ -2,6 +2,29 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.5.2] - 2026-11-08
+
+### Added
+- **Update notification bell** in the header of every page. It reads the latest release from `https://api.github.com/repos/pzxe/Aimless/releases/latest` (cached for 30 minutes, with a timeout, and a fallback to the last cached copy or to the desktop updater's own data when GitHub cannot be reached) and compares its tag with the version you are running.
+  - **Automatic category** from the version number: **Major Update** (X grows, crimson and gold badge), **Minor Update** (Y grows, blue and purple badge) or **Bug Fix & Small Fixes** (Z grows, emerald and amber badge). A pre-release is older than its own release.
+  - **5-second toast:** when a newer version exists, "New Update Available! Update Now" with the version tag pops up next to the bell, stays for exactly 5000 ms, then folds into the bell and leaves a glowing dot until you open the card. It shows once per version.
+  - **Release card:** click the bell for the version, the release name, the category badge, a "You're on the latest version" badge when up to date (so the card is never empty), a one to two sentence overview and the bullet list of key highlights and fixes, parsed from the release notes (images, code blocks, checksums and the Downloads list are skipped).
+  - **Update Now:** in the desktop app it downloads and installs through the built-in updater (with live progress and a Restart & install step); on the web it opens the Windows installer download. **Release notes on GitHub** opens the release page.
+  - `src/services/githubReleaseChecker.ts` (SemVer classification, title and Markdown parsing, cached fetch) and `src/components/UpdateNotificationBell.tsx`. 21 new strings in all five languages (right-to-left aware).
+- 35 new tests (303 in total): SemVer comparison and the three categories, release title and body parsing, cache, offline fallback and rate limits, sync retries, the stream watchdog, rank timeouts and rounding.
+
+### Fixed
+- **Converter and every tool:** `roundTo` returned `NaN` for very small or very large values (for example 1e-7 or 1e21), which `formatNumber` printed as the text "NaN". `roundToStep` also rounded `0.285` to `0.28` instead of `0.29` because of float noise (`0.285 / 0.01` is `28.499999999999996`). `describeSetting`, used by Compare, Mousepad, Profiles and the Raw Accel Lab, now applies the same DPI and sensitivity limits as the converter and never returns a non-finite result.
+- **Raw Accel Lab:** an absurd in-game sensitivity (for example 1e308) produced "Infinity eDPI" and a tiny one "Infinity cm/360°". The field now validates like the Mousepad page and the cards show a dash when a value cannot be computed.
+- **Live tournaments:** a publish that failed (offline, relay error or rate limit) was dropped for good, so viewers kept the old bracket until the next edit or the 3-hour heartbeat. Failed publishes are now retried with backoff (and immediately when the network returns), a newer edit always replaces a queued retry, and Stop cancels them. The live listener also reconnects by itself when its stream goes silent for 75 seconds (a half-open connection after sleep or a Wi-Fi switch looked "live" forever) and does not wait out its backoff when the browser comes back online.
+- **Live rank lookups:** on the web a rank service that stopped answering left the account "refreshing" forever. Requests now time out after 15 seconds with a clear message (the desktop app already had this), and a double click can no longer start two lookups.
+- **Alt Accounts vault:** if unlocking failed for any reason other than a wrong PIN (for example an unreadable vault), the error was an unhandled promise rejection and nothing was shown. It now says so.
+- **Info tips:** pressing Esc on an open info tip also closed the dialog behind it (for example Create Tournament) and discarded what you had typed. Esc now closes only the tip.
+- **Small screens:** grids without an explicit column could stretch the page past a phone's width (the Tools cards at 360 px and narrower, Raw Accel at 320 px). Every grid now defaults to one shrinkable column, the segmented controls scroll inside their own box, and the header's GitHub shortcut steps aside below 380 px to make room for the bell (it stays in the sidebar).
+
+### Changed
+- `RankErrorKind` gains `timeout`; `SessionOptions` gains `retryMs` and `limitRetryMs`; `NtfyTransport` takes a `watchdogMs`.
+
 ## [2.5.1] - 2026-11-08
 
 ### Fixed

@@ -1,5 +1,6 @@
 import { Menu, Moon, ShieldCheck, Sun, X } from 'lucide-react'
 import { useUpdateBadge } from '@/store/updateStore'
+import { UpdateNotificationBell } from '@/components/UpdateNotificationBell'
 import { QuickLinks } from './QuickLinks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
@@ -98,9 +99,11 @@ export function ThemeToggle({ resolvedTheme }: { resolvedTheme: 'dark' | 'light'
 function TopBarActions({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
   return (
     <div className="flex items-center gap-1.5">
-      <GitHubLink />
+      {/* the repository link also lives in the sidebar, so it can make room for the bell on very narrow phones */}
+      <GitHubLink className="max-[380px]:hidden" />
       <LanguageMenu />
       <ThemeToggle resolvedTheme={resolvedTheme} />
+      <UpdateNotificationBell />
     </div>
   )
 }

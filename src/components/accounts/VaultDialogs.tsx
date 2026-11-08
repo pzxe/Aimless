@@ -17,7 +17,7 @@ export function UnlockScreen() {
   const t = useT()
   const unlock = useAccounts((s) => s.unlock)
   const [pin, setPin] = useState('')
-  const [error, setError] = useState(false)
+  const [error, setError] = useState<false | 'wrong' | 'failed'>(false)
   const [busy, setBusy] = useState(false)
 
   const submit = async () => {
@@ -26,8 +26,11 @@ export function UnlockScreen() {
     setError(false)
     try {
       const ok = await unlock(pin)
-      if (!ok) setError(true)
+      if (!ok) setError('wrong')
       else setPin('')
+    } catch {
+      // not a wrong PIN: the stored vault could not be read at all
+      setError('failed')
     } finally {
       setBusy(false)
     }
@@ -61,7 +64,7 @@ export function UnlockScreen() {
           }}
           aria-invalid={error ? true : undefined}
         />
-        <FieldError>{error ? t('vault.wrongPin') : null}</FieldError>
+        <FieldError>{error === 'wrong' ? t('vault.wrongPin') : error === 'failed' ? t('vault.unlockFailed') : null}</FieldError>
         <Button type="submit" variant="primary" className="mt-4 w-full" disabled={!pin || busy}>
           <LockOpen />
           {t('vault.unlock')}

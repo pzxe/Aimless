@@ -11,7 +11,7 @@ import type {
   ResultAccuracy,
   SideResult,
 } from './types'
-import { validateConversionInput } from './validation'
+import { validateConversionInput, validateDpi, validateSensitivity } from './validation'
 
 const ACCURACY_RANK: Record<ResultAccuracy, number> = {
   verified: 3,
@@ -127,8 +127,10 @@ export function describeSetting(
   const game = getGame(gameId)
   if (!game) return null
   const resolved = resolveFormula(game, calibrations)
-  if (!resolved || !(dpi > 0) || !(sensitivity > 0)) return null
-  return describeSide(game, resolved, dpi, sensitivity)
+  // Same limits as the converter: an absurd value must read as "no result", never as NaN or Infinity on screen.
+  if (!resolved || validateDpi(dpi) !== null || validateSensitivity(sensitivity) !== null) return null
+  const side = describeSide(game, resolved, dpi, sensitivity)
+  return [side.edpi, side.degreesPerCount, side.cm360, side.inches360].every(Number.isFinite) ? side : null
 }
 
 /** Sensitivity needed in a game to reach a target cm/360 at a given DPI. */

@@ -219,7 +219,10 @@ export function telemetry(dpi: number, gameSens: number, rawCm360: number | null
   const baseRatio = p.sensMultiplier
   const reachedRatio = ratioAt(p, SPEED_MAX)
   const peakRatio = hasOutputCap(p) ? p.sensMultiplier * p.capOutput : reachedRatio
-  const cm = (ratio: number) => (rawCm360 !== null && ratio > 0 ? rawCm360 / ratio : null)
+  const cm = (ratio: number) => {
+    const v = rawCm360 !== null && ratio > 0 ? rawCm360 / ratio : null
+    return v !== null && Number.isFinite(v) ? v : null
+  }
   return {
     rawEdpi,
     rawCm360,

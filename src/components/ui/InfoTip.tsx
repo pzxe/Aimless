@@ -38,14 +38,19 @@ export function InfoTip({ children, className, label }: { children: ReactNode; c
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    // Capture phase + stopPropagation: Escape closes only this tip, not the dialog it sits in (which would discard what was typed)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      setOpen(false)
+    }
     const onScroll = () => setOpen(false)
     const onDown = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
-    document.addEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey, true)
     window.addEventListener('scroll', onScroll, true)
     document.addEventListener('pointerdown', onDown)
     return () => {
-      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('keydown', onKey, true)
       window.removeEventListener('scroll', onScroll, true)
       document.removeEventListener('pointerdown', onDown)
     }

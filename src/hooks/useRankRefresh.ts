@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { fromValorantRegion, toValorantRegion, type Account } from '@/core/accounts/types'
 import { useT } from '@/i18n'
@@ -13,10 +13,20 @@ export const supportsLiveRank = (gameId: string) => (LIVE_RANK_GAMES as readonly
 export function useRankRefresh() {
   const t = useT()
   const [busy, setBusy] = useState<ReadonlySet<string>>(new Set())
+  // the ref is the source of truth for "already running": the `busy` state in this closure can be one render behind
+  const inflight = useRef(new Set<string>())
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
 
   const refresh = useCallback(
     async (account: Account, opts: { quiet?: boolean } = {}) => {
-      if (!supportsLiveRank(account.gameId) || busy.has(account.id)) return
+      if (!supportsLiveRank(account.gameId) || inflight.current.has(account.id)) return
+      inflight.current.add(account.id)
       setBusy((s) => new Set(s).add(account.id))
       try {
         const store = useAccounts.getState()
@@ -36,14 +46,17 @@ export function useRankRefresh() {
         const kind = e instanceof RankError ? e.kind : 'network'
         if (!opts.quiet) toast.error(t(`rank.error.${kind}`))
       } finally {
-        setBusy((s) => {
-          const n = new Set(s)
-          n.delete(account.id)
-          return n
-        })
+        inflight.current.delete(account.id)
+        if (mounted.current) {
+          setBusy((s) => {
+            const n = new Set(s)
+            n.delete(account.id)
+            return n
+          })
+        }
       }
     },
-    [busy, t],
+    [t],
   )
 
   return { refresh, busy }

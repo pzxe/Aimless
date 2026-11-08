@@ -9,4 +9,4 @@ export function adviceParts(t: TFunction, d: Diagnostic, tel: EdpiTelemetry, p: 
   return { main, hints }
 }
 
-export const fmtCm = (v: number | null) => (v === null ? '—' : v >= 100 ? v.toFixed(0) : v.toFixed(1))
+export const fmtCm = (v: number | null) => (v === null || !Number.isFinite(v) ? '—' : v >= 100 ? v.toFixed(0) : v.toFixed(1))

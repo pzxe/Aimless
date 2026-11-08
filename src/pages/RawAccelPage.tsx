@@ -27,7 +27,7 @@ import { CopyButton } from '@/components/ui/CopyButton'
 import { Input, Label, NumberField, inputClass } from '@/components/ui/Field'
 import { Segmented } from '@/components/ui/Segmented'
 import { MOUSEPAD_WIDTHS_CM } from '@/core/tools'
-import { describeSetting, getGame, parseNumber } from '@/core/sensitivity'
+import { describeSetting, getGame, parseNumber, validateSensitivity } from '@/core/sensitivity'
 import { useT } from '@/i18n'
 import {
   CURVES,
@@ -113,7 +113,10 @@ export default function RawAccelPage() {
     if (!useRawAccel.getState().seeded) syncFromConverter()
   }, [syncFromConverter])
 
-  const sens = parseNumber(st.gameSens)
+  const sensRaw = parseNumber(st.gameSens)
+  const sensErr = st.gameSens.trim() !== '' ? validateSensitivity(sensRaw) : null
+  // an invalid sensitivity (0, negative, absurdly large) counts as "unknown" so the eDPI cards never show NaN or Infinity
+  const sens = validateSensitivity(sensRaw) === null ? sensRaw : 0
   const result = describeSetting(st.gameId, st.dpi, sens, calibrations)
   const rawCm360 = result?.cm360 ?? null
   const tel = useMemo(() => telemetry(st.dpi, sens > 0 ? sens : 0, rawCm360, params), [st.dpi, sens, rawCm360, params])
@@ -345,7 +348,7 @@ export default function RawAccelPage() {
               <Label>{t('common.game')}</Label>
               <GameSelector value={st.gameId} onChange={(id) => st.patch({ gameId: id })} label={t('common.game')} />
             </div>
-            <NumberField label={t('ra.gameSens')} value={st.gameSens} onValueChange={(v) => st.patch({ gameSens: v })} />
+            <NumberField label={t('ra.gameSens')} value={st.gameSens} onValueChange={(v) => st.patch({ gameSens: v })} error={sensErr ? t(`validation.${sensErr}`) : null} />
           </div>
 
           <div>

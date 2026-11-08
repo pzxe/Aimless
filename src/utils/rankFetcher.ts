@@ -21,7 +21,10 @@ import { battleTagToOverFastId, parseRiotId } from '@/core/accounts/ids'
 import { VALORANT_TIERS } from '@/data/valorantTiers'
 import { desktop } from './desktop'
 
-export type RankErrorKind = 'invalid-id' | 'not-found' | 'needs-key' | 'rate-limited' | 'network' | 'bad-response'
+export type RankErrorKind = 'invalid-id' | 'not-found' | 'needs-key' | 'rate-limited' | 'network' | 'timeout' | 'bad-response'
+
+/** A rank service that has not answered after this long is treated as down (the desktop main process uses the same 15 s). */
+export const RANK_TIMEOUT_MS = 15_000
 
 export class RankError extends Error {
   constructor(
@@ -45,13 +48,24 @@ export type Transport = (req: TransportRequest) => Promise<TransportResponse>
 
 /** Desktop: main-process fetch over IPC. Web: the browser's fetch. */
 export const defaultTransport: Transport = async ({ url, headers }) => {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), RANK_TIMEOUT_MS)
   try {
     if (desktop?.rank) return await desktop.rank.fetch(url, headers)
-    const res = await fetch(url, { headers: { Accept: 'application/json', ...headers } })
+    // the timer also covers reading the body: a server that sends headers and then stalls must not hang the refresh
+    const res = await fetch(url, { headers: { Accept: 'application/json', ...headers }, signal: ctrl.signal })
     return { status: res.status, body: await res.text() }
-  } catch {
-    throw new RankError('network')
+  } catch (e) {
+    throw new RankError(isTimeout(e) || ctrl.signal.aborted ? 'timeout' : 'network')
+  } finally {
+    clearTimeout(timer)
   }
+}
+
+/** The error a timed-out fetch (web) or IPC call (desktop main process) leaves behind. */
+export function isTimeout(e: unknown): boolean {
+  const text = `${(e as { name?: string })?.name ?? ''} ${(e as { message?: string })?.message ?? String(e)}`
+  return /timeout|timed out|TimeoutError|AbortError|aborted/i.test(text)
 }
 
 export const OVERFAST_BASE = 'https://overfast-api.tekrop.fr'

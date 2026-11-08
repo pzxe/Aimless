@@ -6,15 +6,25 @@ export function roundTo(value: number, decimals: number): number {
   if (!Number.isFinite(value)) return value
   const d = Math.max(0, Math.min(12, Math.trunc(decimals)))
   const sign = value < 0 ? -1 : 1
-  const shifted = Number(`${Math.abs(value)}e${d}`)
-  return sign * Number(`${Math.round(shifted)}e-${d}`)
+  const rounded = Math.round(shiftExp(Math.abs(value), d))
+  // `+ 0` turns a negative zero (a tiny negative value that rounds away) into a plain 0
+  return sign * shiftExp(rounded, -d) + 0
 }
 
-/** Round to the nearest multiple of `step` (e.g. 0.01 or 1). */
+/** x * 10^n without float error, and without building "1e-7e3" style strings (which parse to NaN). */
+function shiftExp(x: number, n: number): number {
+  const [mantissa, exponent] = x.toExponential().split('e')
+  return Number(`${mantissa}e${Number(exponent) + n}`)
+}
+
+/** Round to the nearest multiple of `step` (e.g. 0.01 or 1). Halves round away from zero. */
 export function roundToStep(value: number, step: number): number {
-  if (!(step > 0)) return value
+  if (!(step > 0) || !Number.isFinite(value)) return value
   const decimals = stepDecimals(step)
-  return roundTo(Math.round(value / step) * step, decimals)
+  const sign = value < 0 ? -1 : 1
+  // 0.285 / 0.01 is 28.499999999999996: clean the float noise first so the half rounds up like a person expects
+  const steps = Math.round(roundTo(Math.abs(value) / step, 9))
+  return roundTo(sign * steps * step, decimals)
 }
 
 /** Number of decimal places implied by a step such as 0.001 → 3. */

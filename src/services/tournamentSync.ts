@@ -345,9 +345,14 @@ export class RelayLimitError extends Error {}
 
 /** ntfy.sh over plain fetch: POST to publish, a streaming SSE request to subscribe (works in browsers, Electron and Node). */
 export class NtfyTransport implements Transport {
+  /**
+   * @param watchdogMs reconnect when the stream has been silent this long. ntfy sends a keepalive about every 30 s,
+   *   so silence means a half-open connection (laptop sleep, Wi-Fi switch) that would otherwise look "live" forever.
+   */
   constructor(
     private base = RELAY_URL,
     private fetchImpl: typeof fetch = (...a) => globalThis.fetch(...a),
+    private watchdogMs = 75_000,
   ) {}
 
   async publish(topic: string, text: string): Promise<void> {
@@ -360,12 +365,24 @@ export class NtfyTransport implements Transport {
     let stopped = false
     let abort: AbortController | null = null
     let delay = 1000
+    let wake: (() => void) | null = null
+    // The network came back: do not wait out the backoff.
+    const onOnline = () => {
+      delay = 1000
+      wake?.()
+    }
+    globalThis.addEventListener?.('online', onOnline)
     const run = async () => {
       while (!stopped) {
-        abort = new AbortController()
+        const ctl = new AbortController()
+        abort = ctl
         onStatus('connecting')
+        let lastData = Date.now()
+        const watchdog = setInterval(() => {
+          if (Date.now() - lastData > this.watchdogMs) ctl.abort()
+        }, Math.max(5, Math.min(10_000, Math.floor(this.watchdogMs / 3))))
         try {
-          const res = await this.fetchImpl(`${this.base}/${topic}/sse?since=all`, { signal: abort.signal })
+          const res = await this.fetchImpl(`${this.base}/${topic}/sse?since=all`, { signal: ctl.signal })
           if (res.status === 429) onStatus('limited')
           else if (!res.ok || !res.body) onStatus('offline')
           else {
@@ -376,6 +393,7 @@ export class NtfyTransport implements Transport {
             for (;;) {
               const { done, value } = await reader.read()
               if (done) break
+              lastData = Date.now()
               buf += dec.decode(value, { stream: true })
               let nl: number
               while ((nl = buf.indexOf('\n')) >= 0) {
@@ -394,9 +412,18 @@ export class NtfyTransport implements Transport {
         } catch {
           if (stopped) return
           onStatus('offline')
+        } finally {
+          clearInterval(watchdog)
         }
         if (stopped) return
-        await new Promise((r) => setTimeout(r, delay))
+        await new Promise<void>((resolve) => {
+          const id = setTimeout(resolve, delay)
+          wake = () => {
+            clearTimeout(id)
+            resolve()
+          }
+        })
+        wake = null
         delay = Math.min(delay * 2, 15000)
       }
     }
@@ -404,6 +431,8 @@ export class NtfyTransport implements Transport {
     return () => {
       stopped = true
       abort?.abort()
+      wake?.()
+      globalThis.removeEventListener?.('online', onOnline)
     }
   }
 }
@@ -447,6 +476,10 @@ export interface SessionOptions {
   /** Called after a publish succeeded or failed. */
   onPublish?: (ok: boolean, error?: unknown) => void
   debounceMs?: number
+  /** First retry delay after a failed publish (doubles up to 30 s). Default 2000. */
+  retryMs?: number
+  /** Retry delay after the relay rate-limited us. Default 60000. */
+  limitRetryMs?: number
 }
 
 export class SyncSession {
@@ -459,12 +492,23 @@ export class SyncSession {
   private gs: number
   private editors: string[]
   private lastSent: Tournament | null = null
+  private stopped = false
+  private retryDelay: number
+  private onOnline = () => {
+    // back online: send whatever is waiting right now instead of at the next backoff step
+    this.retryDelay = this.o.retryMs ?? 2000
+    if (this.pending && !this.stopped) {
+      if (this.timer) clearTimeout(this.timer)
+      void this.flush()
+    }
+  }
   status: LiveStatus = 'connecting'
 
   constructor(private o: SessionOptions) {
     this.collector = new Collector(o.share)
     this.gs = o.grantSeq ?? 0
     this.editors = [...(o.editors ?? [])]
+    this.retryDelay = o.retryMs ?? 2000
   }
 
   get canWrite() {
@@ -478,6 +522,8 @@ export class SyncSession {
   }
 
   start() {
+    this.stopped = false
+    globalThis.addEventListener?.('online', this.onOnline)
     this.unsub = this.o.transport.subscribe(this.o.share.topic, {
       onMessage: (text) => {
         this.chain = this.chain.then(async () => {
@@ -495,6 +541,8 @@ export class SyncSession {
   }
 
   stop() {
+    this.stopped = true
+    globalThis.removeEventListener?.('online', this.onOnline)
     this.unsub?.()
     this.unsub = null
     if (this.timer) clearTimeout(this.timer)
@@ -543,14 +591,30 @@ export class SyncSession {
           await this.o.transport.publish(this.o.share.topic, JSON.stringify(env))
         }
         this.lastSent = t
+        this.retryDelay = this.o.retryMs ?? 2000
         this.o.onPublish?.(true)
       } catch (e) {
-        if (e instanceof RelayLimitError) this.o.onStatus?.('limited')
+        const limited = e instanceof RelayLimitError
+        if (limited) this.o.onStatus?.('limited')
         this.o.onPublish?.(false, e)
+        if (bump) this.scheduleRetry(t, limited)
       }
     }
     this.chain = this.chain.then(run)
     await this.chain
+  }
+
+  /**
+   * A failed publish (offline, relay error, rate limit) is retried with backoff instead of being lost.
+   * A newer edit always wins: it is already in `pending` or has replaced the timer.
+   */
+  private scheduleRetry(t: Tournament, limited: boolean) {
+    if (this.stopped || !this.canWrite) return
+    if (!this.pending) this.pending = t
+    if (this.timer) return
+    const wait = limited ? (this.o.limitRetryMs ?? 60_000) : this.retryDelay
+    this.retryDelay = Math.min(this.retryDelay * 2, 30_000)
+    this.timer = setTimeout(() => void this.flush(), wait)
   }
 
   /** Host only: replace the authorised editor keys and publish a new grant. */

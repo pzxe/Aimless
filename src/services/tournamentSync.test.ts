@@ -4,6 +4,7 @@ import {
   CHUNK_CHARS,
   Collector,
   MemoryRelay,
+  NtfyTransport,
   SyncSession,
   chunkText,
   editorLink,
@@ -316,5 +317,132 @@ describe('collector and sessions', () => {
     const tampered = { ...good, d: parts[0]!.slice(0, -1) + (parts[0]!.endsWith('A') ? 'B' : 'A') }
     expect(await c.ingest(JSON.stringify(tampered))).toBeNull()
     expect(c.rev).toBe(1)
+  })
+})
+
+describe('network resilience', () => {
+  it('retries a failed publish and delivers it once the relay is back', async () => {
+    const { relay, hostKeys, share } = await setup()
+    const oks: boolean[] = []
+    const host = new SyncSession({ transport: relay, share, role: 'host', keys: hostKeys, debounceMs: 0, retryMs: 20, limitRetryMs: 20, onPublish: (ok) => oks.push(ok) })
+    host.start()
+    const seen: RemoteState[] = []
+    const guest = new SyncSession({ transport: relay, share, role: 'guest', onState: (s) => seen.push(s) })
+    guest.start()
+    relay.failPublish = true
+    const t1 = make(4)
+    host.publish(t1)
+    await host.flush()
+    expect(oks).toEqual([false])
+    expect(seen).toHaveLength(0)
+    relay.failPublish = false // the connection comes back
+    await until(() => seen.length === 1, 2000)
+    expect(seen[0]!.tournament.id).toBe(t1.id)
+    expect(oks.at(-1)).toBe(true)
+    host.stop()
+    guest.stop()
+  })
+
+  it('a newer edit always wins over a publish that is being retried', async () => {
+    const { relay, hostKeys, share } = await setup()
+    const host = new SyncSession({ transport: relay, share, role: 'host', keys: hostKeys, debounceMs: 0, retryMs: 30, limitRetryMs: 30 })
+    host.start()
+    const seen: RemoteState[] = []
+    const guest = new SyncSession({ transport: relay, share, role: 'guest', onState: (s) => seen.push(s) })
+    guest.start()
+    const t1 = make(4)
+    const t2 = play(t1, 1)
+    relay.failPublish = true
+    host.publish(t1)
+    await host.flush() // fails, retry queued
+    host.publish(t2) // a newer edit while offline
+    await host.flush() // fails too
+    relay.failPublish = false
+    await until(() => seen.length >= 1, 2000)
+    await new Promise((r) => setTimeout(r, 150))
+    // viewers only ever see the newest state, never the stale one
+    expect(seen.every((x) => Object.keys(x.tournament.results).length === 1)).toBe(true)
+    host.stop()
+    guest.stop()
+  })
+
+  it('stop() cancels pending retries', async () => {
+    const { relay, hostKeys, share } = await setup()
+    const host = new SyncSession({ transport: relay, share, role: 'host', keys: hostKeys, debounceMs: 0, retryMs: 20, limitRetryMs: 20 })
+    host.start()
+    relay.failPublish = true
+    host.publish(make(4))
+    await host.flush()
+    host.stop()
+    relay.failPublish = false
+    await new Promise((r) => setTimeout(r, 120))
+    expect(relay.log.get(share.topic) ?? []).toHaveLength(0)
+  })
+
+  it('does not retry on behalf of a guest', async () => {
+    const { relay, share } = await setup()
+    const guest = new SyncSession({ transport: relay, share, role: 'guest', retryMs: 10, limitRetryMs: 10 })
+    guest.start()
+    guest.publish(make(4))
+    await new Promise((r) => setTimeout(r, 60))
+    expect(relay.log.get(share.topic) ?? []).toHaveLength(0)
+    guest.stop()
+  })
+
+  // a fake ntfy response whose body is controlled by the test
+  const fakeStream = (signal: AbortSignal, onController: (c: ReadableStreamDefaultController<Uint8Array>) => void) =>
+    new ReadableStream<Uint8Array>({
+      start(c) {
+        onController(c)
+        signal.addEventListener('abort', () => c.error(new DOMException('aborted', 'AbortError')))
+      },
+    })
+
+  it('reconnects a stream that went silent (half-open connection)', async () => {
+    let calls = 0
+    const statuses: string[] = []
+    const fetchImpl = (async (_u: string, init: RequestInit) => {
+      calls++
+      return { ok: true, status: 200, body: fakeStream(init.signal as AbortSignal, () => {}) }
+    }) as unknown as typeof fetch
+    const stop = new NtfyTransport('https://relay.test', fetchImpl, 90).subscribe('t', { onMessage: () => {}, onStatus: (st) => statuses.push(st) })
+    await until(() => calls >= 2, 3000)
+    stop()
+    expect(statuses).toContain('offline')
+    expect(statuses.filter((x) => x === 'connecting').length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('leaves a healthy stream alone while keepalives arrive', async () => {
+    let calls = 0
+    const enc = new TextEncoder()
+    let timer: ReturnType<typeof setInterval> | undefined
+    const fetchImpl = (async (_u: string, init: RequestInit) => {
+      calls++
+      return {
+        ok: true,
+        status: 200,
+        body: fakeStream(init.signal as AbortSignal, (c) => {
+          timer = setInterval(() => c.enqueue(enc.encode('data: {"event":"keepalive"}'+String.fromCharCode(10))), 20)
+        }),
+      }
+    }) as unknown as typeof fetch
+    const stop = new NtfyTransport('https://relay.test', fetchImpl, 120).subscribe('t', { onMessage: () => {}, onStatus: () => {} })
+    await new Promise((r) => setTimeout(r, 500))
+    stop()
+    clearInterval(timer)
+    expect(calls).toBe(1)
+  })
+
+  it('unsubscribing during a backoff wait ends the loop at once', async () => {
+    let calls = 0
+    const fetchImpl = (async () => {
+      calls++
+      throw new TypeError('offline')
+    }) as unknown as typeof fetch
+    const stop = new NtfyTransport('https://relay.test', fetchImpl).subscribe('t', { onMessage: () => {}, onStatus: () => {} })
+    await until(() => calls >= 1)
+    stop()
+    await new Promise((r) => setTimeout(r, 1300)) // longer than the first backoff step
+    expect(calls).toBe(1)
   })
 })
