@@ -26,6 +26,8 @@ import { cn } from '@/utils/cn'
 import { isDesktopApp, RELEASES_URL, REPO_URL } from '@/utils/platform'
 
 const GAMES = getAllGames()
+/** Games with a known conversion formula (the rest are listed, but only calibratable). Used for every "we convert N games" claim. */
+const SUPPORTED = GAMES.filter((g) => g.formula !== null).length
 const COUNT = (acc: string) => GAMES.filter((g) => g.accuracy === acc).length
 
 function scrollToId(id: string) {
@@ -159,7 +161,7 @@ function Hero() {
           <div className="lg:col-span-3">
             <div className="eyebrow mb-5">Aimless v2.1</div>
             <h1 className="display text-[2.5rem] sm:text-[3.25rem] lg:text-[3.5rem]">{t('landing.hero.title')}</h1>
-            <p className="mt-5 text-base leading-6 text-muted">{t('landing.hero.lead', { games: GAMES.length })}</p>
+            <p className="mt-5 text-base leading-6 text-muted">{t('landing.hero.lead', { games: SUPPORTED })}</p>
           </div>
           <div className="lg:col-span-6">
             <HeroCollage />
@@ -336,7 +338,7 @@ function Features() {
   return (
     <Section id="features" eyebrow={t('landing.features.eyebrow')} title={t('landing.features.title')} lead={t('landing.features.lead')}>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <BentoCard to="/converter" icon={<ArrowLeftRight />} title={t('landing.f.converter')} body={t('landing.f.converterBody', { games: GAMES.length })} className="xl:col-span-2">
+        <BentoCard to="/converter" icon={<ArrowLeftRight />} title={t('landing.f.converter')} body={t('landing.f.converterBody', { games: SUPPORTED })} className="xl:col-span-2">
           <div dir="ltr" className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-border bg-surface-2/60 p-4">
             <div>
               <div className="text-[11px] text-subtle">CS2 · 800 DPI</div>

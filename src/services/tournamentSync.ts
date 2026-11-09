@@ -20,7 +20,7 @@
 import { sanitizeTournament, type Tournament } from '@/core/tournament'
 
 export const RELAY_URL = 'https://ntfy.sh'
-export const LIVE_BASE_URL = 'https://pzxe.github.io/Aimless/'
+export const LIVE_BASE_URL = 'https://1usl.one/aimless/'
 /** Characters of encoded payload per message (the relay allows 4096 bytes in total). */
 export const CHUNK_CHARS = 2400
 export const MAX_CHUNKS = 40

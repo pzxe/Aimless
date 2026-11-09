@@ -64,7 +64,7 @@ export default function TournamentViewPage() {
     champion: t('tournament.champion'),
     tbd: t('tournament.tbd'),
     bye: t('tournament.bye'),
-    footer: 'Aimless · pzxe.github.io/Aimless',
+    footer: 'Aimless · 1usl.one/aimless',
   }
   const accent = getComputedStyle(document.documentElement).getPropertyValue('--c-accent').trim() || '#ff2e4d'
   const file = safeFilename(tournament.name)

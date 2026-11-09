@@ -18,7 +18,7 @@ Keep your exact muscle memory across 145+ shooter games, track your ranks, manag
 
 [![⬇️ Download Windows Setup (.exe)](https://img.shields.io/badge/⬇️_Download_Windows_Setup_(.exe)-ff2e4d?style=for-the-badge)](https://github.com/pzxe/Aimless/releases/latest)
 [![📦 Portable (.zip)](https://img.shields.io/badge/📦_Portable_(.zip)-1f1f25?style=for-the-badge)](https://github.com/pzxe/Aimless/releases/latest)
-[![🚀 Open Web App](https://img.shields.io/badge/🚀_Open_Web_App-1f1f25?style=for-the-badge)](https://pzxe.github.io/Aimless/)
+[![🚀 Open Web App](https://img.shields.io/badge/🚀_Open_Web_App-1f1f25?style=for-the-badge)](https://1usl.one/aimless/)
 
 <img src="docs/gifs/workspace-tour.gif" width="900" alt="A tour of Aimless: dashboard, converter, compare, tournaments, profiles and tools" />
 
