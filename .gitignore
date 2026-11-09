@@ -29,6 +29,6 @@ scripts/*.local.mjs
 .env
 .env.*
 !.env.example
-
-# the web build config holds no secret: keep it in the repo
-!.env.web
+# web/telemetry config stays out of the public desktop repo
+.env.web
+.env.web.*
