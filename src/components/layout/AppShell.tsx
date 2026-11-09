@@ -10,8 +10,10 @@ import { useSettings } from '@/store/settingsStore'
 import { cn } from '@/utils/cn'
 import { Button } from '../ui/Button'
 import { GitHubLink } from './GitHubLink'
+import { AnalyticsChoice } from './AnalyticsChoice'
 import { LanguageMenu } from './LanguageMenu'
 import { LogoMark, Wordmark } from './Logo'
+import { isDesktopApp } from '@/utils/platform'
 import { NAV_ITEMS } from './nav'
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
@@ -27,7 +29,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
         <div key={g.key}>
           <div className="mb-2 px-3 text-[10px] font-semibold tracking-[0.18em] text-subtle uppercase">{g.label}</div>
           <div className="flex flex-col gap-1">
-            {NAV_ITEMS.filter((i) => i.group === g.key).map(({ to, label, icon: Icon }) => (
+            {NAV_ITEMS.filter((i) => i.group === g.key && (isDesktopApp || !i.desktopOnly)).map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -139,10 +141,14 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
           </div>
           <div className="hairline my-4" />
           <QuickLinks className="mb-4" />
-          <p className="flex items-center gap-1.5 px-3 text-[11px] text-subtle">
-            <ShieldCheck className="size-3.5 text-success" />
-            {t('nav.localOnly')}
-          </p>
+          {isDesktopApp ? (
+            <p className="flex items-center gap-1.5 px-3 text-[11px] text-subtle">
+              <ShieldCheck className="size-3.5 text-success" />
+              {t('nav.localOnly')}
+            </p>
+          ) : (
+            <AnalyticsChoice className="px-3" />
+          )}
         </div>
       </aside>
 
@@ -193,10 +199,14 @@ export function AppShell({ children, resolvedTheme }: { children: ReactNode; res
               <NavList onNavigate={() => setDrawer(false)} />
             </div>
             <QuickLinks className="mt-4" />
-            <p className="mt-4 flex items-center gap-1.5 px-2 text-[11px] text-subtle">
-              <ShieldCheck className="size-3.5 text-success" />
-              {t('nav.localOnly')}
-            </p>
+            {isDesktopApp ? (
+              <p className="mt-4 flex items-center gap-1.5 px-2 text-[11px] text-subtle">
+                <ShieldCheck className="size-3.5 text-success" />
+                {t('nav.localOnly')}
+              </p>
+            ) : (
+              <AnalyticsChoice className="mt-4 px-2" />
+            )}
           </div>
         </div>
       )}

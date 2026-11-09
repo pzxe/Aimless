@@ -1,5 +1,5 @@
 import { ArrowLeftRight, Gauge, Info, Link2, Link2Off, RotateCcw, Ruler, Save, TriangleAlert } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { CalibrateDialog } from '@/components/games/CalibrateDialog'
 import { GameSelector } from '@/components/games/GameSelector'
@@ -18,6 +18,7 @@ import { describeSetting, formatNumber, getGame, isValidFov, isValidResolution, 
 import { useConversion } from '@/hooks/useConversion'
 import { useFormat } from '@/hooks/useFormat'
 import { isTranslationKey, useT } from '@/i18n'
+import { track } from '@/services/telemetry'
 import { useConverter } from '@/store/converterStore'
 import { useSettings } from '@/store/settingsStore'
 import { cn } from '@/utils/cn'
@@ -48,6 +49,13 @@ export default function ConverterPage() {
 
   const unsupported = !result.ok ? result.unsupported : []
   const ok = result.ok ? result : null
+  // Browser version only (track() is a no-op in the desktop app): one "conversion" once the user settles on a pair.
+  const convertedTo = ok ? ok.target.sensitivity : null
+  useEffect(() => {
+    if (convertedTo === null) return
+    const id = window.setTimeout(() => track('converter', { from: form.sourceGameId, to: form.targetGameId }), 1500)
+    return () => window.clearTimeout(id)
+  }, [convertedTo, form.sourceGameId, form.targetGameId])
   // Source metrics stay visible even when the target game can't be converted.
   const sourceSide = ok?.source ?? describeSetting(form.sourceGameId, parsed.sourceDpi, parsed.sourceSensitivity, calibrations)
 

@@ -1,12 +1,14 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { HashRouter, Link, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { HashRouter, Link, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppShell } from '@/components/layout/AppShell'
+import { DesktopOnly } from '@/components/layout/DesktopOnly'
 import { DesktopShortcutPrompt } from '@/components/layout/DesktopShortcut'
 import { TitleBar } from '@/components/layout/TitleBar'
 import { useDocumentSettings } from '@/hooks/useDocumentSettings'
 import { useT } from '@/i18n'
 import { startLiveRuntime } from '@/services/liveRuntime'
+import { pageview, startTelemetry } from '@/services/telemetry'
 import { useSettings } from '@/store/settingsStore'
 import { useUpdates } from '@/store/updateStore'
 import { isDesktopApp } from '@/utils/platform'
@@ -52,6 +54,14 @@ function NotFound() {
   )
 }
 
+/** Browser version only (a no-op in the desktop app): starts analytics and reports each route change. */
+function TelemetryTracker() {
+  const { pathname } = useLocation()
+  useEffect(() => startTelemetry(), [])
+  useEffect(() => pageview(pathname), [pathname])
+  return null
+}
+
 function Workspace({ resolvedTheme }: { resolvedTheme: 'dark' | 'light' }) {
   return (
     <AppShell resolvedTheme={resolvedTheme}>
@@ -71,6 +81,7 @@ export default function App() {
   return (
     <HashRouter>
       <TitleBar />
+      <TelemetryTracker />
       <DesktopShortcutPrompt />
       <Routes>
         <Route path="/" element={<StartupRedirect />} />
@@ -86,15 +97,15 @@ export default function App() {
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/tournaments" element={<TournamentsPage />} />
           <Route path="/tournaments/:id" element={<TournamentViewPage />} />
-          <Route path="/mousepad" element={<MousepadPage />} />
+          <Route path="/mousepad" element={<DesktopOnly><MousepadPage /></DesktopOnly>} />
           <Route path="/rawaccel" element={<RawAccelPage />} />
           <Route path="/perspective" element={<TppFppPage />} />
-          <Route path="/profiles" element={<ProfilesPage />} />
-          <Route path="/accounts" element={<AccountsPage />} />
+          <Route path="/profiles" element={<DesktopOnly><ProfilesPage /></DesktopOnly>} />
+          <Route path="/accounts" element={<DesktopOnly><AccountsPage /></DesktopOnly>} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/tools" element={<ToolsPage />} />
-          <Route path="/games" element={<GamesPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/games" element={<DesktopOnly><GamesPage /></DesktopOnly>} />
+          <Route path="/settings" element={<DesktopOnly><SettingsPage /></DesktopOnly>} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

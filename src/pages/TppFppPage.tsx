@@ -1,5 +1,5 @@
 import { ArrowLeftRight, Eye, Gauge, PersonStanding, ScanEye, Sigma, SwitchCamera, TriangleAlert } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccuracyBadge } from '@/components/games/AccuracyBadge'
 import { GameSelector } from '@/components/games/GameSelector'
@@ -18,6 +18,7 @@ import {
   type AspectKey, type MatchMethod, type Perspective, type PerspectiveResult,
 } from '@/services/tppFppEngine'
 import { useConverter } from '@/store/converterStore'
+import { track } from '@/services/telemetry'
 import { useSettings } from '@/store/settingsStore'
 
 const FOV_HINT: Record<FovType, 'horizontal' | 'vertical' | 'h43'> = { horizontal: 'horizontal', vertical: 'vertical', 'horizontal-4:3': 'h43' }
@@ -84,6 +85,13 @@ export default function TppFppPage() {
     [yaw, game, aspect, from, s, d, fov.tpp, fov.fpp, method],
   )
   const good = result?.ok ? result : null
+  // Browser version only (track() is a no-op in the desktop app).
+  const convertedTo = good ? good.to.sensitivity : null
+  useEffect(() => {
+    if (convertedTo === null) return
+    const id = window.setTimeout(() => track('tpp-fpp', { game: gameId, from, method }), 1500)
+    return () => window.clearTimeout(id)
+  }, [convertedTo, gameId, from, method])
   const badFov = (p: Perspective) => !(fovNum[p] > 0 && fovNum[p] < 180)
 
   const pickGame = (id: string) => {

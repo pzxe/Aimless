@@ -21,6 +21,8 @@ export interface NavItem {
   label: TranslationKey
   icon: LucideIcon
   group: 'main' | 'library'
+  /** Hidden in the browser version; the desktop app has it. */
+  desktopOnly?: boolean
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -28,13 +30,13 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/converter', label: 'nav.converter', icon: ArrowLeftRight, group: 'main' },
   { to: '/compare', label: 'nav.compare', icon: BarChart3, group: 'main' },
   { to: '/tournaments', label: 'nav.tournaments', icon: Trophy, group: 'main' },
-  { to: '/mousepad', label: 'nav.mousepad', icon: RectangleHorizontal, group: 'main' },
+  { to: '/mousepad', label: 'nav.mousepad', icon: RectangleHorizontal, group: 'main', desktopOnly: true },
   { to: '/rawaccel', label: 'nav.rawaccel', icon: MousePointer2, group: 'main' },
   { to: '/perspective', label: 'nav.tppfpp', icon: SwitchCamera, group: 'main' },
   { to: '/tools', label: 'nav.tools', icon: Wrench, group: 'main' },
-  { to: '/profiles', label: 'nav.profiles', icon: UserRound, group: 'library' },
-  { to: '/accounts', label: 'nav.accounts', icon: Users, group: 'library' },
+  { to: '/profiles', label: 'nav.profiles', icon: UserRound, group: 'library', desktopOnly: true },
+  { to: '/accounts', label: 'nav.accounts', icon: Users, group: 'library', desktopOnly: true },
   { to: '/history', label: 'nav.history', icon: History, group: 'library' },
-  { to: '/games', label: 'nav.games', icon: Gamepad2, group: 'library' },
-  { to: '/settings', label: 'nav.settings', icon: Settings, group: 'library' },
+  { to: '/games', label: 'nav.games', icon: Gamepad2, group: 'library', desktopOnly: true },
+  { to: '/settings', label: 'nav.settings', icon: Settings, group: 'library', desktopOnly: true },
 ]

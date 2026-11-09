@@ -368,8 +368,13 @@ function Features() {
           </div>
         </BentoCard>
         <BentoCard to="/compare" icon={<BarChart3 />} title={t('landing.f.compare')} body={t('landing.f.compareBody')} />
-        <BentoCard to="/settings" icon={<ShieldCheck />} title={t('landing.f.privacy')} body={t('landing.f.privacyBody')} />
-        <BentoCard to="/settings" icon={<Globe />} title={t('landing.f.languages')} body={t('landing.f.languagesBody')} className="xl:col-span-2">
+        <BentoCard
+          to={isDesktopApp ? '/settings' : '/converter'}
+          icon={<ShieldCheck />}
+          title={isDesktopApp ? t('landing.f.privacy') : t('landing.f.privacyWeb')}
+          body={isDesktopApp ? t('landing.f.privacyBody') : t('landing.f.privacyBodyWeb')}
+        />
+        <BentoCard to={isDesktopApp ? '/settings' : '/converter'} icon={<Globe />} title={t('landing.f.languages')} body={t('landing.f.languagesBody')} className="xl:col-span-2">
           <div className="flex flex-wrap gap-1.5">
             {LANGUAGES.map((l) => (
               <span key={l.code} lang={l.code} className="rounded-full border border-border px-2.5 py-1 text-xs text-muted">

@@ -17,6 +17,7 @@ import { useT } from '@/i18n'
 import { useConverter } from '@/store/converterStore'
 import { useProfiles } from '@/store/profilesStore'
 import { useSettings } from '@/store/settingsStore'
+import { isDesktopApp } from '@/utils/platform'
 
 function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: React.ReactNode; sub?: React.ReactNode }) {
   return (
@@ -116,7 +117,12 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-5xl space-y-9">
       <div>
         <div className="eyebrow mb-2">{t('dashboard.eyebrow')}</div>
-        <h1 className="display text-3xl sm:text-4xl">{t('dashboard.welcome')}</h1>
+        {isDesktopApp ? (
+          <h1 className="display text-3xl sm:text-4xl">{t('dashboard.welcome')}</h1>
+        ) : (
+          // The browser version has no "welcome back" greeting; the heading stays for screen readers and the outline.
+          <h1 className="sr-only">{t('nav.dashboard')}</h1>
+        )}
         <p className="mt-2 text-sm text-muted">{t('dashboard.subtitle')}</p>
       </div>
 
